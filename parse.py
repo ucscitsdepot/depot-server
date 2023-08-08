@@ -7,6 +7,8 @@ import time
 import re
 from os import getenv
 from dotenv import load_dotenv
+import unicodedata
+import string
 
 load_dotenv()
 
@@ -30,6 +32,10 @@ def printlb(allsheets = True, number = 1):
         pyautogui.press(str(number))
     pyautogui.press('enter')
 
+def strip_accents(data):
+    # return ''.join(x for x in unicodedata.normalize('NFKD', data) if x in string.printable)
+    return unicodedata.normalize('NFD', data).encode('ascii', 'ignore').decode('utf-8')
+
 def labelExecute(label):
     if label.getType() == "Windows":
         for position, serial in enumerate(label.serial):
@@ -40,8 +46,8 @@ def labelExecute(label):
             winritm = open("out.txt", "w")
             winritm.write("RITM, ST, PCNAME, FULLUSERNAME, DOMAIN, PRINTER, REQUESTORNAME, BACKUP, RETURNLOC, ITEMS\n")
             winritm.write("%s, %s, %s, %s, %s, %s, %s, %s, %s, %s\n" % 
-                          (str(label.RITM), str(serial), str(label.pcname), str(label.client_name), 
-                           dom.upper(), str(label.printer), str(label.requestor_name), 
+                          (str(label.RITM), str(serial), str(label.pcname), strip_accents(str(label.client_name)), 
+                           dom.upper(), str(label.printer), strip_accents(str(label.requestor_name)), 
                            str(label.backup), str(label.returnLoc), str(position+1) + ' of ' + str(len(label.serial))))
             winritm.close()
             P = subprocess.Popen([path_to_ptouch, 'winritm.lbx'])
@@ -65,8 +71,8 @@ def labelExecute(label):
         for position, serial in enumerate(label.serial):
             macritm = open("out_mac.txt", "w")
             macritm.write("RITM, PCNAME, FULLUSERNAME, PRINTER, REQUESTORNAME, BACKUP, RETURNLOC, SERIAL, ITEMS\n")
-            macritm.write("%s, %s, %s, %s, %s, %s, %s, %s, %s\n" % (label.RITM, label.pcname, label.client_name, 
-                                                                label.printer, label.requestor_name, label.backup, 
+            macritm.write("%s, %s, %s, %s, %s, %s, %s, %s, %s\n" % (label.RITM, label.pcname, strip_accents(label.client_name), 
+                                                                label.printer, strip_accents(label.requestor_name), label.backup, 
                                                                 label.returnLoc, serial, str(position+1) + ' of ' + str(len(label.serial))))
             macritm.close()
             P = subprocess.Popen([path_to_ptouch, 'macritm.lbx'])
