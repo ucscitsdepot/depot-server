@@ -8,7 +8,6 @@ import re
 from os import getenv
 from dotenv import load_dotenv
 import unicodedata
-import string
 
 load_dotenv()
 
@@ -80,6 +79,7 @@ def labelExecute(label):
             printlb()
             time.sleep(2)
             P.terminate()
+            time.sleep(5)
 
     noteritm = open("out_note.txt", "w")
     noteritm.write("RITM, IP, PRINTER, SOFT, NOTE\n")
