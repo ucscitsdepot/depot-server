@@ -1,6 +1,7 @@
 import imaplib
 import email
 from label import Label
+from ewaste import Ewaste
 import subprocess
 import pyautogui
 import time
@@ -15,13 +16,14 @@ path_to_ptouch = "C:\\Program Files (x86)\\Brother\\Ptedit54\\Ptedit54.exe"
 pyautogui.FAILSAFE = False
 
 
-def printlb(allsheets=True, number=1):
+def printlb(allsheets=True, number=1, ewaste=False):
     pyautogui.keyDown("ctrl")
     pyautogui.press("p")
     pyautogui.keyUp("ctrl")
     if allsheets and number == 1:
         pyautogui.press("Tab", presses=8)
-        pyautogui.press("down")
+        if not ewaste:
+            pyautogui.press("down")
     elif allsheets and number != 1:
         pyautogui.press("Tab", presses=6)
         pyautogui.press(str(number))
@@ -113,30 +115,51 @@ def labelExecute(label):
             P.terminate()
             time.sleep(5)
 
-    noteritm = open("out_note.txt", "w")
-    noteritm.write("RITM, IP, PRINTER, SOFT, NOTE\n")
-    noteritm.write(
-        "%s, %s, %s, %s, %s\n"
-        % (
-            label.RITM,
-            label.printer_ip.replace(".", "·"),
-            label.printer_notes,
-            label.software,
-            label.notes,
+    elif label.getType() == "Ewaste":
+        ewasteritm = open("out_ewaste.txt", "w")
+        ewasteritm.write("RITM, SERIAL, ERASE, EXPORT, JAMF\n")
+        ewasteritm.write(
+            "%s, %s, %s, %s, %s\n"
+            % (
+                str(label.RITM),
+                str(label.serial),
+                str(label.erase_type),
+                str(label.export),
+                str(label.jamf),
+            )
         )
-    )
-    noteritm.close()
-    if label.printer == "NO" and len(label.notes) == 0 and len(label.software) == 1:
+        ewasteritm.close()
+        P = subprocess.Popen([path_to_ptouch, "Ewaste.lbx"])
+        time.sleep(10)
+        printlb(ewaste=True)
+        time.sleep(1)
+        P.terminate()
+
+    if label.getType() == "Windows" or label.getType() == "Mac":
+        noteritm = open("out_note.txt", "w")
+        noteritm.write("RITM, IP, PRINTER, SOFT, NOTE\n")
+        noteritm.write(
+            "%s, %s, %s, %s, %s\n"
+            % (
+                label.RITM,
+                label.printer_ip.replace(".", "·"),
+                label.printer_notes,
+                label.software,
+                label.notes,
+            )
+        )
+        noteritm.close()
+        if label.printer == "NO" and len(label.notes) == 0 and len(label.software) == 1:
+            time.sleep(2)
+            return
+        elif label.printer == "NO":
+            P = subprocess.Popen([path_to_ptouch, "noteritmsimple.lbx"])
+        else:
+            P = subprocess.Popen([path_to_ptouch, "noteritm.lbx"])
+        time.sleep(10)
+        printlb(allsheets=False, number=len(label.serial))
         time.sleep(2)
-        return
-    elif label.printer == "NO":
-        P = subprocess.Popen([path_to_ptouch, "noteritmsimple.lbx"])
-    else:
-        P = subprocess.Popen([path_to_ptouch, "noteritm.lbx"])
-    time.sleep(10)
-    printlb(allsheets=False, number=len(label.serial))
-    time.sleep(2)
-    P.terminate()
+        P.terminate()
 
 
 username = getenv("app_username")
@@ -149,7 +172,7 @@ mail.login(username, app_password)
 while True:
     mail.select("Labels", False)
     _, selected_mails = mail.search(None, '(TO "depot+labels@ucsc.edu")', "(UNSEEN)")
-    print("Total Labels:", len(selected_mails[0].split()))
+    print("Total Intake Labels:", len(selected_mails[0].split()))
     print("==========================================\n")
     pyautogui.press("F15")
 
@@ -270,6 +293,53 @@ while True:
 
         if SVC:
             continue
+        print(label)
+        labelExecute(label)
+        print("==========================================\n")
+
+    mail.select("Ewaste", False)
+    _, selected_mails = mail.search(None, '(TO "depot+ewaste@ucsc.edu")', "(UNSEEN)")
+    print("Total Ewaste Labels:", len(selected_mails[0].split()))
+    print("==========================================\n")
+    pyautogui.press("F15")
+
+    labels = []
+    for num in selected_mails[0].split():
+        _, data = mail.fetch(num, "(RFC822)")
+        _, bytes_data = data[0]
+        mail.store(num, "+FLAGS", "\Seen")
+
+        email_message = email.message_from_bytes(bytes_data)
+        for part in email_message.walk():
+            if (
+                part.get_content_type() == "text/plain"
+                or part.get_content_type() == "text/html"
+            ):
+                message = part.get_payload(decode=True)
+                # print(message)
+                labels.append(message.decode())
+                break
+
+    for label in labels:
+        fields = label.replace("\r", "")
+        fields = re.split("\n", fields)
+        fields = list(filter(None, fields))
+        fields = fields[:-1]
+        fields[0] = fields[0].replace("RITM00", "")
+
+        print(fields)
+        label = Ewaste(fields[0])
+
+        for field in fields:
+            if "Serial Number: " in field:
+                label.serial = field.replace("Serial Number: ", "")
+            elif "Data Disposition: " in field:
+                label.setEraseType(field.replace("Data Disposition: ", ""))
+            elif "Surplus Form: " in field:
+                label.setExport(field.replace("Surplus Form: ", ""))
+            elif "Jamf Status: " in field:
+                label.setJamf(field.replace("Jamf Status: ", ""))
+
         print(label)
         labelExecute(label)
         print("==========================================\n")
