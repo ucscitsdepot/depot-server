@@ -174,7 +174,7 @@ while True:
     _, selected_mails = mail.search(None, '(TO "depot+labels@ucsc.edu")', "(UNSEEN)")
     print("Total Intake Labels:", len(selected_mails[0].split()))
     print("==========================================\n")
-    pyautogui.press("F15")
+    # pyautogui.press("F15")
 
     labels = []
     for num in selected_mails[0].split():
@@ -301,7 +301,7 @@ while True:
     _, selected_mails = mail.search(None, '(TO "depot+ewaste@ucsc.edu")', "(UNSEEN)")
     print("Total Ewaste Labels:", len(selected_mails[0].split()))
     print("==========================================\n")
-    pyautogui.press("F15")
+    # pyautogui.press("F15")
 
     labels = []
     for num in selected_mails[0].split():
