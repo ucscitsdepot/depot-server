@@ -87,6 +87,7 @@ def labelExecute(label):
                 time.sleep(2)
                 P.terminate()
 
+# TODO: local admin for Macs
     elif label.getType() == "Mac":
         for position, serial in enumerate(label.serial):
             macritm = open("out_mac.txt", "w")
