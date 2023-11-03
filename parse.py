@@ -9,6 +9,7 @@ import re
 from os import getenv
 from dotenv import load_dotenv
 import unicodedata
+from write_pngs import *
 
 load_dotenv()
 
@@ -41,6 +42,7 @@ def strip_accents(data):
 
 
 def labelExecute(label):
+    processes = list()
     if label.getType() == "Windows":
         for position, serial in enumerate(label.serial):
             serial = serial.replace(",", "")
@@ -50,32 +52,37 @@ def labelExecute(label):
                 dom = "__"
             else:
                 dom = label.domain
-            winritm = open("out.txt", "w")
-            winritm.write(
-                "RITM, ST, PCNAME, FULLUSERNAME, DOMAIN, PRINTER, REQUESTORNAME, BACKUP, RETURNLOC, ITEMS\n"
-            )
-            winritm.write(
-                "%s, %s, %s, %s, %s, %s, %s, %s, %s, %s\n"
-                % (
-                    str(label.RITM),
-                    str(serial),
-                    str(label.pcname),
-                    strip_accents(str(label.client_name)),
-                    dom.upper(),
-                    str(label.printer),
-                    strip_accents(str(label.requestor_name)),
-                    str(label.backup),
-                    str(label.returnLoc),
-                    str(position + 1) + " of " + str(len(label.serial)),
-                )
-            )
-            winritm.close()
-            P = subprocess.Popen([path_to_ptouch, "winritm.lbx"])
-            time.sleep(10)
-            printlb()
-            time.sleep(1)
-            P.terminate()
-            time.sleep(2)
+            # winritm = open("out.txt", "w")
+            # winritm.write(
+            #     "RITM, ST, PCNAME, FULLUSERNAME, DOMAIN, PRINTER, REQUESTORNAME, BACKUP, RETURNLOC, ITEMS\n"
+            # )
+            # winritm.write(
+            #     "%s, %s, %s, %s, %s, %s, %s, %s, %s, %s\n"
+            #     % (
+            #         str(label.RITM),
+            #         str(serial),
+            #         str(label.pcname),
+            #         strip_accents(str(label.client_name)),
+            #         dom.upper(),
+            #         str(label.printer),
+            #         strip_accents(str(label.requestor_name)),
+            #         str(label.backup),
+            #         str(label.returnLoc),
+            #         str(position + 1) + " of " + str(len(label.serial)),
+            #     )
+            # )
+
+            winsetup(str(label.RITM), str(label.pcname), str(serial), strip_accents(str(label.requestor_name)), label.backup, str(label.printer))
+            processes.append(print_label())
+            time.sleep(5)
+
+            # winritm.close()
+            # P = subprocess.Popen([path_to_ptouch, "winritm.lbx"])
+            # time.sleep(10)
+            # printlb()
+            # time.sleep(1)
+            # P.terminate()
+            # time.sleep(2)
             if label.localA is not None:
                 user = open("out_username.txt", "w")
                 user.write("USERNAME\n")
@@ -199,7 +206,7 @@ while True:
         fields = re.split("<p>|<br>", label)
         fields[-1] = fields[-1].replace("</p></body></html>\r\n", "")
         fields[0] = (
-            fields[0].replace('<html><head></head><body><h3 id="main">RITM00', "")
+            fields[0].replace('<html><head></head><body><h3 id="main">RITM', "")
         ).replace("&nbsp;</h3>\r\n", "")
         # print(fields)
         # fields.remove('')
@@ -239,9 +246,9 @@ while True:
                 label.setDepartment(field.replace("Client Department: ", ""))
             elif "Back up: " in field:
                 if "Yes" in field:
-                    label.backup = "Yes"
+                    label.backup = True
                 elif "No" in field:
-                    label.backup = "No"
+                    label.backup = False
             elif "Adobe: " in field:
                 if "true" in field:
                     label.setSoftware("CC")

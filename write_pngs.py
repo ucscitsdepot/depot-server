@@ -1,3 +1,6 @@
+import subprocess
+import time
+
 from PIL import Image, ImageDraw, ImageFont
 
 
@@ -32,11 +35,11 @@ def fit_text(img, text, color, font, x, y, w, h):
         y += h
 
 
-def write_ewaste(ritm, date, serial, erase_type, jamf):
+def ewaste(ritm, date, serial, erase_type, jamf):
     img = Image.open("png/ewaste.png", "r").convert("RGB")
     imgdraw = ImageDraw.Draw(img)
     ritm_font = ImageFont.truetype("Roboto-Regular.ttf", 350)
-    imgdraw.text((900, 120), "%07d" % ritm, (0, 0, 0), font=ritm_font)
+    imgdraw.text((900, 120), ritm, (0, 0, 0), font=ritm_font)
     font = ImageFont.truetype("Roboto-Regular.ttf", 250)
     imgdraw.text((70, 530), date, (0, 0, 0), font=font)
     imgdraw.text((800, 870), serial, (0, 0, 0), font=font)
@@ -55,11 +58,11 @@ def write_ewaste(ritm, date, serial, erase_type, jamf):
     img.save("tmp.png")
 
 
-def write_ritm(ritm, names, date, migration, index, returnloc):
+def ritm(ritm, names, date, migration, index, returnloc):
     img = Image.open("png/ritm.png", "r").convert("RGB")
     imgdraw = ImageDraw.Draw(img)
     ritm_font = ImageFont.truetype("Roboto-Regular.ttf", 350)
-    imgdraw.text((900, 190), "%07d" % ritm, (0, 0, 0), font=ritm_font)
+    imgdraw.text((900, 190), ritm, (0, 0, 0), font=ritm_font)
     font = ImageFont.truetype("Roboto-Regular.ttf", 230)
     small_font = ImageFont.truetype("Roboto-Regular.ttf", 120)
 
@@ -87,11 +90,11 @@ def write_ritm(ritm, names, date, migration, index, returnloc):
     img.save("tmp.png")
 
 
-def write_macsetup(ritm, macname, serial, names, backup, printers):
+def macsetup(ritm, macname, serial, names, backup, printers):
     img = Image.open("png/macsetup.png", "r").convert("RGB")
     imgdraw = ImageDraw.Draw(img)
     ritm_font = ImageFont.truetype("Roboto-Regular.ttf", 350)
-    imgdraw.text((900, 120), "%07d" % ritm, (0, 0, 0), font=ritm_font)
+    imgdraw.text((900, 120), ritm, (0, 0, 0), font=ritm_font)
     font = ImageFont.truetype("Roboto-Regular.ttf", 230)
     small_font = ImageFont.truetype("Roboto-Regular.ttf", 120)
 
@@ -103,17 +106,16 @@ def write_macsetup(ritm, macname, serial, names, backup, printers):
     if backup is False:
         imgdraw.text((1300, 1300), "No", (0, 0, 0), font=font)
 
-    if printers is False:
-        imgdraw.text((1150, 1800), "No", (0, 0, 0), font=font)
+    imgdraw.text((1150, 1800), printers, (0, 0, 0), font=font)
 
     img.save("tmp.png")
 
 
-def write_notes_printer(ritm, printerip, printermodel, sw, notes):
+def notes_printer(ritm, printerip, printermodel, sw, notes):
     img = Image.open("png/notes_printer.png", "r").convert("RGB")
     imgdraw = ImageDraw.Draw(img)
     ritm_font = ImageFont.truetype("Roboto-Regular.ttf", 350)
-    imgdraw.text((920, 120), "%07d" % ritm, (0, 0, 0), font=ritm_font)
+    imgdraw.text((920, 120), ritm, (0, 0, 0), font=ritm_font)
     font = ImageFont.truetype("Roboto-Regular.ttf", 230)
     small_font = ImageFont.truetype("Roboto-Regular.ttf", 120)
 
@@ -129,11 +131,11 @@ def write_notes_printer(ritm, printerip, printermodel, sw, notes):
     img.save("tmp.png")
 
 
-def write_notes(ritm, sw, notes):
+def notes(ritm, sw, notes):
     img = Image.open("png/notes.png", "r").convert("RGB")
     imgdraw = ImageDraw.Draw(img)
     ritm_font = ImageFont.truetype("Roboto-Regular.ttf", 350)
-    imgdraw.text((920, 120), "%07d" % ritm, (0, 0, 0), font=ritm_font)
+    imgdraw.text((920, 120), ritm, (0, 0, 0), font=ritm_font)
     font = ImageFont.truetype("Roboto-Regular.ttf", 230)
     small_font = ImageFont.truetype("Roboto-Regular.ttf", 120)
 
@@ -145,7 +147,7 @@ def write_notes(ritm, sw, notes):
     img.save("tmp.png")
 
 
-def write_username(username):
+def username(username):
     img = Image.open("png/username.png", "r").convert("RGB")
     imgdraw = ImageDraw.Draw(img)
     font = ImageFont.truetype("Roboto-Regular.ttf", 230)
@@ -155,34 +157,86 @@ def write_username(username):
     img.save("tmp.png")
 
 
+def winsetup(ritm, pcname, servicetag, names, backup, printers):
+    img = Image.open("png/winsetup.png", "r").convert("RGB")
+    imgdraw = ImageDraw.Draw(img)
+    ritm_font = ImageFont.truetype("Roboto-Regular.ttf", 350)
+    imgdraw.text((930, 120), ritm, (0, 0, 0), font=ritm_font)
+    font = ImageFont.truetype("Roboto-Regular.ttf", 230)
+    small_font = ImageFont.truetype("Roboto-Regular.ttf", 120)
+
+    imgdraw.text((1300, 450), servicetag, (0, 0, 0), font=font)
+
+    if imgdraw.textlength(pcname, font) > 2800:
+        imgdraw.text((100, 850), pcname, (0, 0, 0), font=small_font)
+    else:
+        imgdraw.text((100, 850), pcname, (0, 0, 0), font=font)
+
+    fit_text(img, names, (0, 0, 0), small_font, 100, 1300, 2800, 120)
+
+    if backup is False:
+        imgdraw.text((1200, 2170), "No", (0, 0, 0), font=font)
+
+    imgdraw.text((1000, 2400), printers, (0, 0, 0), font=font)
+
+    img.save("tmp.png")
+
+
+def print_label():
+    return subprocess.Popen(["brother_ql", "print", "-l", "62", "tmp.png"])
+
+
 if __name__ == "__main__":
-    # write_ewaste(87654, "10/31/2023", "H4TKT0ENQ6X3", "3 Pass", None)
-    # write_ritm(
-    #     123456,
-    #     "Ishan Madan, Cédric Chartier, etc",
-    #     "10/31/2023",
-    #     None,
-    #     "20 of 20",
-    #     "WgWgWgWgWgWgWgWgWgWgWgWgWgWgWgWgWgWgWgWgWg",
-    # )
-    # write_macritm3(
-    #     123456,
-    #     "DGE-tobeusedasloanerlaptop-___",
-    #     "H4TKT0ENQ6X3",
-    #     "Ishan Madan, Cédric Chartier, etc",
-    #     False,
-    #     False,
-    # )
-    # write_noteritm(
-    #     123456,
-    #     "123.456.789.012",
-    #     "QL-570",
-    #     "CC FF",
-    #     "WgWgWgWgWgWgWgWgWgWgWgWgWgWgWgWgWgWgWgWgWg",
-    # )
-    # write_noteritm_simple(
-    #     123456,
-    #     "CC FF",
-    #     "WgWgWgWgWgWgWgWgWgWgWgWgWgWgWgWgWgWgWgWgWg",
-    # )
-    write_username(".\\admin.imadan1")
+    process = list()
+    ewaste(87654, "10/31/2023", "H4TKT0ENQ6X3", "3 Pass", None)
+    process.append(print_label())
+    time.sleep(5)
+    ritm(
+        123456,
+        "Ishan Madan, Cédric Chartier, etc",
+        "10/31/2023",
+        None,
+        "20 of 20",
+        "WgWgWgWgWgWgWgWgWgWgWgWgWgWgWgWgWgWgWgWgWg",
+    )
+    process.append(print_label())
+    time.sleep(5)
+    macsetup(
+        123456,
+        "DGE-tobeusedasloanerlaptop-___",
+        "H4TKT0ENQ6X3",
+        "Ishan Madan, Cédric Chartier, etc",
+        False,
+        False,
+    )
+    process.append(print_label())
+    time.sleep(5)
+    notes_printer(
+        123456,
+        "123.456.789.012",
+        "QL-570",
+        "CC FF",
+        "WgWgWgWgWgWgWgWgWgWgWgWgWgWgWgWgWgWgWgWgWg",
+    )
+    process.append(print_label())
+    time.sleep(5)
+    notes(
+        123456,
+        "CC FF",
+        "WgWgWgWgWgWgWgWgWgWgWgWgWgWgWgWgWgWgWgWgWg",
+    )
+    process.append(print_label())
+    time.sleep(5)
+    username(".\\admin.imadan1")
+    process.append(print_label())
+    time.sleep(5)
+    winsetup(
+        123456,
+        "DGE-loaner-___",
+        "7PCA52G",
+        "Ishan Madan, Cédric Chartier, etc",
+        False,
+        False,
+    )
+    process.append(print_label())
+    time.sleep(5)
