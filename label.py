@@ -1,5 +1,5 @@
-import difflib
 import csv
+import difflib
 import re
 
 departments = {}
@@ -24,7 +24,7 @@ class Label:
         self.returnLoc = None
         self.pcname = None
         self.group = False
-        self.printer = "NO"
+        self.printer = "No"
         self.printer_notes = ""
         self.printer_ip = ""
         self.notes = ""

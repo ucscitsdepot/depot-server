@@ -66,12 +66,13 @@ def ritm(ritm, client_name, requestor_name, date, migration, index, returnloc):
     imgdraw.text((900, 190), ritm, (0, 0, 0), font=ritm_font)
     font = ImageFont.truetype("Roboto-Regular.ttf", 230)
     name_font = ImageFont.truetype("Roboto-Italic.ttf", 160)
+    large_name_font = ImageFont.truetype("Roboto-Italic.ttf", 230)
     small_font = ImageFont.truetype("Roboto-Regular.ttf", 120)
 
     imgdraw.text((1220, 1050), date, (0, 0, 0), font=font)
 
     imgdraw.text((1560, 625), requestor_name, (0, 0, 0), font=name_font)
-    imgdraw.text((70, 800), client_name, (0, 0, 0), font=name_font)
+    imgdraw.text((70, 800), client_name, (0, 0, 0), font=large_name_font)
 
     if len(index) <= 6:
         imgdraw.text((1760, 1400), index, (0, 0, 0), font=font)
@@ -99,12 +100,18 @@ def macsetup(ritm, macname, serial, client_name, backup, printers):
     ritm_font = ImageFont.truetype("Roboto-Regular.ttf", 350)
     imgdraw.text((900, 120), ritm, (0, 0, 0), font=ritm_font)
     font = ImageFont.truetype("Roboto-Regular.ttf", 230)
-    name_font = ImageFont.truetype("Roboto-Italic.ttf", 160)
+    name_font = ImageFont.truetype("Roboto-Italic.ttf", 200)
     small_font = ImageFont.truetype("Roboto-Regular.ttf", 120)
 
-    imgdraw.text((1050, 500), macname, (0, 0, 0), font=small_font)
-    imgdraw.text((620, 700), serial, (0, 0, 0), font=small_font)
+    # imgdraw.text((1050, 500), macname, (0, 0, 0), font=small_font)
+    # imgdraw.line((1050, 500) + (1050 + 1800, 500), "black", width=20)
 
+    if imgdraw.textlength(macname, font) > 1800:
+        imgdraw.text((1050, 500), macname, (0, 0, 0), font=small_font)
+    else:
+        imgdraw.text((1050, 430), macname, (0, 0, 0), font=font)
+
+    imgdraw.text((620, 650), serial, (0, 0, 0), font=font)
     imgdraw.text((100, 1050), client_name, (0, 0, 0), font=name_font)
     # fit_text(img, names, (0, 0, 0), small_font, 100, 1050, 2800, 120)
 
@@ -122,16 +129,16 @@ def notes_printer(ritm, printerip, printermodel, sw, notes):
     ritm_font = ImageFont.truetype("Roboto-Regular.ttf", 350)
     imgdraw.text((920, 120), ritm, (0, 0, 0), font=ritm_font)
     font = ImageFont.truetype("Roboto-Regular.ttf", 230)
-    small_font = ImageFont.truetype("Roboto-Regular.ttf", 120)
+    small_font = ImageFont.truetype("Roboto-Regular.ttf", 160)
 
     if len(printerip) > 0:
-        fit_text(img, printerip, (0, 0, 0), small_font, 90, 650, 2800, 120)
+        fit_text(img, printerip, (0, 0, 0), small_font, 90, 650, 2800, 160)
     if len(printermodel) > 0:
-        fit_text(img, printermodel, (0, 0, 0), small_font, 90, 1100, 2800, 120)
+        fit_text(img, printermodel, (0, 0, 0), small_font, 90, 1100, 2800, 160)
     if len(sw) > 0:
-        fit_text(img, sw, (0, 0, 0), small_font, 90, 1750, 2800, 120)
+        fit_text(img, sw, (0, 0, 0), small_font, 90, 1750, 2800, 160)
     if len(notes) > 0:
-        fit_text(img, notes, (0, 0, 0), small_font, 90, 2320, 2800, 120)
+        fit_text(img, notes, (0, 0, 0), small_font, 90, 2320, 2800, 160)
 
     img.save("tmp.png")
 
@@ -142,12 +149,12 @@ def notes(ritm, sw, notes):
     ritm_font = ImageFont.truetype("Roboto-Regular.ttf", 350)
     imgdraw.text((920, 120), ritm, (0, 0, 0), font=ritm_font)
     font = ImageFont.truetype("Roboto-Regular.ttf", 230)
-    small_font = ImageFont.truetype("Roboto-Regular.ttf", 120)
+    small_font = ImageFont.truetype("Roboto-Regular.ttf", 160)
 
     if len(sw) > 0:
-        fit_text(img, sw, (0, 0, 0), small_font, 90, 670, 2800, 120)
+        fit_text(img, sw, (0, 0, 0), small_font, 90, 670, 2800, 160)
     if len(notes) > 0:
-        fit_text(img, notes, (0, 0, 0), small_font, 90, 1200, 2800, 120)
+        fit_text(img, notes, (0, 0, 0), small_font, 90, 1200, 2800, 160)
 
     img.save("tmp.png")
 
@@ -155,7 +162,7 @@ def notes(ritm, sw, notes):
 def username(username):
     img = Image.open("png/username.png", "r").convert("RGB")
     imgdraw = ImageDraw.Draw(img)
-    font = ImageFont.truetype("Roboto-Regular.ttf", 230)
+    font = ImageFont.truetype("Roboto-Medium.ttf", 230)
 
     imgdraw.text((1450, 540), username, (0, 0, 0), font=font, anchor="mt")
 
@@ -168,6 +175,7 @@ def winsetup(ritm, pcname, servicetag, client_name, backup, printers):
     ritm_font = ImageFont.truetype("Roboto-Regular.ttf", 350)
     imgdraw.text((930, 120), ritm, (0, 0, 0), font=ritm_font)
     font = ImageFont.truetype("Roboto-Regular.ttf", 230)
+    name_font = ImageFont.truetype("Roboto-Italic.ttf", 200)
     small_font = ImageFont.truetype("Roboto-Regular.ttf", 120)
 
     imgdraw.text((1300, 450), servicetag, (0, 0, 0), font=font)
@@ -177,7 +185,8 @@ def winsetup(ritm, pcname, servicetag, client_name, backup, printers):
     else:
         imgdraw.text((100, 850), pcname, (0, 0, 0), font=font)
 
-    fit_text(img, client_name, (0, 0, 0), small_font, 100, 1300, 2800, 120)
+    imgdraw.text((100, 1300), client_name, (0, 0, 0), font=name_font)
+    # fit_text(img, client_name, (0, 0, 0), small_font, 100, 1300, 2800, 120)
 
     if backup is False:
         imgdraw.text((1200, 2170), "No", (0, 0, 0), font=font)
@@ -200,16 +209,19 @@ if __name__ == "__main__":
     # ritm(
     #     "123456",
     #     "Ishan Madan",
-    #     "Cédric Chartier",
+    #     "Michael Andres-Larsen",
     #     "10/31/2023",
     #     None,
     #     "20 of 20",
     #     "WgWgWgWgWgWgWgWgWgWgWgWgWgWgWgWgWgWgWgWgWg",
     # )
+
+    # TODO: move client name under "Client Name(s)", so ther's one line for the client and one line for the requestor, and get rid of return location
+
     # process.append(print_label())
     # macsetup(
     #     "123456",
-    #     "DGE-tobeusedasloanerlaptop-___",
+    #     "DGE-sanity-___",
     #     "H4TKT0ENQ6X3",
     #     "Ishan Madan",
     #     False,
@@ -226,18 +238,18 @@ if __name__ == "__main__":
     # process.append(print_label())
     # notes(
     #     "123456",
-    #     "CC FF",
+    #     "CC FF FM19 FM194 Proj Vis i want more things from you",
     #     "WgWgWgWgWgWgWgWgWgWgWgWgWgWgWgWgWgWgWgWgWg",
     # )
     # process.append(print_label())
-    username(".\\admin.imadan1")
+    # username(".\\admin.imadan1")
     # process.append(print_label())
     # winsetup(
     #     "123456",
     #     "DGE-loaner-___",
     #     "7PCA52G",
-    #     "Ishan Madan, Cédric Chartier, etc",
+    #     "Ishan Madan",
     #     False,
-    #     False,
+    #     "No",
     # )
     # process.append(print_label())
