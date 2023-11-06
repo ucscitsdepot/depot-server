@@ -1,39 +1,42 @@
-import imaplib
 import email
-from label import Label
-from ewaste import Ewaste
-import subprocess
-import pyautogui
-import time
+import imaplib
 import re
-from os import getenv
-from dotenv import load_dotenv
+import subprocess
+import time
 import unicodedata
+from datetime import datetime
+from os import getenv
+
+# import pyautogui
+from dotenv import load_dotenv
+
+from ewaste import Ewaste
+from label import Label
 from write_pngs import *
 
 load_dotenv()
 
-path_to_ptouch = "C:\\Program Files (x86)\\Brother\\Ptedit54\\Ptedit54.exe"
-pyautogui.FAILSAFE = False
+# path_to_ptouch = "C:\\Program Files (x86)\\Brother\\Ptedit54\\Ptedit54.exe"
+# pyautogui.FAILSAFE = False
 
 
-def printlb(allsheets=True, number=1, ewaste=False):
-    pyautogui.keyDown("ctrl")
-    pyautogui.press("p")
-    pyautogui.keyUp("ctrl")
-    if allsheets and number == 1:
-        pyautogui.press("Tab", presses=8)
-        if not ewaste:
-            pyautogui.press("down")
-    elif allsheets and number != 1:
-        pyautogui.press("Tab", presses=6)
-        pyautogui.press(str(number))
-        pyautogui.press("Tab", presses=2)
-        pyautogui.press("down")
-    elif number != 1:
-        pyautogui.press("Tab", presses=6)
-        pyautogui.press(str(number))
-    pyautogui.press("enter")
+# def printlb(allsheets=True, number=1, ewaste=False):
+#     pyautogui.keyDown("ctrl")
+#     pyautogui.press("p")
+#     pyautogui.keyUp("ctrl")
+#     if allsheets and number == 1:
+#         pyautogui.press("Tab", presses=8)
+#         if not ewaste:
+#             pyautogui.press("down")
+#     elif allsheets and number != 1:
+#         pyautogui.press("Tab", presses=6)
+#         pyautogui.press(str(number))
+#         pyautogui.press("Tab", presses=2)
+#         pyautogui.press("down")
+#     elif number != 1:
+#         pyautogui.press("Tab", presses=6)
+#         pyautogui.press(str(number))
+#     pyautogui.press("enter")
 
 
 def strip_accents(data):
@@ -71,111 +74,150 @@ def labelExecute(label):
             #         str(position + 1) + " of " + str(len(label.serial)),
             #     )
             # )
-
-            winsetup(str(label.RITM), str(label.pcname), str(serial), strip_accents(str(label.requestor_name)), label.backup, str(label.printer))
+            ritm(
+                str(label.RITM),
+                strip_accents(str(label.client_name)),
+                strip_accents(str(label.requestor_name)),
+                datetime.now().strftime("%m/%d/%Y"),
+                False,
+                str(position + 1) + " of " + str(len(label.serial)),
+                str(label.returnLoc),
+            )
             processes.append(print_label())
-            time.sleep(5)
 
-            # winritm.close()
-            # P = subprocess.Popen([path_to_ptouch, "winritm.lbx"])
-            # time.sleep(10)
-            # printlb()
-            # time.sleep(1)
-            # P.terminate()
-            # time.sleep(2)
+            winsetup(
+                str(label.RITM),
+                str(label.pcname),
+                str(serial),
+                strip_accents(str(label.client_name)),
+                label.backup,
+                str(label.printer),
+            )
+            processes.append(print_label())
+
             if label.localA is not None:
-                user = open("out_username.txt", "w")
-                user.write("USERNAME\n")
-                user.write(label.getUsername())
-                user.close()
-                P = subprocess.Popen([path_to_ptouch, "username.lbx"])
-                time.sleep(5)
-                printlb(allsheets=False)
-                time.sleep(2)
-                P.terminate()
+                username(label.getUsername())
+                processes.append(print_label())
 
-# TODO: local admin for Macs
+    # TODO: local admin for Macs
     elif label.getType() == "Mac":
         for position, serial in enumerate(label.serial):
-            macritm = open("out_mac.txt", "w")
-            macritm.write(
-                "RITM, PCNAME, FULLUSERNAME, PRINTER, REQUESTORNAME, BACKUP, RETURNLOC, SERIAL, ITEMS\n"
+            # macritm = open("out_mac.txt", "w")
+            # macritm.write(
+            #     "RITM, PCNAME, FULLUSERNAME, PRINTER, REQUESTORNAME, BACKUP, RETURNLOC, SERIAL, ITEMS\n"
+            # )
+            # macritm.write(
+            #     "%s, %s, %s, %s, %s, %s, %s, %s, %s\n"
+            #     % (
+            #         label.RITM,
+            #         label.pcname,
+            #         strip_accents(label.client_name),
+            #         label.printer,
+            #         strip_accents(label.requestor_name),
+            #         label.backup,
+            #         label.returnLoc,
+            #         serial,
+            #         str(position + 1) + " of " + str(len(label.serial)),
+            #     )
+            # )
+
+            ritm(
+                str(label.RITM),
+                strip_accents(str(label.client_name)),
+                strip_accents(str(label.requestor_name)),
+                datetime.now().strftime("%m/%d/%Y"),
+                False,
+                str(position + 1) + " of " + str(len(label.serial)),
+                str(label.returnLoc),
             )
-            macritm.write(
-                "%s, %s, %s, %s, %s, %s, %s, %s, %s\n"
-                % (
-                    label.RITM,
-                    label.pcname,
-                    strip_accents(label.client_name),
-                    label.printer,
-                    strip_accents(label.requestor_name),
-                    label.backup,
-                    label.returnLoc,
-                    serial,
-                    str(position + 1) + " of " + str(len(label.serial)),
-                )
+            processes.append(print_label())
+
+            macsetup(
+                str(label.RITM),
+                label.pcname,
+                serial,
+                strip_accents(str(label.client_name)),
+                label.backup,
+                label.printer,
             )
-            macritm.close()
-            P = subprocess.Popen([path_to_ptouch, "macritm.lbx"])
-            time.sleep(10)
-            printlb()
-            time.sleep(2)
-            P.terminate()
-            time.sleep(5)
+            processes.append(print_label())
+
+            if label.localA is not None:
+                username(strip_accents(str(label.client_name)))
+                processes.append(print_label())
+                username("Admin " + strip_accents(str(label.client_name)))
+                processes.append(print_label())
+            else:
+                processes.append(print_label("png/tmpwd.png"))
 
     elif label.getType() == "Ewaste":
-        ewasteritm = open("out_ewaste.txt", "w")
-        ewasteritm.write("RITM, SERIAL, ERASE, EXPORT, JAMF\n")
-        ewasteritm.write(
-            "%s, %s, %s, %s, %s\n"
-            % (
-                str(label.RITM),
-                str(label.serial),
-                str(label.erase_type),
-                str(label.export),
-                str(label.jamf),
-            )
+        # ewasteritm = open("out_ewaste.txt", "w")
+        # ewasteritm.write("RITM, SERIAL, ERASE, EXPORT, JAMF\n")
+        # ewasteritm.write(
+        #     "%s, %s, %s, %s, %s\n"
+        #     % (
+        #         str(label.RITM),
+        #         str(label.serial),
+        #         str(label.erase_type),
+        #         str(label.export),
+        #         str(label.jamf),
+        #     )
+        # )
+
+        ewaste(
+            str(label.RITM),
+            datetime.now().strftime("%m/%d/%Y"),
+            str(label.serial),
+            str(label.erase_type),
+            str(label.export),
+            label.jamf,
         )
-        ewasteritm.close()
-        P = subprocess.Popen([path_to_ptouch, "Ewaste.lbx"])
-        time.sleep(10)
-        printlb(ewaste=True)
-        time.sleep(1)
-        P.terminate()
 
     if label.getType() == "Windows" or label.getType() == "Mac":
-        noteritm = open("out_note.txt", "w")
-        noteritm.write("RITM, IP, PRINTER, SOFT, NOTE\n")
-        noteritm.write(
-            "%s, %s, %s, %s, %s\n"
-            % (
-                label.RITM,
-                label.printer_ip.replace(".", "·"),
-                label.printer_notes,
-                label.software,
-                label.notes,
-            )
-        )
-        noteritm.close()
-        if label.printer == "NO" and len(label.notes) == 0 and len(label.software) == 1:
-            time.sleep(2)
-            return
-        elif label.printer == "NO":
-            P = subprocess.Popen([path_to_ptouch, "noteritmsimple.lbx"])
-        else:
-            P = subprocess.Popen([path_to_ptouch, "noteritm.lbx"])
-        time.sleep(10)
-        printlb(allsheets=False, number=len(label.serial))
-        time.sleep(2)
-        P.terminate()
+        if label.printer != "NO" or len(label.notes) > 0 or len(label.software) > 1:
+            if label.printer == "NO":
+                notes(label.RITM, label.software, label.notes)
+            else:
+                notes_printer(
+                    label.RITM,
+                    label.printer_ip.replace(".", "·"),
+                    label.printer_notes,
+                    label.software,
+                    label.notes,
+                )
+            processes.append(print_label())
+        # noteritm = open("out_note.txt", "w")
+        # noteritm.write("RITM, IP, PRINTER, SOFT, NOTE\n")
+        # noteritm.write(
+        #     "%s, %s, %s, %s, %s\n"
+        #     % (
+        #         label.RITM,
+        #         label.printer_ip.replace(".", "·"),
+        #         label.printer_notes,
+        #         label.software,
+        #         label.notes,
+        #     )
+        # )
+        # noteritm.close()
+        # if label.printer == "NO" and len(label.notes) == 0 and len(label.software) == 1:
+        #     time.sleep(2)
+        #     return
+        # elif label.printer == "NO":
+        #     P = subprocess.Popen([path_to_ptouch, "noteritmsimple.lbx"])
+        # else:
+        #     P = subprocess.Popen([path_to_ptouch, "noteritm.lbx"])
+        # time.sleep(10)
+        # printlb(allsheets=False, number=len(label.serial))
+        # time.sleep(2)
+        # P.terminate()
 
 
-username = getenv("app_username")
+app_username = getenv("app_username")
 app_password = getenv("app_password")
 
 gmail_host = "imap.gmail.com"
 mail = imaplib.IMAP4_SSL(gmail_host)
-mail.login(username, app_password)
+mail.login(app_username, app_password)
 
 while True:
     mail.select("Labels", False)
@@ -333,7 +375,7 @@ while True:
         fields = re.split("\n", fields)
         fields = list(filter(None, fields))
         fields = fields[:-1]
-        fields[0] = fields[0].replace("RITM00", "")
+        fields[0] = fields[0].replace("RITM", "")
 
         print(fields)
         label = Ewaste(fields[0])

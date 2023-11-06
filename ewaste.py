@@ -35,11 +35,11 @@ class Ewaste:
 
     def setJamf(self, input):
         if "Not Done" in input:
-            self.jamf = ""
+            self.jamf = False
         elif "Complete" in input:
-            self.jamf = "Done"
+            self.jamf = True
         else:
-            self.jamf = "No"
+            self.jamf = None
 
     def getType(self):
         return "Ewaste"
