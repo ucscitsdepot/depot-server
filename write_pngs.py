@@ -4,6 +4,8 @@ import time
 from PIL import Image, ImageDraw, ImageFont
 
 
+# find correct textlength to fit in desired size
+# derived from https://stackoverflow.com/questions/58041361/break-long-drawn-text-to-multiple-lines-with-pillow
 def break_fix(text, width, font, draw):
     if not text:
         return
@@ -23,24 +25,26 @@ def break_fix(text, width, font, draw):
     yield from break_fix(text[lo:], width, font, draw)
 
 
+# draw text to fit within certain width using break_fix()
 def fit_text(img, text, color, font, x, y, w, h):
     draw = ImageDraw.Draw(img)
     pieces = list(break_fix(text, w, font, draw))
-    # height = sum(p[2] for p in pieces)
-    # if height > img.size[1]:
-    #     raise ValueError("text doesn't fit")
-    # y = (img.size[1] - height) // 2
     for t, _ in pieces:
         draw.text((x, y), t, font=font, fill=color)
         y += h
 
 
+# setup ewaste label
 def ewaste(ritm, date, serial, erase_type, export, jamf):
     img = Image.open("png/ewaste.png", "r").convert("RGB")
     imgdraw = ImageDraw.Draw(img)
+
+    # import fonts
     ritm_font = ImageFont.truetype("Roboto-Regular.ttf", 350)
-    imgdraw.text((900, 120), ritm, (0, 0, 0), font=ritm_font)
     font = ImageFont.truetype("Roboto-Regular.ttf", 250)
+
+    # draw text for ritm, date, export type, serial, and erase type
+    imgdraw.text((900, 120), ritm, (0, 0, 0), font=ritm_font)
     imgdraw.text((70, 530), date, (0, 0, 0), font=font)
     imgdraw.text((1570, 530), export, (0, 0, 0), font=font)
     imgdraw.text((800, 870), serial, (0, 0, 0), font=font)
@@ -51,10 +55,13 @@ def ewaste(ritm, date, serial, erase_type, export, jamf):
     w = 257
     h = 256
     if jamf is True:
+        # if jamf is done, fill in jamf checkbox
         imgdraw.rectangle((x, y, x + w, y + h), "black")
     elif jamf is None:
-        imgdraw.line((x, y) + (x + w, y + h), "black", width=20)
-        imgdraw.line((x + w, y) + (x, y + h), "black", width=20)
+        # if jamf not needed, strikethrough the jamf field
+        imgdraw.line(
+            (70, y + h / 2 - 20) + (70 + x + w, y + h / 2 - 20), "black", width=20
+        )
 
     img.save("tmp.png")
 
@@ -62,23 +69,27 @@ def ewaste(ritm, date, serial, erase_type, export, jamf):
 def ritm(ritm, client_name, requestor_name, date, migration, index, returnloc):
     img = Image.open("png/ritm.png", "r").convert("RGB")
     imgdraw = ImageDraw.Draw(img)
+
+    # import fonts
     ritm_font = ImageFont.truetype("Roboto-Regular.ttf", 350)
-    imgdraw.text((900, 190), ritm, (0, 0, 0), font=ritm_font)
     font = ImageFont.truetype("Roboto-Regular.ttf", 230)
     name_font = ImageFont.truetype("Roboto-Italic.ttf", 160)
     large_name_font = ImageFont.truetype("Roboto-Italic.ttf", 230)
     small_font = ImageFont.truetype("Roboto-Regular.ttf", 120)
 
+    # draw text for ritm, date, requestor name, client name
+    imgdraw.text((900, 190), ritm, (0, 0, 0), font=ritm_font)
     imgdraw.text((1220, 1050), date, (0, 0, 0), font=font)
-
     imgdraw.text((1560, 625), requestor_name, (0, 0, 0), font=name_font)
     imgdraw.text((70, 800), client_name, (0, 0, 0), font=large_name_font)
 
+    # print index (X of Y), make it smaller if necessary
     if len(index) <= 6:
         imgdraw.text((1760, 1400), index, (0, 0, 0), font=font)
     else:
         imgdraw.text((1825, 1455), index, (0, 0, 0), font=small_font)
 
+    # print return location, wrap text
     fit_text(img, returnloc, (0, 0, 0), small_font, 70, 1750, 2800, 120)
 
     x = 970
@@ -103,9 +114,6 @@ def macsetup(ritm, macname, serial, client_name, backup, printers):
     name_font = ImageFont.truetype("Roboto-Italic.ttf", 200)
     small_font = ImageFont.truetype("Roboto-Regular.ttf", 120)
 
-    # imgdraw.text((1050, 500), macname, (0, 0, 0), font=small_font)
-    # imgdraw.line((1050, 500) + (1050 + 1800, 500), "black", width=20)
-
     if imgdraw.textlength(macname, font) > 1800:
         imgdraw.text((1050, 500), macname, (0, 0, 0), font=small_font)
     else:
@@ -113,7 +121,6 @@ def macsetup(ritm, macname, serial, client_name, backup, printers):
 
     imgdraw.text((620, 650), serial, (0, 0, 0), font=font)
     imgdraw.text((100, 1050), client_name, (0, 0, 0), font=name_font)
-    # fit_text(img, names, (0, 0, 0), small_font, 100, 1050, 2800, 120)
 
     if backup is False:
         imgdraw.text((1300, 1300), "No", (0, 0, 0), font=font)
@@ -169,7 +176,7 @@ def username(username):
     img.save("tmp.png")
 
 
-def winsetup(ritm, pcname, servicetag, client_name, backup, printers):
+def winsetup(ritm, pcname, servicetag, domain, client_name, backup, printers):
     img = Image.open("png/winsetup.png", "r").convert("RGB")
     imgdraw = ImageDraw.Draw(img)
     ritm_font = ImageFont.truetype("Roboto-Regular.ttf", 350)
@@ -186,7 +193,7 @@ def winsetup(ritm, pcname, servicetag, client_name, backup, printers):
         imgdraw.text((100, 850), pcname, (0, 0, 0), font=font)
 
     imgdraw.text((100, 1300), client_name, (0, 0, 0), font=name_font)
-    # fit_text(img, client_name, (0, 0, 0), small_font, 100, 1300, 2800, 120)
+    imgdraw.text((2300, 1500), domain, (0, 0, 0), font=font)
 
     if backup is False:
         imgdraw.text((1200, 2170), "No", (0, 0, 0), font=font)
@@ -198,13 +205,14 @@ def winsetup(ritm, pcname, servicetag, client_name, backup, printers):
 
 def print_label(file="tmp.png"):
     p = subprocess.Popen(["brother_ql", "print", "-l", "62", file])
+    # p = None
     time.sleep(5)
     return p
 
 
 if __name__ == "__main__":
     process = list()
-    # ewaste("87654", "10/31/2023", "H4TKT0ENQ6X3", "3 Pass", "Ewaste", None)
+    ewaste("87654", "10/31/2023", "H4TKT0ENQ6X3", "3 Pass", "Ewaste", None)
     # process.append(print_label())
     # ritm(
     #     "123456",
@@ -215,8 +223,6 @@ if __name__ == "__main__":
     #     "20 of 20",
     #     "WgWgWgWgWgWgWgWgWgWgWgWgWgWgWgWgWgWgWgWgWg",
     # )
-
-    # TODO: move client name under "Client Name(s)", so ther's one line for the client and one line for the requestor, and get rid of return location
 
     # process.append(print_label())
     # macsetup(
@@ -248,6 +254,7 @@ if __name__ == "__main__":
     #     "123456",
     #     "DGE-loaner-___",
     #     "7PCA52G",
+    #     "__",
     #     "Ishan Madan",
     #     False,
     #     "No",
