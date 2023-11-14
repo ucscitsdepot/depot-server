@@ -1,3 +1,4 @@
+import os
 import subprocess
 import time
 
@@ -204,11 +205,9 @@ def winsetup(ritm, pcname, servicetag, domain, client_name, backup, printers):
 
 
 def print_label(file="tmp.png"):
-    p = subprocess.Popen(["brother_ql", "print", "-l", "62", file])
-    # p = None
-    time.sleep(5)
-    return p
-
+    p = subprocess.run(["brother_ql", "print", "-l", "62", file])
+    while type(p) is not subprocess.CompletedProcess:
+        time.sleep(0.1)
 
 if __name__ == "__main__":
     process = list()
