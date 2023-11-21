@@ -102,21 +102,13 @@ def labelExecute(label):
                 strip_accents(str(label.client_name)),
                 label.backup,
                 label.printer,
+                label.localA is not None,
             )
             # print label
             print_label()
 
-            # if client wants local admin
-            if label.localA is not None:
-                # export non-admin username/password label
-                username(strip_accents(str(label.client_name)))
-                print_label()
-                # export admin username/password label
-                username("Admin " + strip_accents(str(label.client_name)))
-                print_label()
-            else:
-                # export password label - username not provided since there is only one local account (presumably)
-                print_label("png/tmpwd.png")
+            # export password label
+            print_label("static/tmpwd.png")
 
     # if label is an ewaste
     elif label.getType() == "Ewaste":

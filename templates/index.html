@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Depot Label Printer</title>
+    <style>
+        img {
+            max-width: 100%;
+            width: 300px;
+            border: 1px solid black;
+        }
+        #container {
+            display: flex;
+            flex-flow: row wrap;
+            justify-content: space-evenly;
+            align-items: flex-start;
+            align-content: space-around;
+        }
+        h1, .alert {
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Depot Label Printer</h1>
+
+    {% for message in get_flashed_messages() %}
+    <div class="alert">{{ message }}</div>
+    {% endfor %}
+
+    <div id="container">
+        <div>
+            <h2>AD</h2>
+            <img src="{{ url_for('static', filename='ad.png') }}">
+            <form method="post">
+                <input type="hidden" name="label" value="ad">
+                <button type="submit" name="submit_ad">Print ad</button>
+            </form>
+        </div>
+
+        <div>
+            <h2>Depot</h2>
+            <img src="{{ url_for('static', filename='depot.png') }}">
+            <form method="post">
+                <input type="hidden" name="label" value="depot">
+                <button type="submit" name="submit_depot">Print depot</button>
+            </form>
+        </div>
+
+        <div>
+            <h2>Ewaste</h2>
+            <img src="{{ url_for('static', filename='ewaste.png') }}">
+            <form method="post">
+                <input type="hidden" name="label" value="ewaste">
+                RITM: <input type="number" name="ritm" placeholder="0000000">
+                <br>
+                Serial: <input type="text" name="serial" placeholder="">
+                <br>
+                Erase Type: <select name="erase_type">
+                    <option value="3 Pass">3 Pass</option>
+                    <option value="Crypto">Crypto</option>
+                    <option value="Destroy">Destroy</option>
+                    <option value="None">None</option>
+                </select>
+                <br>
+                Surplus? <input type="checkbox" name="export">
+                <br>
+                Jamf: <select name="jamf">
+                    <option value="Complete">Complete</option>
+                    <option value="Incomplete">Incomplete</option>
+                    <option value="Unnecessary">Unnecessary</option>
+                </select>
+                <br>
+                <button type="submit" name="submit_ewaste">Print ewaste</button>
+            </form>
+        </div>
+
+        <div>
+            <h2>Macsetup</h2>
+            <img src="{{ url_for('static', filename='macsetup.png') }}">
+            <form method="post">
+                <input type="hidden" name="label" value="macsetup">
+                RITM: <input type="number" name="ritm" placeholder="0000000">
+                <br>
+                Mac Name: <input type="text" name="macname" placeholder="DIV-CRUZID">
+                <br>
+                Serial: <input type="text" name="serial" placeholder="">
+                <br>
+                Client Name: <input type="text" name="client_name" placeholder="">
+                <br>
+                Backup? <input type="checkbox" name="backup">
+                <br>
+                Printers: <select name="printers">
+                    <option value="No">No</option>
+                    <option value="DRIVERS">DRIVERS</option>
+                    <option value="DRIVERS & ADD">DRIVERS & ADD</option>
+                </select>
+                <br>
+                Local Admin? <input type="checkbox" name="admin">
+                <br>
+                <button type="submit" name="submit_macsetup">Print macsetup</button>
+            </form>
+        </div>
+
+        <div>
+            <h2>Notes w/ Printer</h2>
+            <img src="{{ url_for('static', filename='notes_printer.png') }}">
+            <form method="post">
+                <input type="hidden" name="label" value="notes_printer">
+                RITM: <input type="number" name="ritm" placeholder="0000000">
+                <br>
+                Printer IP: <input type="text" name="printerip" placeholder="XXX.XXX.XXX.XXX">
+                <br>
+                Printer Model: <input type="text" name="printermodel" placeholder="">
+                <br>
+                Software: <input type="text" name="sw" placeholder="">
+                <br>
+                Notes: <input type="text" name="notes" placeholder="">
+                <br>
+                <button type="submit" name="submit_notes_printer">Print notes_printer</button>
+            </form>
+        </div>
+
+        <div>
+            <h2>Notes</h2>
+            <img src="{{ url_for('static', filename='notes.png') }}">
+            <form method="post">
+                <input type="hidden" name="label" value="notes">
+                RITM: <input type="number" name="ritm" placeholder="0000000">
+                <br>
+                Software: <input type="text" name="sw" placeholder="">
+                <br>
+                Notes: <input type="text" name="notes" placeholder="">
+                <br>
+                <button type="submit" name="submit_notes">Print notes</button>
+            </form>
+        </div>
+
+        <div>
+            <h2>RITM</h2>
+            <img src="{{ url_for('static', filename='ritm.png') }}">
+            <form method="post">
+                <input type="hidden" name="label" value="ritm">
+                RITM: <input type="number" name="ritm" placeholder="0000000">
+                <br>
+                Client Name: <input type="text" name="client_name" placeholder="">
+                <br>
+                Requestor Name: <input type="text" name="requestor_name" placeholder="">
+                <br>
+                Migration: <select name="migration">
+                    <option value="Complete">Complete</option>
+                    <option value="Incomplete">Incomplete</option>
+                    <option value="Unnecessary">Unnecessary</option>
+                </select>
+                <br>
+                Index: <input type="number" name="index_1" placeholder="0"> of <input type="number" name="index_2"
+                    placeholder="0">
+                <br>
+                Return Location: <input type="text" name="returnloc" placeholder="">
+                <br>
+                <button type="submit" name="submit_ritm">Print ritm</button>
+            </form>
+        </div>
+
+        <div>
+            <h2>Tmpwd</h2>
+            <img src="{{ url_for('static', filename='tmpwd.png') }}">
+            <form method="post">
+                <input type="hidden" name="label" value="tmpwd">
+                <button type="submit" name="submit_tmpwd">Print tmpwd</button>
+            </form>
+        </div>
+
+        <div>
+            <h2>Username</h2>
+            <img src="{{ url_for('static', filename='username.png') }}">
+            <form method="post">
+                <input type="hidden" name="label" value="username">
+                Username: <input type="text" name="username" placeholder="">
+                <br>
+                <button type="submit" name="submit_username">Print username</button>
+            </form>
+        </div>
+
+        <div>
+            <h2>Winsetup</h2>
+            <img src="{{ url_for('static', filename='winsetup.png') }}">
+            <form method="post">
+                <input type="hidden" name="label" value="winsetup">
+                RITM: <input type="number" name="ritm" placeholder="0000000">
+                <br>
+                PC Name: <input type="text" name="pcname" placeholder="DIV-CRUZID">
+                <br>
+                Service Tag: <input type="text" name="servicetag" placeholder="">
+                <br>
+                Domain: <input type="text" name="domain" placeholder="AU">
+                <br>
+                Client Name: <input type="text" name="client_name" placeholder="">
+                <br>
+                Backup? <input type="checkbox" name="backup">
+                <br>
+                Printers: <select name="printers">
+                    <option value="No">No</option>
+                    <option value="DRIVERS">DRIVERS</option>
+                    <option value="DRIVERS & ADD">DRIVERS & ADD</option>
+                </select>
+                <br>
+                <button type="submit" name="submit_winsetup">Print winsetup</button>
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>

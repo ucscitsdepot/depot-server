@@ -37,7 +37,7 @@ def fit_text(img, text, color, font, x, y, w, h):
 
 # setup ewaste label
 def ewaste(ritm, date, serial, erase_type, export, jamf):
-    img = Image.open("png/ewaste.png", "r").convert("RGB")
+    img = Image.open("static/ewaste.png", "r").convert("RGB")
     imgdraw = ImageDraw.Draw(img)
 
     # import fonts
@@ -68,7 +68,7 @@ def ewaste(ritm, date, serial, erase_type, export, jamf):
 
 
 def ritm(ritm, client_name, requestor_name, date, migration, index, returnloc):
-    img = Image.open("png/ritm.png", "r").convert("RGB")
+    img = Image.open("static/ritm.png", "r").convert("RGB")
     imgdraw = ImageDraw.Draw(img)
 
     # import fonts
@@ -106,8 +106,8 @@ def ritm(ritm, client_name, requestor_name, date, migration, index, returnloc):
     img.save("tmp.png")
 
 
-def macsetup(ritm, macname, serial, client_name, backup, printers):
-    img = Image.open("png/macsetup.png", "r").convert("RGB")
+def macsetup(ritm, macname, serial, client_name, backup, printers, localA):
+    img = Image.open("static/macsetup.png", "r").convert("RGB")
     imgdraw = ImageDraw.Draw(img)
     ritm_font = ImageFont.truetype("Roboto-Regular.ttf", 350)
     imgdraw.text((900, 120), ritm, (0, 0, 0), font=ritm_font)
@@ -124,7 +124,15 @@ def macsetup(ritm, macname, serial, client_name, backup, printers):
     imgdraw.text((100, 1050), client_name, (0, 0, 0), font=name_font)
 
     if backup is False:
-        imgdraw.text((1300, 1300), "No", (0, 0, 0), font=font)
+        imgdraw.text((1300, 1300), "No", (0, 0, 0), font=name_font)
+
+    if localA:
+        imgdraw.text((1700, 1275), "Admin", (0, 0, 0), font=font)
+        x = 2400
+        y = 1305
+        w = 200
+        h = 200
+        imgdraw.rectangle((x, y, x + w, y + h), None, "black", 7)
 
     imgdraw.text((1150, 1800), printers, (0, 0, 0), font=font)
 
@@ -132,7 +140,7 @@ def macsetup(ritm, macname, serial, client_name, backup, printers):
 
 
 def notes_printer(ritm, printerip, printermodel, sw, notes):
-    img = Image.open("png/notes_printer.png", "r").convert("RGB")
+    img = Image.open("static/notes_printer.png", "r").convert("RGB")
     imgdraw = ImageDraw.Draw(img)
     ritm_font = ImageFont.truetype("Roboto-Regular.ttf", 350)
     imgdraw.text((920, 120), ritm, (0, 0, 0), font=ritm_font)
@@ -152,7 +160,7 @@ def notes_printer(ritm, printerip, printermodel, sw, notes):
 
 
 def notes(ritm, sw, notes):
-    img = Image.open("png/notes.png", "r").convert("RGB")
+    img = Image.open("static/notes.png", "r").convert("RGB")
     imgdraw = ImageDraw.Draw(img)
     ritm_font = ImageFont.truetype("Roboto-Regular.ttf", 350)
     imgdraw.text((920, 120), ritm, (0, 0, 0), font=ritm_font)
@@ -168,7 +176,7 @@ def notes(ritm, sw, notes):
 
 
 def username(username):
-    img = Image.open("png/username.png", "r").convert("RGB")
+    img = Image.open("static/username.png", "r").convert("RGB")
     imgdraw = ImageDraw.Draw(img)
     font = ImageFont.truetype("Roboto-Medium.ttf", 230)
 
@@ -178,7 +186,7 @@ def username(username):
 
 
 def winsetup(ritm, pcname, servicetag, domain, client_name, backup, printers):
-    img = Image.open("png/winsetup.png", "r").convert("RGB")
+    img = Image.open("static/winsetup.png", "r").convert("RGB")
     imgdraw = ImageDraw.Draw(img)
     ritm_font = ImageFont.truetype("Roboto-Regular.ttf", 350)
     imgdraw.text((930, 120), ritm, (0, 0, 0), font=ritm_font)
@@ -207,11 +215,11 @@ def winsetup(ritm, pcname, servicetag, domain, client_name, backup, printers):
 def print_label(file="tmp.png"):
     p = subprocess.run(["brother_ql", "print", "-l", "62", file])
     while type(p) is not subprocess.CompletedProcess:
-        time.sleep(0.1)
+        time.sleep(0.05)
 
 if __name__ == "__main__":
     process = list()
-    ewaste("87654", "10/31/2023", "H4TKT0ENQ6X3", "3 Pass", "Ewaste", None)
+    # ewaste("87654", "10/31/2023", "H4TKT0ENQ6X3", "3 Pass", "Ewaste", None)
     # process.append(print_label())
     # ritm(
     #     "123456",
@@ -224,14 +232,15 @@ if __name__ == "__main__":
     # )
 
     # process.append(print_label())
-    # macsetup(
-    #     "123456",
-    #     "DGE-sanity-___",
-    #     "H4TKT0ENQ6X3",
-    #     "Ishan Madan",
-    #     False,
-    #     "No",
-    # )
+    macsetup(
+        "123456",
+        "DGE-sanity-___",
+        "H4TKT0ENQ6X3",
+        "Ishan Madan",
+        False,
+        "No",
+        True
+    )
     # process.append(print_label())
     # notes_printer(
     #     "123456",
