@@ -1,6 +1,7 @@
 import os
 import subprocess
 import time
+from threading import Thread
 
 from PIL import Image, ImageDraw, ImageFont
 
@@ -93,15 +94,15 @@ def ritm(ritm, client_name, requestor_name, date, migration, index, returnloc):
     # print return location, wrap text
     fit_text(img, returnloc, (0, 0, 0), small_font, 70, 1750, 2800, 120)
 
-    x = 970
-    y = 1395
-    w = 135
-    h = 120
+    x = 70
+    y = 1450
+    w = 1070
+    h = 0
     if migration is True:
         imgdraw.rectangle((x, y, x + w, y + h), "black")
     elif migration is None:
         imgdraw.line((x, y) + (x + w, y + h), "black", width=20)
-        imgdraw.line((x + w, y) + (x, y + h), "black", width=20)
+        # imgdraw.line((x + w, y) + (x, y + h), "black", width=20)
 
     img.save("tmp.png")
 
@@ -217,30 +218,37 @@ def print_label(file="tmp.png"):
     while type(p) is not subprocess.CompletedProcess:
         time.sleep(0.05)
 
+
+def print_thread(file="tmp.png"):
+    thr = Thread(target=print_label, args=(), kwargs={"file": file})
+    thr.start()
+
+
 if __name__ == "__main__":
     process = list()
     # ewaste("87654", "10/31/2023", "H4TKT0ENQ6X3", "3 Pass", "Ewaste", None)
     # process.append(print_label())
-    # ritm(
-    #     "123456",
-    #     "Ishan Madan",
-    #     "Michael Andres-Larsen",
-    #     "10/31/2023",
-    #     None,
-    #     "20 of 20",
-    #     "WgWgWgWgWgWgWgWgWgWgWgWgWgWgWgWgWgWgWgWgWg",
-    # )
+    ritm(
+        "123456",
+        "Ishan Madan",
+        "Michael Andres-Larsen",
+        "10/31/2023",
+        None,
+        "20 of 20",
+        "WgWgWgWgWgWgWgWgWgWgWgWgWgWgWgWgWgWgWgWgWg",
+    )
 
     # process.append(print_label())
-    macsetup(
-        "123456",
-        "DGE-sanity-___",
-        "H4TKT0ENQ6X3",
-        "Ishan Madan",
-        False,
-        "No",
-        True
-    )
+    # macsetup(
+    #     "123456",
+    #     "DGE-sanity-___",
+    #     "H4TKT0ENQ6X3",
+    #     "Ishan Madan",
+    #     False,
+    #     "No",
+    #     True
+    # )
+    # print_label()
     # process.append(print_label())
     # notes_printer(
     #     "123456",
