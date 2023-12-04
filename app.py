@@ -6,6 +6,8 @@ from flask import Flask, flash, render_template, request
 
 from write_pngs import *
 
+os.chdir(os.path.dirname(os.path.realpath(__file__)))
+
 # initialize flask app
 app = Flask(__name__)
 
@@ -55,7 +57,6 @@ def server():
                 # print the ewaste label in a thread
                 print_thread()
             elif request.form["label"] == "macsetup":
-                
                 macsetup(
                     ritm_text,
                     str(request.form["macname"]),
