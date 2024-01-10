@@ -373,6 +373,7 @@ if __name__ == "__main__":
                 except imaplib.IMAP4.abort as e:
                     print("Could not get mail from folder: ", e)
                     if "socket error" in str(e):
+                        # gmail will throw a socket error if we have been logged in for too long.
                         login_again = True
 
                 # delay 1 second between runs
