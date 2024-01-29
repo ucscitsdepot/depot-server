@@ -62,7 +62,7 @@ def server():
             elif request.form["label"] == "macsetup":
                 macsetup(
                     ritm_text,
-                    str(request.form["macname"]),
+                    str(request.form["dept"]),
                     str(request.form["serial"]),
                     str(request.form["client_name"]),
                     "backup" in request.form,
@@ -109,7 +109,7 @@ def server():
             elif request.form["label"] == "winsetup":
                 winsetup(
                     ritm_text,
-                    str(request.form["pcname"]),
+                    str(request.form["dept"]),
                     str(request.form["servicetag"]),
                     str(request.form["domain"]),
                     str(request.form["client_name"]),

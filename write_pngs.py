@@ -109,7 +109,7 @@ def ritm(ritm, client_name, requestor_name, date, migration, index, returnloc):
     img.save("tmp.png")
 
 
-def macsetup(ritm, macname, serial, client_name, backup, printers, localA):
+def macsetup(ritm, dept, serial, client_name, backup, printers, localA):
     img = Image.open("static/macsetup.png", "r").convert("RGB")
     imgdraw = ImageDraw.Draw(img)
     ritm_font = ImageFont.truetype("Roboto-Regular.ttf", 350)
@@ -118,10 +118,10 @@ def macsetup(ritm, macname, serial, client_name, backup, printers, localA):
     name_font = ImageFont.truetype("Roboto-Italic.ttf", 200)
     small_font = ImageFont.truetype("Roboto-Regular.ttf", 120)
 
-    if imgdraw.textlength(macname, font) > 1800:
-        imgdraw.text((1050, 500), macname, (0, 0, 0), font=small_font)
+    if imgdraw.textlength(dept + "-" + serial[-7:], font) > 1800:
+        imgdraw.text((1050, 500), dept + "-" + serial[-7:], (0, 0, 0), font=small_font)
     else:
-        imgdraw.text((1050, 430), macname, (0, 0, 0), font=font)
+        imgdraw.text((1050, 430), dept + "-" + serial[-7:], (0, 0, 0), font=font)
 
     imgdraw.text((620, 650), serial, (0, 0, 0), font=font)
     imgdraw.text((100, 1050), client_name, (0, 0, 0), font=name_font)
@@ -188,7 +188,7 @@ def username(username):
     img.save("tmp.png")
 
 
-def winsetup(ritm, pcname, servicetag, domain, client_name, backup, printers):
+def winsetup(ritm, dept, servicetag, domain, client_name, backup, printers):
     img = Image.open("static/winsetup.png", "r").convert("RGB")
     imgdraw = ImageDraw.Draw(img)
     ritm_font = ImageFont.truetype("Roboto-Regular.ttf", 350)
@@ -199,10 +199,10 @@ def winsetup(ritm, pcname, servicetag, domain, client_name, backup, printers):
 
     imgdraw.text((1300, 450), servicetag, (0, 0, 0), font=font)
 
-    if imgdraw.textlength(pcname, font) > 2800:
-        imgdraw.text((100, 850), pcname, (0, 0, 0), font=small_font)
+    if imgdraw.textlength(dept + "-" + servicetag, font) > 2800:
+        imgdraw.text((100, 850), dept + "-" + servicetag, (0, 0, 0), font=small_font)
     else:
-        imgdraw.text((100, 850), pcname, (0, 0, 0), font=font)
+        imgdraw.text((100, 850), dept + "-" + servicetag, (0, 0, 0), font=font)
 
     imgdraw.text((100, 1300), client_name, (0, 0, 0), font=name_font)
     imgdraw.text((2300, 1500), domain, (0, 0, 0), font=font)

@@ -26,7 +26,7 @@ class Label:
         self.domain = None  # what domain to enroll the computer in
         self.serial = ""  # computer's serial/service tag
         self.returnLoc = None  # return location on campus
-        self.pcname = None  # mac/pc's computer name
+        self.dept = None  # department prefix for computer name
         self.group = False  # group that will be using this computer
         self.printer = "No"  # does the user want a printer (No/Drivers/Drivers & Add)
         self.printer_notes = ""  # printer's names, etc
@@ -35,7 +35,7 @@ class Label:
 
     def __str__(self):
         strs = "RITM[" + str(self.RITM) + "]\n"
-        strs += "pcname[" + str(self.pcname) + "]\n"
+        strs += "dept[" + str(self.dept) + "]\n"
         strs += "software[" + str(self.software) + "]\n"
         strs += "backup[" + str(self.backup) + "]\n"
         strs += "type[" + str(self.type) + "]\n"
@@ -55,14 +55,10 @@ class Label:
     def setSoftware(self, soft):
         self.software = self.software + " " + soft.replace(",", " ")
 
-    # set client data (cruzid, name, pcname)
+    # set client data (cruzid, name)
     def setClient(self, user):
         self.client_cruzid = user[user.find("(") + 1 : user.find(")")]
         self.client_name = user[: user.find("(") - 1]
-        if self.client_cruzid != "":
-            self.pcname = "-%s" % self.client_cruzid
-        else:
-            self.pcname = ""
 
     # group username
     def setGroupLogin(self, group):
@@ -73,10 +69,6 @@ class Label:
     def setGroupName(self, group):
         self.client_cruzid = group.replace(" ", "")
         self.client_name = group
-        if self.client_name is not None:
-            self.pcname = self.pcname + "-%s" % self.client_cruzid
-        else:
-            self.pcname = ""
 
     # requestor name (may be same as client)
     def setRequestor(self, user):
@@ -120,15 +112,9 @@ class Label:
     def setDepartment(self, dept):
         match = difflib.get_close_matches(dept, departments.keys(), 1, 0.7)
         if match != []:
-            if self.pcname is not None:
-                self.pcname = departments[match[0]] + self.pcname
-            else:
-                self.pcname = departments[match[0]]
+            self.dept = departments[match[0]]
         else:
-            if self.pcname is not None:
-                self.pcname = "___" + self.pcname
-            else:
-                self.pcname = "___"
+            self.dept = "___"
 
     # fill out printer/printer_ip/printer_notes fields
     def setPrinter(self, notes):

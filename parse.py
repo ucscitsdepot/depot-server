@@ -60,7 +60,7 @@ def labelExecute(label):
             # export windows setup label (next to trackpad on laptop)
             winsetup(
                 str(label.RITM),
-                str(label.pcname),
+                str(label.dept),
                 str(serial),
                 str(dom),
                 strip_accents(str(label.client_name)),
@@ -97,7 +97,7 @@ def labelExecute(label):
             # export mac setup label (next to trackpad on laptop)
             macsetup(
                 str(label.RITM),
-                label.pcname,
+                label.dept,
                 serial,
                 strip_accents(str(label.client_name)),
                 label.backup,
