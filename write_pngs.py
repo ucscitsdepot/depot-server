@@ -243,28 +243,41 @@ def inc_generic(inc, notes):
     img.save("tmp.png")
 
 
+# file path to lock on, the exact path is not important as long as it's identical across processes
 active_write_path = "/tmp/active_write"
 
+
 def print_label(file="tmp.png"):
+    # attempt to acquire a lock on the tmp file using flock
     f = check_file()
+    # if check_file fails for some reason (it shouldn't though), repeat
     while not f:
         time.sleep(0.1)
         f = check_file()
+    # call printer library - this is blocking but non-exclusive, so multiple simultaneous calls to this will just cause one to succeed and the rest to error
     p = subprocess.run(["brother_ql", "print", "-l", "62", file])
+    # while printer proces is still running, delay
     while type(p) is not subprocess.CompletedProcess:
         time.sleep(0.05)
+    # release lock on tmp file
     fcntl.flock(f, fcntl.LOCK_UN)
+    # close tmp file (optional since we're not writing to the file itself)
     f.close()
 
 
 def print_thread(file="tmp.png"):
+    # create a thread & run print_label in it, so the website can reload after the POST request and not just hang while waiting for the printer process to finish
     thr = Thread(target=print_label, args=(), kwargs={"file": file})
     thr.start()
 
 
 def check_file():
+    # open tmp file
     f = open(active_write_path, "a+")
+    # if there are no permissions errors and the tmp file is writable by us
     if f.writable():
+        # acquire an exclusive lock on f (if another process holds a lock, this will block)
+        # https://linux.die.net/man/2/flock
         fcntl.flock(f, fcntl.LOCK_EX)
         return f
 
