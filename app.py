@@ -10,15 +10,18 @@ os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
 # initialize flask app
 app = Flask(__name__)
+app.secret_key = os.urandom(12).hex()
 
 
 # define this function to be the root page, accepts both GET requests (loading the page) and POST requests (submitted a form)
 @app.route("/", methods=("GET", "POST"))
 def server():
+    print('help')
     # try/except in case something fails
     try:
         # if a form was submitted
         if request.method == "POST":
+            print('post')
             # if the form response includes a RITM, capture it as a properly-formatted string
             ritm_text = (
                 "0000000"
@@ -112,6 +115,18 @@ def server():
                     str(request.form["client_name"]),
                     "backup" in request.form,
                     str(request.form["printers"]),
+                )
+                print_thread()
+            elif request.form["label"] == "ritm_generic":
+                ritm_generic(
+                    ritm_text,
+                    str(request.form["notes"]),
+                )
+                print_thread()
+            elif request.form["label"] == "inc_generic":
+                inc_generic(
+                    ritm_text,
+                    str(request.form["notes"]),
                 )
                 print_thread()
             flash(f"Printed { request.form['label'] }")

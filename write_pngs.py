@@ -1,6 +1,8 @@
+import fcntl
 import os
 import subprocess
 import time
+from pathlib import Path
 from threading import Thread
 
 from PIL import Image, ImageDraw, ImageFont
@@ -213,10 +215,46 @@ def winsetup(ritm, pcname, servicetag, domain, client_name, backup, printers):
     img.save("tmp.png")
 
 
+def ritm_generic(ritm, notes):
+    img = Image.open("static/ritm_generic.png", "r").convert("RGB")
+    imgdraw = ImageDraw.Draw(img)
+    ritm_font = ImageFont.truetype("Roboto-Regular.ttf", 330)
+    imgdraw.text((860, 25), ritm, (0, 0, 0), font=ritm_font)
+    font = ImageFont.truetype("Roboto-Regular.ttf", 230)
+    small_font = ImageFont.truetype("Roboto-Regular.ttf", 160)
+
+    if len(notes) > 0:
+        fit_text(img, notes, (0, 0, 0), small_font, 90, 520, 2800, 160)
+
+    img.save("tmp.png")
+
+
+def inc_generic(inc, notes):
+    img = Image.open("static/inc_generic.png", "r").convert("RGB")
+    imgdraw = ImageDraw.Draw(img)
+    ritm_font = ImageFont.truetype("Roboto-Regular.ttf", 330)
+    imgdraw.text((630, 25), inc, (0, 0, 0), font=ritm_font)
+    font = ImageFont.truetype("Roboto-Regular.ttf", 230)
+    small_font = ImageFont.truetype("Roboto-Regular.ttf", 160)
+
+    if len(notes) > 0:
+        fit_text(img, notes, (0, 0, 0), small_font, 90, 520, 2800, 160)
+
+    img.save("tmp.png")
+
+
+active_write_path = "/tmp/active_write"
+
 def print_label(file="tmp.png"):
+    f = check_file()
+    while not f:
+        time.sleep(0.1)
+        f = check_file()
     p = subprocess.run(["brother_ql", "print", "-l", "62", file])
     while type(p) is not subprocess.CompletedProcess:
         time.sleep(0.05)
+    fcntl.flock(f, fcntl.LOCK_UN)
+    f.close()
 
 
 def print_thread(file="tmp.png"):
@@ -224,19 +262,28 @@ def print_thread(file="tmp.png"):
     thr.start()
 
 
+def check_file():
+    f = open(active_write_path, "a+")
+    if f.writable():
+        fcntl.flock(f, fcntl.LOCK_EX)
+        return f
+
+    return False
+
+
 if __name__ == "__main__":
     process = list()
     # ewaste("87654", "10/31/2023", "H4TKT0ENQ6X3", "3 Pass", "Ewaste", None)
     # process.append(print_label())
-    ritm(
-        "123456",
-        "Ishan Madan",
-        "Michael Andres-Larsen",
-        "10/31/2023",
-        None,
-        "20 of 20",
-        "WgWgWgWgWgWgWgWgWgWgWgWgWgWgWgWgWgWgWgWgWg",
-    )
+    # ritm(
+    #     "123456",
+    #     "Ishan Madan",
+    #     "Michael Andres-Larsen",
+    #     "10/31/2023",
+    #     None,
+    #     "20 of 20",
+    #     "WgWgWgWgWgWgWgWgWgWgWgWgWgWgWgWgWgWgWgWgWg",
+    # )
 
     # process.append(print_label())
     # macsetup(
@@ -276,3 +323,11 @@ if __name__ == "__main__":
     #     "No",
     # )
     # process.append(print_label())
+    # ritm_generic(
+    #     "0012345",
+    #     "the quick brown fox jumped over the lazy dog. the quick brown fox jumped over the lazy dog. the quick brown fox jumped over the lazy dog. the quick brown fox jumped over the lazy dog. the quick brown fox jumped over the lazy dog.",
+    # )
+    inc_generic(
+        "0012345",
+        "the quick brown fox jumped over the lazy dog. the quick brown fox jumped over the lazy dog. the quick brown fox jumped over the lazy dog. the quick brown fox jumped over the lazy dog. the quick brown fox jumped over the lazy dog.",
+    )

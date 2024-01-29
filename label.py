@@ -60,7 +60,7 @@ class Label:
         self.client_cruzid = user[user.find("(") + 1 : user.find(")")]
         self.client_name = user[: user.find("(") - 1]
         if self.client_cruzid != "":
-            self.pcname = "-%s-___" % self.client_cruzid
+            self.pcname = "-%s" % self.client_cruzid
         else:
             self.pcname = ""
 
@@ -74,7 +74,7 @@ class Label:
         self.client_cruzid = group.replace(" ", "")
         self.client_name = group
         if self.client_name is not None:
-            self.pcname = self.pcname + "-%s-___" % self.client_cruzid
+            self.pcname = self.pcname + "-%s" % self.client_cruzid
         else:
             self.pcname = ""
 

@@ -127,9 +127,9 @@ def labelExecute(label):
     # if label is a mac or windows
     if label.getType() == "Windows" or label.getType() == "Mac":
         # if client wants a printer or has notes or has software requests (if notes need to be printed)
-        if label.printer != "NO" or len(label.notes) > 0 or len(label.software) > 1:
+        if label.printer.upper() != "NO" or len(label.notes) > 0 or len(label.software) > 1:
             # if no printer requested
-            if label.printer == "NO":
+            if label.printer.upper() == "NO":
                 # print simple notes label - just software and notes
                 notes(label.RITM, label.software, label.notes)
             else:
@@ -278,8 +278,9 @@ if __name__ == "__main__":
                                 label.setNotes(field)
                             elif "Printer model:" in field:
                                 field = field.replace("Printer model:", "")
-                                field = field.replace("\r\n", " ")
+                                field = field.replace("\r\n", "")
                                 if len(field) != 0:
+                                    print("I AM NOW SETTING A PRINTER THIS IS A LARGE PRINT HOPEFULLY IT IS VISIBLE")
                                     label.setPrinter(field)
                             elif "Local Admin: " in field:
                                 if "Yes" in field:

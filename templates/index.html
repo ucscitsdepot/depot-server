@@ -157,7 +157,7 @@
                     <option value="Unnecessary">Unnecessary</option>
                 </select>
                 <br>
-                Index: <input type="number" name="index_1" placeholder="0"> of <input type="number" name="index_2"
+                Index: <input style="width: 50px;" type="number" name="index_1" placeholder="0"> of <input style="width: 50px;" type="number" name="index_2"
                     placeholder="0">
                 <br>
                 Return Location: <input type="text" name="returnloc" placeholder="">
@@ -210,6 +210,32 @@
                 </select>
                 <br>
                 <button type="submit" name="submit_winsetup">Print winsetup</button>
+            </form>
+        </div>
+
+        <div>
+            <h2>RITM_Generic</h2>
+            <img src="{{ url_for('static', filename='ritm_generic.png') }}">
+            <form method="post">
+                <input type="hidden" name="label" value="ritm_generic">
+                RITM: <input type="number" name="ritm" placeholder="0000000">
+                <br>
+                Notes: <input type="text" name="notes" placeholder="">
+                <br>
+                <button type="submit" name="submit_ritm_generic">Print ritm_generic</button>
+            </form>
+        </div>
+
+        <div>
+            <h2>INC_Generic</h2>
+            <img src="{{ url_for('static', filename='inc_generic.png') }}">
+            <form method="post">
+                <input type="hidden" name="label" value="inc_generic">
+                INC: <input type="number" name="ritm" placeholder="0000000">
+                <br>
+                Notes: <input type="text" name="notes" placeholder="">
+                <br>
+                <button type="submit" name="submit_inc_generic">Print inc_generic</button>
             </form>
         </div>
     </div>
