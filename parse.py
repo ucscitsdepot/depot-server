@@ -99,7 +99,7 @@ def labelExecute(label):
                 str(label.RITM),
                 label.dept,
                 serial,
-                strip_accents(str(label.client_name)),
+                strip_accents(str(label.client_name)) + f' ({str(label.client_cruzid)})',
                 label.backup,
                 label.printer,
                 label.localA is not None,
