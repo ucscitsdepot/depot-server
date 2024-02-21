@@ -2,7 +2,7 @@ import os
 from datetime import datetime
 from threading import Thread
 
-from flask import Flask, flash, render_template, request
+from flask import Flask, flash, redirect, render_template, request
 
 from write_pngs import *
 
@@ -16,12 +16,12 @@ app.secret_key = os.urandom(12).hex()
 # define this function to be the root page, accepts both GET requests (loading the page) and POST requests (submitted a form)
 @app.route("/", methods=("GET", "POST"))
 def server():
-    print('help')
+    print("help")
     # try/except in case something fails
     try:
         # if a form was submitted
         if request.method == "POST":
-            print('post')
+            print("post")
             # if the form response includes a RITM, capture it as a properly-formatted string
             ritm_text = (
                 "0000000"
@@ -51,10 +51,10 @@ def server():
                     str(
                         "Surplus" if "export" in request.form else "Ewaste"
                     ),  # if "Surplus?" box was checked, Surplus, if unchecked it will not show up in the request.form dict --> Ewaste
-                    True
-                    if request.form["jamf"] == "Complete"
-                    else (
-                        False if request.form["jamf"] == "Incomplete" else None
+                    (
+                        True
+                        if request.form["jamf"] == "Complete"
+                        else (False if request.form["jamf"] == "Incomplete" else None)
                     ),  # if Complete, set to True; if Incomplete, set to False; otherwise (Unnecessary), set to None
                 )
                 # print the ewaste label in a thread
@@ -92,10 +92,14 @@ def server():
                     str(request.form["client_name"]),
                     str(request.form["requestor_name"]),
                     date,
-                    True
-                    if request.form["migration"] == "Complete"
-                    else (
-                        False if (request.form["migration"] == "Incomplete") else None
+                    (
+                        True
+                        if request.form["migration"] == "Complete"
+                        else (
+                            False
+                            if (request.form["migration"] == "Incomplete")
+                            else None
+                        )
                     ),
                     f"{str(request.form['index_1'])} of {str(request.form['index_2'])}",
                     str(request.form["returnloc"]),
@@ -133,6 +137,12 @@ def server():
     except Exception as e:
         print(e)
     return render_template("index.html")
+
+
+@app.route("/<ritm_num>")
+def ritm_link(ritm_num):
+    ritm_text = str("RITM%07d" % int(ritm_num))
+    return redirect("https://ucsc.service-now.com/sc_req_item.do?sysparm_query=number=" + ritm_text)
 
 
 if __name__ == "__main__":
