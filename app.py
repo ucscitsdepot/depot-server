@@ -1,4 +1,5 @@
 import os
+import re
 from datetime import datetime
 from threading import Thread
 
@@ -141,8 +142,10 @@ def server():
 
 @app.route("/<ritm_num>")
 def ritm_link(ritm_num):
-    ritm_text = str("RITM%07d" % int(ritm_num))
-    return redirect("https://ucsc.service-now.com/sc_req_item.do?sysparm_query=number=" + ritm_text)
+    ritm_text = str("RITM%07d" % int(re.sub("[^\d\.]", "", ritm_num)))
+    return redirect(
+        "https://ucsc.service-now.com/sc_req_item.do?sysparm_query=number=" + ritm_text
+    )
 
 
 if __name__ == "__main__":
