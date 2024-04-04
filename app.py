@@ -2,12 +2,29 @@ import os
 import re
 from datetime import datetime
 from threading import Thread
+import pypandoc
+from docx import Document
+import sys
+import cups
+import shutil
+import mammoth
+from html2image import Html2Image
 
 from flask import Flask, flash, redirect, render_template, request
 
 from write_pngs import *
+from print import *
 
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
+
+#init paramaters
+hti = Html2Image(custom_flags=['--no-sandbox'], size=(800, 1000))
+rtf_path = 'ITS-Shipping-Form.rtf'
+docx_path = 'ITS-Shipping-Form.docx'
+new_docx_path = 'ITS-Shipping-Form-Copy.docx'
+shutil.copy(docx_path, new_docx_path)
+printer_name ="printername"
+cmd = "lp -o fill blue_page.png"
 
 # initialize flask app
 app = Flask(__name__)
@@ -146,6 +163,63 @@ def ritm_link(ritm_num):
     return redirect(
         "https://ucsc.service-now.com/sc_req_item.do?sysparm_query=number=" + ritm_text
     )
+
+
+
+@app.route('/ship')
+def index():
+    return render_template('ship.html')
+
+@app.route('/submit', methods=['POST'])
+def submit():
+    name = request.form['name']
+    date = request.form['date']
+    phone = request.form['phone']
+    address1 = request.form['address1']
+    address2 = request.form['address2']
+    city = request.form['city']
+    state = request.form['state']
+    zip_code = request.form['zip']
+    mailcode = request.form['mailcode']
+    tracking_email = request.form['tracking_email']
+    approver = request.form['approver']
+    ritm = request.form['ritm']
+    inc = request.form['inc']
+    print(name, date, phone, address1, address2, city, state, zip_code, mailcode, tracking_email, approver, ritm, inc)
+    
+    replace_string_in_docx(new_docx_path, 'Name ____________________________', 'Name: %s' % adjust_string_length(name, 29))
+    replace_string_in_docx(new_docx_path, 'Date _____________', 'Date: %s' % adjust_string_length(date, 10))
+    replace_string_in_docx(new_docx_path, 'Phone _____________________', 'Phone: %s' % adjust_string_length(phone, 5))
+    replace_string_in_docx(new_docx_path, 'Address Line 1 __________________________________________________________________', 'Address1: %s' % adjust_string_length(address1, 5))
+    replace_string_in_docx(new_docx_path, 'Address Line 2 __________________________________________________________________', 'Address2: %s' % adjust_string_length(address2, 5))
+    replace_string_in_docx(new_docx_path, 'City ____________________', 'City: %s' % adjust_string_length(city, 7))
+    replace_string_in_docx(new_docx_path, 'State _________', 'State: %s' % adjust_string_length(state, 2))
+    replace_string_in_docx(new_docx_path, 'ZIP _____________', 'Zip: %s' % adjust_string_length(zip_code, 5))
+    replace_string_in_docx(new_docx_path, 'MailCode ________', 'Mailcode: %s' % adjust_string_length(mailcode, 2))
+    replace_string_in_docx(new_docx_path, 'depot@ucsc.edu | __________________________________', 'depot@ucsc.edu | %s' % adjust_string_length(tracking_email, 14))
+    replace_string_in_docx(new_docx_path, 'MailCode Approver _____________________________', 'MailCode Approver: %s' % adjust_string_length(approver, 8))
+    replace_string_in_docx(new_docx_path, 'RITM00_____________', '%s' % adjust_string_length(ritm, 5))
+    replace_string_in_docx(new_docx_path, 'INC0_____________', '%s' % adjust_string_length(inc, 5))
+    print("hi2")
+    custom_styles = "b => i"
+    with open(new_docx_path, "rb") as docx_file:
+        print("hi3")
+        result = mammoth.convert_to_html(docx_file, style_map=custom_styles)
+        text = result.value
+        with open('output.html', 'w') as html_file:
+            html_file.write(text)
+        print("hi4")
+    print("hi5")
+    hti.screenshot(html_file='output.html', save_as='blue_page.png')
+    print("hi6")
+    os.system(cmd)
+    
+    return 'Form submitted successfully'
+
+if __name__ == '__main__':
+    app.run(debug=True)
+
+
 
 
 if __name__ == "__main__":

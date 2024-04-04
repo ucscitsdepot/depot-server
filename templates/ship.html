@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Shipping Label Form</title>
+</head>
+<body>
+    <h1>Shipping Label Form</h1>
+    <form action="/submit" method="POST">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" required><br><br>
+        
+        <label for="date">Date:</label>
+        <input type="text" id="date" name="date" required><br><br>
+        
+        <label for="phone">Phone:</label>
+        <input type="text" id="phone" name="phone" required><br><br>
+        
+        <label for="address1">Address Line 1:</label>
+        <input type="text" id="address1" name="address1" required><br><br>
+        
+        <label for="address2">Address Line 2:</label>
+        <input type="text" id="address2" name="address2"><br><br>
+        
+        <label for="city">City:</label>
+        <input type="text" id="city" name="city" required><br><br>
+        
+        <label for="state">State:</label>
+        <input type="text" id="state" name="state" required><br><br>
+        
+        <label for="zip">Zip:</label>
+        <input type="text" id="zip" name="zip" required><br><br>
+        
+        <label for="mailcode">Mailcode:</label>
+        <input type="text" id="mailcode" name="mailcode" required><br><br>
+        
+        <label for="tracking_email">Tracking Email:</label>
+        <input type="text" id="tracking_email" name="tracking_email" required><br><br>
+        
+        <label for="approver">MailCode Approver:</label>
+        <input type="text" id="approver" name="approver" required><br><br>
+        
+        <label for="ritm">RITM:</label>
+        <input type="text" id="ritm" name="ritm" required><br><br>
+        
+        <label for="inc">INC:</label>
+        <input type="text" id="inc" name="inc"><br><br>
+        
+        <script>
+            const ritmInput = document.getElementById("ritm");
+            const incInput = document.getElementById("inc");
+            
+            ritmInput.addEventListener("input", () => {
+                if (ritmInput.value.trim() !== "") {
+                    incInput.removeAttribute("required");
+                } else {
+                    incInput.setAttribute("required", "required");
+                }
+            });
+            
+            incInput.addEventListener("input", () => {
+                if (incInput.value.trim() !== "") {
+                    ritmInput.removeAttribute("required");
+                } else {
+                    ritmInput.setAttribute("required", "required");
+                }
+            });
+        </script>
+        
+        <input type="submit" value="Submit">
+    </form>
+</body>
+</html>
+
