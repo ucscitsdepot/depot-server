@@ -79,7 +79,19 @@ def labelExecute(label):
                 print_label()
 
             if printship:
-                printcall(str(label.client_name), phone, address1, address2, city, state, zip_code, mail_code, "____", approver, str(label.RITM))
+                printcall(
+                    str(label.client_name),
+                    str(phone),
+                    str(address1),
+                    str(address2),
+                    str(city),
+                    str(state),
+                    str(zip_code),
+                    str(mail_code),
+                    "____",
+                    str(approver),
+                    str(label.RITM)
+                )
 
 
     # if label is a mac setup
