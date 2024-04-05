@@ -59,7 +59,7 @@ def adjust_string_length(variable, length):
     return variable + underscores
 
 
-def printcall(name, phone, address1, address2, city, state, zip_code, mailcode, tracking_email, approver, ritm, inc):
+def printcall(name, phone, address1, address2, city, state, zip_code, mailcode, tracking_email, approver, ritm):
     replace_string_in_docx(new_docx_path, 'Name ____________________________', 'Name: %s' % adjust_string_length(name, 29))
     replace_string_in_docx(new_docx_path, 'Date _____________', 'Date: %s' % adjust_string_length(current_date, 10))
     replace_string_in_docx(new_docx_path, 'Phone _____________________', 'Phone: %s' % adjust_string_length(phone, 5))
