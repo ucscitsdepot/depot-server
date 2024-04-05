@@ -6,6 +6,7 @@ import re
 import time
 import unicodedata
 from datetime import datetime
+from print import *
 
 # library to load environment variables from .env file (printer ip, printer model, gmail username, gmail password)
 # .env file not included in git repo for obvious reasons (: i've been using scp to transfer it between computers
@@ -76,6 +77,10 @@ def labelExecute(label):
                 username(label.getUsername())
                 # print label
                 print_label()
+
+            if printship:
+                printcall(str(label.client_name), phone, address1, address2, city, state, zip_code, mail_code, "____", approver, str(label.RITM))
+
 
     # if label is a mac setup
     elif label.getType() == "Mac":
@@ -233,6 +238,8 @@ if __name__ == "__main__":
                                 )
                                 if field != "":
                                     label.setGroupName(field)
+                            elif "Client Phone: " in field:
+                                phone= field.replace("Client Phone: ", "")
                             elif "Requestor: " in field:
                                 label.setRequestor(field.replace("Requestor: ", ""))
                             elif "ComputerType: " in field:
@@ -300,9 +307,21 @@ if __name__ == "__main__":
                             elif "How would you like us to return the computer to you:" in field:
                                 if "Ship" in field:
                                     printship = True
-                                    os.system("touch ~/txt.txt")
+                                    
                                 else:
                                     printship = False
+                            elif "Mail Code: " in field:
+                                mail_code = field.replace("Mail Code: ", "")
+                            elif "Signature Confirmation: " in field:
+                                sig_conf = True if "true" in field else False
+                            elif "Mail Code approver: " in field:
+                                approver = field.replace("Mail Code approver: ", "")
+                            elif "Shipping Address: " in field:
+                                address1 = " ".join(field.replace("Shipping Address: ", "").split()[:3])
+                                address2 = " ".join(field.replace("Shipping Address: ", "").split()[3:4])
+                                city = field.replace("Shipping Address: ", "").split()[4]
+                                state = field.replace("Shipping Address: ", "").split()[5]
+                                zip_code = field.replace("Shipping Address: ", "").split()[6]
                             elif "Return: " in field:
                                 label.returnLoc = field.replace("Return: ", "")
                                 if label.returnLoc == "":

@@ -185,7 +185,6 @@ def submit():
     approver = request.form['approver']
     ritm = request.form['ritm']
     inc = request.form['inc']
-    print(name, date, phone, address1, address2, city, state, zip_code, mailcode, tracking_email, approver, ritm, inc)
     
     replace_string_in_docx(new_docx_path, 'Name ____________________________', 'Name: %s' % adjust_string_length(name, 29))
     replace_string_in_docx(new_docx_path, 'Date _____________', 'Date: %s' % adjust_string_length(date, 10))
@@ -200,18 +199,18 @@ def submit():
     replace_string_in_docx(new_docx_path, 'MailCode Approver _____________________________', 'MailCode Approver: %s' % adjust_string_length(approver, 8))
     replace_string_in_docx(new_docx_path, 'RITM00_____________', '%s' % adjust_string_length(ritm, 5))
     replace_string_in_docx(new_docx_path, 'INC0_____________', '%s' % adjust_string_length(inc, 5))
-    print("hi2")
+    
     custom_styles = "b => i"
     with open(new_docx_path, "rb") as docx_file:
-        print("hi3")
+        
         result = mammoth.convert_to_html(docx_file, style_map=custom_styles)
         text = result.value
         with open('output.html', 'w') as html_file:
             html_file.write(text)
-        print("hi4")
-    print("hi5")
+        
+    
     hti.screenshot(html_file='output.html', save_as='blue_page.png')
-    print("hi6")
+    
     os.system(cmd)
     
     return 'Form submitted successfully'
