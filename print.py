@@ -97,7 +97,7 @@ with open(new_docx_path, "rb") as docx_file:
         text = result.value
         with open('/home/depot/Auto-Label-Generator/output.html', 'w') as html_file:
             html_file.write(text)
-hti.screenshot(html_file='/home/depot/Auto-Label-Generator/output.html', save_as='/home/depot//Auto-Label-Generator/blue_page.png')
+hti.screenshot(html_file='/home/depot/Auto-Label-Generator/output.html', save_as='blue_page.png')
     
 os.system(cmd)
         
