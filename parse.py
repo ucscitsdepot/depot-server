@@ -376,7 +376,7 @@ if __name__ == "__main__":
                         # setup label for printing & print it
                         labelExecute(label)
                         print("==========================================\n")
-                        if printship:
+                        if printship == True:
                             print("I AM NOW SETTING A SHIPPING LABEL")
                             os.system("touch hi.txt")
                             
