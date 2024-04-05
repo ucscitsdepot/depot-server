@@ -71,7 +71,7 @@ def printcall(name, phone, address1, address2, city, state, zip_code, mailcode, 
     replace_string_in_docx(new_docx_path, 'MailCode ________', 'Mailcode: %s' % adjust_string_length(mailcode, 2))
     replace_string_in_docx(new_docx_path, 'depot@ucsc.edu | __________________________________', 'depot@ucsc.edu | %s' % adjust_string_length(tracking_email, 14))
     replace_string_in_docx(new_docx_path, 'MailCode Approver _____________________________', 'MailCode Approver: %s' % adjust_string_length(approver, 8))
-    replace_string_in_docx(new_docx_path, 'RITM00_____________', '%s' % adjust_string_length("RITM00" + ritm, 5))
+    replace_string_in_docx(new_docx_path, 'RITM00_____________', '%s' % adjust_string_length("RITM" + ritm, 5))
     # replace_string_in_docx(new_docx_path, 'INC0_____________', '%s' % adjust_string_length(inc, 5))
     
     custom_styles = "b => i"
@@ -82,21 +82,11 @@ def printcall(name, phone, address1, address2, city, state, zip_code, mailcode, 
         with open('/home/depot/Auto-Label-Generator/output.html', 'w') as html_file:
             html_file.write(text)
     hti.screenshot(html_file='/home/depot/Auto-Label-Generator/output.html', save_as='blue_page.png')
-    # os.system(cmd)
+    os.system(cmd)
 
 
 
 
-# custom_styles = "b => i"
-# with open(new_docx_path, "rb") as docx_file:
-        
-#         result = mammoth.convert_to_html(docx_file, style_map=custom_styles)
-#         text = result.value
-#         with open('/home/depot/Auto-Label-Generator/output.html', 'w') as html_file:
-#             html_file.write(text)
-# hti.screenshot(html_file='/home/depot/Auto-Label-Generator/output.html', save_as='blue_page.png')
-    
-# os.system(cmd)
         
 
 
