@@ -90,7 +90,7 @@ def labelExecute(label):
                 # print label
                 # print_label()
 
-            if printship:
+            if printship == True:
                 printcall(
                     str(label.client_name),
                     str(phone),
