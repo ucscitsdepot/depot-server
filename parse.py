@@ -297,10 +297,10 @@ if __name__ == "__main__":
                                     "Serial Number or Service Tag: ", ""
                                 )
                                 label.serial = label.serial.split(", ")
-                            elif "How would you like us to return the computer to you?" in field:
+                            elif "How would you like us to return the computer to you:" in field:
                                 if "Ship" in field:
                                     printship = True
-                                    os.system("touch txt.txt")
+                                    os.system("touch ~/txt.txt")
                                 else:
                                     printship = False
                             elif "Return: " in field:
