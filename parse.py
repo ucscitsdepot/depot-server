@@ -331,7 +331,7 @@ if __name__ == "__main__":
                                 approver = field.replace("Mail Code approver: ", "")
                             elif "Shipping Address: " in field:
                                 address1 = " ".join(field.replace("Shipping Address: ", "").split()[:3])
-                            #     address2 = " ".join(field.replace("Shipping Address: ", "").split()[3:4])
+                                address2 = " ".join(field.replace("Shipping Address: ", "").split()[3:4])
                             #     city = field.replace("Shipping Address: ", "").split()[4]
                             #     state = field.replace("Shipping Address: ", "").split()[5]
                             #     zip_code = field.replace("Shipping Address: ", "").split()[6]
