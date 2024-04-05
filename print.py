@@ -10,12 +10,12 @@ from flask import Flask, render_template, request
 import os
 from datetime import date
 hti = Html2Image(custom_flags=['--no-sandbox'], size=(800, 1000))
-rtf_path = '~/Auto-Label-Generator/ITS-Shipping-Form.rtf'
-docx_path = '~/Auto-Label-Generator/ITS-Shipping-Form.docx'
-new_docx_path = '~/Auto-Label-Generator/ITS-Shipping-Form-Copy.docx'
+rtf_path = '/home/depot/Auto-Label-Generator/ITS-Shipping-Form.rtf'
+docx_path = '/home/depot/Auto-Label-Generator/ITS-Shipping-Form.docx'
+new_docx_path = '/home/depot/Auto-Label-Generator/ITS-Shipping-Form-Copy.docx'
 shutil.copy(docx_path, new_docx_path)
-printer_name ="printername"
-cmd = "lp -o fill ~/Auto-Label-Generator/blue_page.png"
+printer_name = "printername"
+cmd = "lp -o fill /home/depot/Auto-Label-Generator/blue_page.png"
 current_date = date.today().strftime("%m/%d/%Y")
 
 
@@ -79,11 +79,11 @@ def printcall(name, phone, address1, address2, city, state, zip_code, mailcode, 
         
         result = mammoth.convert_to_html(docx_file, style_map=custom_styles)
         text = result.value
-        with open('~/Auto-Label-Generator/output.html', 'w') as html_file:
+        with open('/home/depot/Auto-Label-Generator/output.html', 'w') as html_file:
             html_file.write(text)
         
     
-    hti.screenshot(html_file='~/Auto-Label-Generator/output.html', save_as='~/Auto-Label-Generator/blue_page.png')
+    hti.screenshot(html_file='/home/depot/Auto-Label-Generator/output.html', save_as='~/Auto-Label-Generator/blue_page.png')
     
     os.system(cmd)
     
