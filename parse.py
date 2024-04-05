@@ -18,7 +18,7 @@ os.chdir(os.path.dirname(os.path.realpath(__file__)))
 from ewaste import Ewaste
 from label import Label
 from write_pngs import *
-
+printship = False
 # load environment variables
 load_dotenv()
 
@@ -297,6 +297,11 @@ if __name__ == "__main__":
                                     "Serial Number or Service Tag: ", ""
                                 )
                                 label.serial = label.serial.split(", ")
+                            elif "How would you like us to return the computer to you?" in field:
+                                if "Ship" in field:
+                                    printship = True
+                                else:
+                                    printship = False
                             elif "Return: " in field:
                                 label.returnLoc = field.replace("Return: ", "")
                                 if label.returnLoc == "":
@@ -371,6 +376,11 @@ if __name__ == "__main__":
                         # setup label for printing & print it
                         labelExecute(label)
                         print("==========================================\n")
+                        if printship:
+                            print("I AM NOW SETTING A SHIPPING LABEL")
+                            os.system("touch hi.txt")
+                            
+                           
                 except imaplib.IMAP4.abort as e:
                     print("Could not get mail from folder: ", e)
                     if "socket error" in str(e):
