@@ -345,6 +345,7 @@ if __name__ == "__main__":
                         # print text of label to console
                         print(label)
                         if printship == True:
+                            print("I AM PRINTING SHIPPING LABEL")
                             printcall(
                                 str(label.client_name),
                                 str(phone),
