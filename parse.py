@@ -68,7 +68,7 @@ def labelExecute(label):
                 str(label.returnLoc),
             )
             # print label
-            print_label()
+            # print_label()
 
             # export windows setup label (next to trackpad on laptop)
             winsetup(
@@ -81,7 +81,7 @@ def labelExecute(label):
                 str(label.printer),
             )
             # print label
-            print_label()
+            # print_label()
             
 
             # if client wants local admin
@@ -89,7 +89,7 @@ def labelExecute(label):
                 # export username/password label
                 username(label.getUsername())
                 # print label
-                print_label()
+                # print_label()
 
             
                
@@ -320,22 +320,24 @@ if __name__ == "__main__":
                             elif "How would you like us to return the computer to you:" in field:
                                 if "Ship" in field:
                                     printship = True
-                                    if "Mail Code: " in field:
-                                        mail_code = field.replace("Mail Code: ", "")
-                            # elif "Signature Confirmation: " in field:
-                            #     sig_conf = True if "true" in field else False
-                                    elif "Mail Code approver: " in field:
-                                        approver = field.replace("Mail Code approver: ", "")
-                                    elif "Shipping Address: " in field:
-                                        address1 = " ".join(field.replace("Shipping Address: ", "").split()[:3])
-                                        # address2 = " ".join(field.replace("Shipping Address: ", "").split()[3:4])
-                                        city = field.replace("Shipping Address: ", "").split()[3:4]
-                                        state = field.replace("Shipping Address: ", "").split()[4:5]
-                                        zip_code = field.replace("Shipping Address: ", "").split()[5]
                                     
                                 else:
                                     printship = False
-                            
+                            elif "Mail Code: " in field:
+                                mail_code = field.replace("Mail Code: ", "")
+                            # elif "Signature Confirmation: " in field:
+                            #     sig_conf = True if "true" in field else False
+                            elif "Mail Code approver: " in field:
+                                approver = field.replace("Mail Code approver: ", "")
+                            elif "Shipping Address: " in field:
+                                if "" in field:
+                                    pass
+                                else:
+                                    address1 = " ".join(field.replace("Shipping Address: ", "").split()[:3])
+                                    # address2 = " ".join(field.replace("Shipping Address: ", "").split()[3:4])
+                                    city = field.replace("Shipping Address: ", "").split()[3:4]
+                                    state = field.replace("Shipping Address: ", "").split()[4:5]
+                                    zip_code = field.replace("Shipping Address: ", "").split()[5]
                             elif "Return: " in field:
                                 label.returnLoc = field.replace("Return: ", "")
                                 if label.returnLoc == "":
