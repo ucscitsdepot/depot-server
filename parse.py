@@ -82,6 +82,7 @@ def labelExecute(label):
             )
             # print label
             # print_label()
+            
 
             # if client wants local admin
             if label.localA is not None:
@@ -90,20 +91,7 @@ def labelExecute(label):
                 # print label
                 # print_label()
 
-            if printship == True:
-                printcall(
-                    str(label.client_name),
-                    str(phone),
-                    str(address1),
-                    str(address2),
-                    str(city),
-                    str(state),
-                    str(zip_code),
-                    str(mail_code),
-                    "____",
-                    str(approver),
-                    str(label.RITM)
-                )
+            
                
 
 
@@ -356,6 +344,21 @@ if __name__ == "__main__":
                             continue
                         # print text of label to console
                         print(label)
+                        if printship == True:
+                            printcall(
+                                str(label.client_name),
+                                str(phone),
+                                str(address1),
+                                str(address2),
+                                str(city),
+                                str(state),
+                                str(zip_code),
+                                str(mail_code),
+                                "____",
+                                str(approver),
+                                str(label.RITM)
+                            )
+                            printship = False
                         # setup label for printing & print it
                         labelExecute(label)
                         print("==========================================\n")
