@@ -71,7 +71,7 @@ def printcall(name, phone, address1, address2, city, state, zip_code, mailcode, 
     replace_string_in_docx(new_docx_path, 'MailCode ________', 'Mailcode: %s' % adjust_string_length(mailcode, 2))
     replace_string_in_docx(new_docx_path, 'depot@ucsc.edu | __________________________________', 'depot@ucsc.edu | %s' % adjust_string_length(tracking_email, 14))
     replace_string_in_docx(new_docx_path, 'MailCode Approver _____________________________', 'MailCode Approver: %s' % adjust_string_length(approver, 8))
-    replace_string_in_docx(new_docx_path, 'RITM00_____________', '%s' % adjust_string_length(ritm, 5))
+    replace_string_in_docx(new_docx_path, 'RITM00_____________', '%s' % adjust_string_length("RITM00" + ritm, 5))
     # replace_string_in_docx(new_docx_path, 'INC0_____________', '%s' % adjust_string_length(inc, 5))
     
     custom_styles = "b => i"
