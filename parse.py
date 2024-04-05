@@ -20,6 +20,18 @@ from ewaste import Ewaste
 from label import Label
 from write_pngs import *
 printship = False
+
+name= ""
+phone= ""
+address1= ""
+address2= ""
+city= ""
+state= ""
+zip_code= ""
+mail_code= ""
+approver= ""
+tracking_email= ""
+
 # load environment variables
 load_dotenv()
 
@@ -79,19 +91,20 @@ def labelExecute(label):
                 print_label()
 
             if printship:
-                printcall(
-                    str(label.client_name),
-                    str(phone),
-                    str(address1),
-                    str(address2),
-                    str(city),
-                    str(state),
-                    str(zip_code),
-                    str(mail_code),
-                    "____",
-                    str(approver),
-                    str(label.RITM)
-                )
+                # printcall(
+                #     str(label.client_name),
+                #     str(phone),
+                #     str(address1),
+                #     str(address2),
+                #     str(city),
+                #     str(state),
+                #     str(zip_code),
+                #     str(mail_code),
+                #     "____",
+                #     str(approver),
+                #     str(label.RITM)
+                # )
+                pass
 
 
     # if label is a mac setup
@@ -324,16 +337,16 @@ if __name__ == "__main__":
                                     printship = False
                             elif "Mail Code: " in field:
                                 mail_code = field.replace("Mail Code: ", "")
-                            elif "Signature Confirmation: " in field:
-                                sig_conf = True if "true" in field else False
+                            # elif "Signature Confirmation: " in field:
+                            #     sig_conf = True if "true" in field else False
                             elif "Mail Code approver: " in field:
                                 approver = field.replace("Mail Code approver: ", "")
-                            elif "Shipping Address: " in field:
-                                address1 = " ".join(field.replace("Shipping Address: ", "").split()[:3])
-                                address2 = " ".join(field.replace("Shipping Address: ", "").split()[3:4])
-                                city = field.replace("Shipping Address: ", "").split()[4]
-                                state = field.replace("Shipping Address: ", "").split()[5]
-                                zip_code = field.replace("Shipping Address: ", "").split()[6]
+                            # elif "Shipping Address: " in field:
+                            #     address1 = " ".join(field.replace("Shipping Address: ", "").split()[:3])
+                            #     address2 = " ".join(field.replace("Shipping Address: ", "").split()[3:4])
+                            #     city = field.replace("Shipping Address: ", "").split()[4]
+                            #     state = field.replace("Shipping Address: ", "").split()[5]
+                            #     zip_code = field.replace("Shipping Address: ", "").split()[6]
                             elif "Return: " in field:
                                 label.returnLoc = field.replace("Return: ", "")
                                 if label.returnLoc == "":
