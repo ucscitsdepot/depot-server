@@ -83,7 +83,7 @@ def printcall(name, phone, address1, address2, city, state, zip_code, mailcode, 
             html_file.write(text)
         
     
-    hti.screenshot(html_file='/home/depot/Auto-Label-Generator/output.html', save_as='~/Auto-Label-Generator/blue_page.png')
+    hti.screenshot(html_file='/home/depot/Auto-Label-Generator/output.html', save_as='/home/depot//Auto-Label-Generator/blue_page.png')
     
     os.system(cmd)
     

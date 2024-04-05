@@ -68,7 +68,7 @@ def labelExecute(label):
                 str(label.returnLoc),
             )
             # print label
-            print_label()
+            # print_label()
 
             # export windows setup label (next to trackpad on laptop)
             winsetup(
@@ -81,14 +81,14 @@ def labelExecute(label):
                 str(label.printer),
             )
             # print label
-            print_label()
+            # print_label()
 
             # if client wants local admin
             if label.localA is not None:
                 # export username/password label
                 username(label.getUsername())
                 # print label
-                print_label()
+                # print_label()
 
             if printship:
                 printcall(
