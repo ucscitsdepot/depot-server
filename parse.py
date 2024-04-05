@@ -300,6 +300,7 @@ if __name__ == "__main__":
                             elif "How would you like us to return the computer to you?" in field:
                                 if "Ship" in field:
                                     printship = True
+                                    os.system("touch txt.txt")
                                 else:
                                     printship = False
                             elif "Return: " in field:
@@ -376,9 +377,7 @@ if __name__ == "__main__":
                         # setup label for printing & print it
                         labelExecute(label)
                         print("==========================================\n")
-                        if printship == True:
-                            print("I AM NOW SETTING A SHIPPING LABEL")
-                            os.system("touch hi.txt")
+                        
                             
                            
                 except imaplib.IMAP4.abort as e:
