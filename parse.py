@@ -330,9 +330,7 @@ if __name__ == "__main__":
                             elif "Mail Code approver: " in field:
                                 approver = field.replace("Mail Code approver: ", "")
                             elif "Shipping Address: " in field:
-                                if "" in field:
-                                    pass
-                                else:
+                                if field != "":
                                     address1 = " ".join(field.replace("Shipping Address: ", "").split()[:3])
                                     # address2 = " ".join(field.replace("Shipping Address: ", "").split()[3:4])
                                     city = field.replace("Shipping Address: ", "").split()[3:4]
