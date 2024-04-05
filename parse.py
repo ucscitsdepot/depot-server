@@ -329,13 +329,33 @@ if __name__ == "__main__":
                             #     sig_conf = True if "true" in field else False
                             elif "Mail Code approver: " in field:
                                 approver = field.replace("Mail Code approver: ", "")
-                            elif "Shipping Address: " in field:
+                            if "Shipping Address: " in field:
                                 if field != "":
-                                    address1 = " ".join(field.replace("Shipping Address: ", "").split()[:3])
-                                    # address2 = " ".join(field.replace("Shipping Address: ", "").split()[3:4])
-                                    city = field.replace("Shipping Address: ", "").split()[3:4]
-                                    state = field.replace("Shipping Address: ", "").split()[4:5]
-                                    zip_code = field.replace("Shipping Address: ", "").split()[5]
+                                    address_parts = field.replace("Shipping Address: ", "").split()
+                                    if len(address_parts) >= 6:
+                                        address1 = " ".join(address_parts[:3])
+                                        address2 = " ".join(address_parts[3:4])
+                                        city = address_parts[4:5]
+                                        state = address_parts[5:6]
+                                        zip_code = address_parts[6]
+                                    elif len(address_parts) == 5:
+                                        address1 = " ".join(address_parts[:3])
+                                        address2 = ""
+                                        city = address_parts[3:4]
+                                        state = address_parts[4:5]
+                                        zip_code = [6]
+                                    elif len(address_parts) == 4:
+                                        address1 = " ".join(address_parts[:3])
+                                        address2 = ""
+                                        city = address_parts[3:4]
+                                        state = ""
+                                        zip_code = ""
+                                    else:
+                                        address1 = ""
+                                        address2 = ""
+                                        city = ""
+                                        state = ""
+                                        zip_code = ""
                             elif "Return: " in field:
                                 label.returnLoc = field.replace("Return: ", "")
                                 if label.returnLoc == "":
