@@ -329,8 +329,8 @@ if __name__ == "__main__":
                             #     sig_conf = True if "true" in field else False
                             elif "Mail Code approver: " in field:
                                 approver = field.replace("Mail Code approver: ", "")
-                            # elif "Shipping Address: " in field:
-                            #     address1 = " ".join(field.replace("Shipping Address: ", "").split()[:3])
+                            elif "Shipping Address: " in field:
+                                address1 = " ".join(field.replace("Shipping Address: ", "").split()[:3])
                             #     address2 = " ".join(field.replace("Shipping Address: ", "").split()[3:4])
                             #     city = field.replace("Shipping Address: ", "").split()[4]
                             #     state = field.replace("Shipping Address: ", "").split()[5]
