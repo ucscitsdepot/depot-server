@@ -19,18 +19,19 @@ os.chdir(os.path.dirname(os.path.realpath(__file__)))
 from ewaste import Ewaste
 from label import Label
 from write_pngs import *
+
 printship = False
 
-name= ""
-phone= ""
-address1= ""
-address2= ""
-city= ""
-state= ""
-zip_code= ""
-mail_code= ""
-approver= ""
-tracking_email= ""
+name = ""
+phone = ""
+address1 = ""
+address2 = ""
+city = ""
+state = ""
+zip_code = ""
+mail_code = ""
+approver = ""
+tracking_email = ""
 
 # load environment variables
 load_dotenv()
@@ -82,7 +83,6 @@ def labelExecute(label):
             )
             # print label
             print_label()
-            
 
             # if client wants local admin
             if label.localA is not None:
@@ -90,10 +90,6 @@ def labelExecute(label):
                 username(label.getUsername())
                 # print label
                 print_label()
-
-            
-               
-
 
     # if label is a mac setup
     elif label.getType() == "Mac":
@@ -117,7 +113,8 @@ def labelExecute(label):
                 str(label.RITM),
                 label.dept,
                 serial,
-                strip_accents(str(label.client_name)) + f' ({str(label.client_cruzid)})',
+                strip_accents(str(label.client_name))
+                + f" ({str(label.client_cruzid)})",
                 label.backup,
                 label.printer,
                 label.localA is not None,
@@ -145,7 +142,11 @@ def labelExecute(label):
     # if label is a mac or windows
     if label.getType() == "Windows" or label.getType() == "Mac":
         # if client wants a printer or has notes or has software requests (if notes need to be printed)
-        if label.printer.upper() != "NO" or len(label.notes) > 0 or len(label.software) > 1:
+        if (
+            label.printer.upper() != "NO"
+            or len(label.notes) > 0
+            or len(label.software) > 1
+        ):
             # if no printer requested
             if label.printer.upper() == "NO":
                 # print simple notes label - just software and notes
@@ -217,7 +218,9 @@ if __name__ == "__main__":
                         fields[-1] = fields[-1].replace("</p></body></html>\r\n", "")
                         # remove opening html data from first line, plus "RITM", plus heading format
                         fields[0] = (
-                            fields[0].replace('<html><head></head><body><h3 id="main">RITM', "")
+                            fields[0].replace(
+                                '<html><head></head><body><h3 id="main">RITM', ""
+                            )
                         ).replace("&nbsp;</h3>\r\n", "")
                         # create label from RITM
                         label = Label(fields[0])
@@ -242,17 +245,23 @@ if __name__ == "__main__":
                                     label.client_name = field
                                     label.client_cruzid = "____"
                             elif "Preferred username for login: " in field:
-                                field = field.replace("Preferred username for login: ", "")
+                                field = field.replace(
+                                    "Preferred username for login: ", ""
+                                )
                                 if field != "":
                                     label.setGroupLogin(field)
-                            elif "Group/position that will be using this computer: " in field:
+                            elif (
+                                "Group/position that will be using this computer: "
+                                in field
+                            ):
                                 field = field.replace(
-                                    "Group/position that will be using this computer: ", ""
+                                    "Group/position that will be using this computer: ",
+                                    "",
                                 )
                                 if field != "":
                                     label.setGroupName(field)
                             elif "Client Phone: " in field:
-                                phone= field.replace("Client Phone: ", "")
+                                phone = field.replace("Client Phone: ", "")
                             elif "Requestor: " in field:
                                 label.setRequestor(field.replace("Requestor: ", ""))
                             elif "ComputerType: " in field:
@@ -261,7 +270,9 @@ if __name__ == "__main__":
                                 SVC = True
                                 break
                             elif "Client Department: " in field:
-                                label.setDepartment(field.replace("Client Department: ", ""))
+                                label.setDepartment(
+                                    field.replace("Client Department: ", "")
+                                )
                             elif "Back up: " in field:
                                 if "Yes" in field:
                                     label.backup = True
@@ -300,7 +311,6 @@ if __name__ == "__main__":
                                 field = field.replace("Printer model:", "")
                                 field = field.replace("\r\n", "")
                                 if len(field) != 0:
-                                    print("I AM NOW SETTING A PRINTER THIS IS A LARGE PRINT HOPEFULLY IT IS VISIBLE")
                                     label.setPrinter(field)
                             elif "Local Admin: " in field:
                                 if "Yes" in field:
@@ -317,10 +327,13 @@ if __name__ == "__main__":
                                     "Serial Number or Service Tag: ", ""
                                 )
                                 label.serial = label.serial.split(", ")
-                            elif "How would you like us to return the computer to you:" in field:
+                            elif (
+                                "How would you like us to return the computer to you:"
+                                in field
+                            ):
                                 if "Ship" in field:
                                     printship = True
-                                    
+
                                 else:
                                     printship = False
                             elif "Mail Code: " in field:
@@ -329,9 +342,11 @@ if __name__ == "__main__":
                             #     sig_conf = True if "true" in field else False
                             elif "Mail Code approver: " in field:
                                 approver = field.replace("Mail Code approver: ", "")
-                            if "Shipping Address: " in field:
-                                if field != "":
-                                    address_parts = field.replace("Shipping Address: ", "").split()
+                            elif "Shipping Address: " in field:
+                                if False and field != "": # TODO: find some other way to parse addresses
+                                    address_parts = field.replace(
+                                        "Shipping Address: ", ""
+                                    ).split()
                                     if len(address_parts) >= 6:
                                         address1 = " ".join(address_parts[:3])
                                         address2 = " ".join(address_parts[3:4])
@@ -365,7 +380,8 @@ if __name__ == "__main__":
                             continue
                         # print text of label to console
                         print(label)
-                        if printship == True:
+                        if False and printship == True: # TODO: remove "False and" when address parsing is fixed
+                            printship = False
                             print("I AM PRINTING SHIPPING LABEL")
                             printcall(
                                 str(label.client_name),
@@ -378,9 +394,8 @@ if __name__ == "__main__":
                                 str(mail_code),
                                 "____",
                                 str(approver),
-                                str(label.RITM)
+                                str(label.RITM),
                             )
-                            printship = False
                         # setup label for printing & print it
                         labelExecute(label)
                         print("==========================================\n")
@@ -435,7 +450,9 @@ if __name__ == "__main__":
                             if "Serial Number: " in field:
                                 label.serial = field.replace("Serial Number: ", "")
                             elif "Data Disposition: " in field:
-                                label.setEraseType(field.replace("Data Disposition: ", ""))
+                                label.setEraseType(
+                                    field.replace("Data Disposition: ", "")
+                                )
                             elif "Surplus Form: " in field:
                                 label.setExport(field.replace("Surplus Form: ", ""))
                             elif "Jamf Status: " in field:
@@ -446,9 +463,7 @@ if __name__ == "__main__":
                         # setup label for printing & print it
                         labelExecute(label)
                         print("==========================================\n")
-                        
-                            
-                           
+
                 except imaplib.IMAP4.abort as e:
                     print("Could not get mail from folder: ", e)
                     if "socket error" in str(e):

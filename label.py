@@ -125,7 +125,6 @@ class Label:
                 self.printer_ip = self.printer_ip + " " + i
                 self.printer_notes.remove(i)
         self.printer_notes = " ".join([str(elem) for elem in self.printer_notes])
-        print(self.printer_ip)
         if self.printer_ip != "":
             self.printer = "DRIVERS & ADD"
         else:
