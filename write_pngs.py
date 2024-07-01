@@ -246,6 +246,11 @@ def inc_generic(inc, notes):
 # file path to lock on, the exact path is not important as long as it's identical across processes
 active_write_path = "/tmp/active_write"
 
+# device address for printer
+try:
+    address = open("address").readline().strip()
+except:
+    address = "file:///dev/usb/lp0"
 
 def print_label(file="tmp.png"):
     # attempt to acquire a lock on the tmp file using flock
@@ -255,7 +260,7 @@ def print_label(file="tmp.png"):
         time.sleep(0.1)
         f = check_file()
     # call printer library - this is blocking but non-exclusive, so multiple simultaneous calls to this will just cause one to succeed and the rest to error
-    p = subprocess.run(["brother_ql", "-m", "QL-570", "-p", "file:///dev/usb/lp0", "print", "-l", "62", file])
+    p = subprocess.run(["brother_ql", "-m", "QL-570", "-p", address, "print", "-l", "62", file])
     # while printer proces is still running, delay
     while type(p) is not subprocess.CompletedProcess:
         time.sleep(0.05)
