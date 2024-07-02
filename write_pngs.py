@@ -71,40 +71,58 @@ def ewaste(ritm, date, serial, erase_type, export, jamf):
 
 
 def ritm(ritm, client_name, requestor_name, date, migration, index, returnloc):
-    img = Image.open("static/ritm.png", "r").convert("RGB")
+    img = Image.open("static/ritm_new.png", "r").convert("RGB")
     imgdraw = ImageDraw.Draw(img)
 
     # import fonts
     ritm_font = ImageFont.truetype("Roboto-Regular.ttf", 350)
     font = ImageFont.truetype("Roboto-Regular.ttf", 230)
-    name_font = ImageFont.truetype("Roboto-Italic.ttf", 160)
+    name_font = ImageFont.truetype("Roboto-Italic.ttf", 200)
     large_name_font = ImageFont.truetype("Roboto-Italic.ttf", 230)
-    small_font = ImageFont.truetype("Roboto-Regular.ttf", 120)
+    small_font = ImageFont.truetype("Roboto-Regular.ttf", 160)
 
     # draw text for ritm, date, requestor name, client name
     imgdraw.text((900, 190), ritm, (0, 0, 0), font=ritm_font)
-    imgdraw.text((1220, 1050), date, (0, 0, 0), font=font)
-    imgdraw.text((1560, 625), requestor_name, (0, 0, 0), font=name_font)
-    imgdraw.text((70, 800), client_name, (0, 0, 0), font=large_name_font)
+    imgdraw.text((70, 625), "Client & Requestor:", (0, 0, 0), font=font)
+    imgdraw.text((70, 850), client_name, (0, 0, 0), font=large_name_font)
+    imgdraw.text((70, 1100), requestor_name, (0, 0, 0), font=large_name_font)
+    imgdraw.text((70, 1330), "Intake Date:", (0, 0, 0), font=font)
+    imgdraw.text((1300, 1330), date, (0, 0, 0), font=font)
+
+    imgdraw.rectangle((1770, 1600, 1700 + 750, 1600 + 300), None, "black", 10)
 
     # print index (X of Y), make it smaller if necessary
     if len(index) <= 6:
-        imgdraw.text((1760, 1400), index, (0, 0, 0), font=font)
+        imgdraw.text((1815, 1610), index, (0, 0, 0), font=font)
     else:
-        imgdraw.text((1825, 1455), index, (0, 0, 0), font=small_font)
+        imgdraw.text((1815, 1660), index, (0, 0, 0), font=small_font)
 
-    # print return location, wrap text
-    fit_text(img, returnloc, (0, 0, 0), small_font, 70, 1750, 2800, 120)
+    # # print return location, wrap text
+    # fit_text(img, returnloc, (0, 0, 0), small_font, 70, 1750, 2800, 120)
 
-    x = 70
-    y = 1450
-    w = 1070
-    h = 0
+    imgdraw.text((70, 1600), "Migration", (0, 0, 0), font=font)
+
+    box_x = 1100
+    box_y = 1615
+    box_w = 250
+    box_h = 250
+    imgdraw.rectangle((box_x, box_y, box_x + box_w, box_y + box_h), None, "black", 10)
+
     if migration is True:
+        gap = 30
+        x = box_x + gap
+        y = box_y + gap
+        w = box_w - gap * 2
+        h = box_h - gap * 2
         imgdraw.rectangle((x, y, x + w, y + h), "black")
     elif migration is None:
-        imgdraw.line((x, y) + (x + w, y + h), "black", width=20)
+        # x = 70
+        # y = 1615
+        # w = 1070
+        # h = 0
+        # imgdraw.line((x, y) + (x + w, y + h), "black", width=20)
         # imgdraw.line((x + w, y) + (x, y + h), "black", width=20)
+        imgdraw.text((1400, 1620), "No", (0, 0, 0), font=name_font)
 
     img.save("tmp.png")
 
@@ -252,6 +270,7 @@ try:
 except:
     address = "file:///dev/usb/lp0"
 
+
 def print_label(file="tmp.png"):
     # attempt to acquire a lock on the tmp file using flock
     f = check_file()
@@ -260,7 +279,9 @@ def print_label(file="tmp.png"):
         time.sleep(0.1)
         f = check_file()
     # call printer library - this is blocking but non-exclusive, so multiple simultaneous calls to this will just cause one to succeed and the rest to error
-    p = subprocess.run(["brother_ql", "-m", "QL-570", "-p", address, "print", "-l", "62", file])
+    p = subprocess.run(
+        ["brother_ql", "-m", "QL-570", "-p", address, "print", "-l", "62", file]
+    )
     # while printer proces is still running, delay
     while type(p) is not subprocess.CompletedProcess:
         time.sleep(0.05)

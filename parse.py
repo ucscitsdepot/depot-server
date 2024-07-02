@@ -150,18 +150,21 @@ def labelExecute(label):
             # if no printer requested
             if label.printer.upper() == "NO":
                 # print simple notes label - just software and notes
-                notes(label.RITM, label.software, label.notes)
+                for _ in range(len(label.serial)):
+                    notes(label.RITM, label.software, label.notes)
+                    print_label()
             else:
                 # print notes label w/ printer info, software, and notes
-                notes_printer(
-                    label.RITM,
-                    label.printer_ip.replace(".", "·"),
-                    label.printer_notes,
-                    label.software,
-                    label.notes,
-                )
+                for _ in range(len(label.serial)):
+                    notes_printer(
+                        label.RITM,
+                        label.printer_ip.replace(".", "·"),
+                        label.printer_notes,
+                        label.software,
+                        label.notes,
+                    )
+                    print_label()
             # print whichever label was sent to tmp.png (notes.png or notes_printer.png)
-            print_label()
 
 
 if __name__ == "__main__":
