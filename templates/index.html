@@ -142,7 +142,7 @@
 
         <div>
             <h2>RITM</h2>
-            <img src="{{ url_for('static', filename='ritm.png') }}">
+            <img src="{{ url_for('static', filename='ritm_template.png') }}">
             <form method="post">
                 <input type="hidden" name="label" value="ritm">
                 RITM: <input type="number" name="ritm" placeholder="0000000">
@@ -159,8 +159,6 @@
                 <br>
                 Index: <input style="width: 50px;" type="number" name="index_1" placeholder="0"> of <input style="width: 50px;" type="number" name="index_2"
                     placeholder="0">
-                <br>
-                Return Location: <input type="text" name="returnloc" placeholder="">
                 <br>
                 <button type="submit" name="submit_ritm">Print ritm</button>
             </form>

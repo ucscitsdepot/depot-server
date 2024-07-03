@@ -70,8 +70,8 @@ def ewaste(ritm, date, serial, erase_type, export, jamf):
     img.save("tmp.png")
 
 
-def ritm(ritm, client_name, requestor_name, date, migration, index, returnloc):
-    img = Image.open("static/ritm_new.png", "r").convert("RGB")
+def ritm(ritm, client_name, requestor_name, date, migration, index):
+    img = Image.open("static/ritm.png", "r").convert("RGB")
     imgdraw = ImageDraw.Draw(img)
 
     # import fonts

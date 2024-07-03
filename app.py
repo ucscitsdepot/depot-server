@@ -125,7 +125,6 @@ def server():
                         )
                     ),
                     f"{str(request.form['index_1'])} of {str(request.form['index_2'])}",
-                    str(request.form["returnloc"]),
                 )
                 print_thread()
             elif request.form["label"] == "tmpwd":

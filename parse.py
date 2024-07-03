@@ -66,7 +66,6 @@ def labelExecute(label):
                 datetime.now().strftime("%m/%d/%Y"),
                 False,
                 str(position + 1) + " of " + str(len(label.serial)),
-                str(label.returnLoc),
             )
             # print label
             print_label()
@@ -103,7 +102,6 @@ def labelExecute(label):
                 datetime.now().strftime("%m/%d/%Y"),  # today's date (for intake date)
                 False,
                 str(position + 1) + " of " + str(len(label.serial)),
-                str(label.returnLoc),
             )
             # print label
             print_label()
