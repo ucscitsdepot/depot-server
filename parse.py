@@ -1,19 +1,47 @@
 # import necessary libraries
 import email
 import imaplib
+import logging
 import os
 import re
 import time
 import unicodedata
 from datetime import datetime
-from print import *
 
 # library to load environment variables from .env file (printer ip, printer model, gmail username, gmail password)
 # .env file not included in git repo for obvious reasons (: i've been using scp to transfer it between computers
 from dotenv import load_dotenv
 
-# change directory into Auto-Label-Generator folder
-os.chdir(os.path.dirname(os.path.realpath(__file__)))
+from print import *
+
+# Change directory to current file location
+path = os.path.dirname(os.path.abspath(__file__))
+os.chdir(path)
+
+# Create a new directory for logs if it doesn't exist
+if not os.path.exists(path + "/logs/parse"):
+    os.makedirs(path + "/logs/parse")
+
+# create new logger with all levels
+logger = logging.getLogger("root")
+logger.setLevel(logging.DEBUG)
+
+# create file handler which logs debug messages (and above - everything)
+fh = logging.FileHandler(f"logs/parse/{str(datetime.now())}.log")
+fh.setLevel(logging.DEBUG)
+
+# create console handler which only logs warnings (and above)
+ch = logging.StreamHandler()
+ch.setLevel(logging.WARNING)
+
+# create formatter and add it to the handlers
+formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s: %(message)s")
+fh.setFormatter(formatter)
+ch.setFormatter(formatter)
+
+# add the handlers to the logger
+logger.addHandler(fh)
+logger.addHandler(ch)
 
 # import Ewaste/Label classes, all functions to output png files
 from ewaste import Ewaste
@@ -68,7 +96,7 @@ def labelExecute(label):
                 str(position + 1) + " of " + str(len(label.serial)),
             )
             # print label
-            print_label()
+            print_label(logger)
 
             # export windows setup label (next to trackpad on laptop)
             winsetup(
@@ -81,14 +109,14 @@ def labelExecute(label):
                 str(label.printer),
             )
             # print label
-            print_label()
+            print_label(logger)
 
             # if client wants local admin
             if label.localA is not None:
                 # export username/password label
                 username(label.getUsername())
                 # print label
-                print_label()
+                print_label(logger)
 
     # if label is a mac setup
     elif label.getType() == "Mac":
@@ -104,7 +132,7 @@ def labelExecute(label):
                 str(position + 1) + " of " + str(len(label.serial)),
             )
             # print label
-            print_label()
+            print_label(logger)
 
             # export mac setup label (next to trackpad on laptop)
             macsetup(
@@ -118,10 +146,10 @@ def labelExecute(label):
                 label.localA is not None,
             )
             # print label
-            print_label()
+            print_label(logger)
 
             # export password label
-            print_label("static/tmpwd.png")
+            print_label(logger, "static/tmpwd.png")
 
     # if label is an ewaste
     elif label.getType() == "Ewaste":
@@ -135,7 +163,7 @@ def labelExecute(label):
             label.jamf,
         )
         # print label
-        print_label()
+        print_label(logger)
 
     # if label is a mac or windows
     if label.getType() == "Windows" or label.getType() == "Mac":
@@ -150,7 +178,7 @@ def labelExecute(label):
                 # print simple notes label - just software and notes
                 for _ in range(len(label.serial)):
                     notes(label.RITM, label.software, label.notes)
-                    print_label()
+                    print_label(logger)
             else:
                 # print notes label w/ printer info, software, and notes
                 for _ in range(len(label.serial)):
@@ -161,7 +189,7 @@ def labelExecute(label):
                         label.software,
                         label.notes,
                     )
-                    print_label()
+                    print_label(logger)
             # print whichever label was sent to tmp.png (notes.png or notes_printer.png)
 
 
@@ -188,8 +216,12 @@ if __name__ == "__main__":
                         None, '(TO "depot+labels@ucsc.edu")', "(UNSEEN)"
                     )
                     # print total number of unread label emails
-                    print("Total Intake Labels:", len(selected_mails[0].split()))
-                    print("==========================================\n")
+                    # print("Total Intake Labels:", len(selected_mails[0].split()))
+                    # print("==========================================\n")
+                    if selected_mails[0].split():
+                        logger.info(
+                            f"Total Intake Labels: {len(selected_mails[0].split())}"
+                        )
 
                     labels = []
                     # iterate over selected emails
@@ -344,7 +376,9 @@ if __name__ == "__main__":
                             elif "Mail Code approver: " in field:
                                 approver = field.replace("Mail Code approver: ", "")
                             elif "Shipping Address: " in field:
-                                if False and field != "": # TODO: find some other way to parse addresses
+                                if (
+                                    False and field != ""
+                                ):  # TODO: find some other way to parse addresses
                                     address_parts = field.replace(
                                         "Shipping Address: ", ""
                                     ).split()
@@ -380,8 +414,10 @@ if __name__ == "__main__":
                         if SVC:
                             continue
                         # print text of label to console
-                        print(label)
-                        if False and printship == True: # TODO: remove "False and" when address parsing is fixed
+                        logger.info(label)
+                        if (
+                            False and printship == True
+                        ):  # TODO: remove "False and" when address parsing is fixed
                             printship = False
                             print("I AM PRINTING SHIPPING LABEL")
                             printcall(
@@ -399,7 +435,7 @@ if __name__ == "__main__":
                             )
                         # setup label for printing & print it
                         labelExecute(label)
-                        print("==========================================\n")
+                        # print("==========================================\n")
 
                     # get Ewaste mailbox
                     mail.select("Ewaste", False)
@@ -408,8 +444,12 @@ if __name__ == "__main__":
                         None, '(TO "depot+ewaste@ucsc.edu")', "(UNSEEN)"
                     )
                     # print total number of unread ewaste emails
-                    print("Total Ewaste Labels:", len(selected_mails[0].split()))
-                    print("==========================================\n")
+                    # print("Total Ewaste Labels:", len(selected_mails[0].split()))
+                    # print("==========================================\n")
+                    if selected_mails[0].split():
+                        logger.info(
+                            f"Total Ewaste Labels: {len(selected_mails[0].split())}"
+                        )
 
                     labels = []
                     # iterate over selected emails
@@ -460,13 +500,14 @@ if __name__ == "__main__":
                                 label.setJamf(field.replace("Jamf Status: ", ""))
 
                         # print text of label to console
-                        print(label)
+                        logger.info(label)
                         # setup label for printing & print it
                         labelExecute(label)
-                        print("==========================================\n")
+                        # print("==========================================\n")
 
                 except imaplib.IMAP4.abort as e:
-                    print("Could not get mail from folder: ", e)
+                    # print("Could not get mail from folder: ", e)
+                    logger.error(f"Could not get mail from folder: {e}")
                     if "socket error" in str(e):
                         # gmail will throw a socket error if we have been logged in for too long.
                         login_again = True
@@ -474,4 +515,4 @@ if __name__ == "__main__":
                 # delay 1 second between runs
                 time.sleep(1)
         except Exception as e:
-            print(e)
+            logger.error(e)

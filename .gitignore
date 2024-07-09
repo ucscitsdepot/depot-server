@@ -1,6 +1,7 @@
-/__pycache__
+/__pycache__/
 /*.txt
 .env
 tmp.png
 active_write
 address
+logs/

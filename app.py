@@ -1,14 +1,10 @@
+import logging
 import os
 import re
 import shutil
-import sys
 from datetime import datetime
-from threading import Thread
 
-import cups
 import mammoth
-import pypandoc
-from docx import Document
 from flask import Flask, flash, redirect, render_template, request, url_for
 from html2image import Html2Image
 
@@ -20,7 +16,9 @@ from write_pngs import *
 # https://adamj.eu/tech/2021/12/29/set-up-a-gunicorn-configuration-file-and-test-it/
 # to start, just run 'authbind gunicorn'
 
-os.chdir(os.path.dirname(os.path.realpath(__file__)))
+# Change directory to current file location
+path = os.path.dirname(os.path.abspath(__file__))
+os.chdir(path)
 
 # init paramaters
 hti = Html2Image(custom_flags=["--no-sandbox"], size=(800, 1000))
@@ -35,16 +33,18 @@ cmd = "lp -o fill blue_page.png"
 app = Flask(__name__)
 app.secret_key = os.urandom(12).hex()
 
+logger = logging.getLogger("gunicorn.error")
+
 
 # define this function to be the root page, accepts both GET requests (loading the page) and POST requests (submitted a form)
 @app.route("/", methods=("GET", "POST"))
 def server():
-    # print("help")
+    print("help")
     # try/except in case something fails
     try:
         # if a form was submitted
         if request.method == "POST":
-            print("post")
+            # print("post")
             # if the form response includes a RITM, capture it as a properly-formatted string
             ritm_text = (
                 "0000000"
@@ -56,11 +56,11 @@ def server():
             # if the ad label was submitted
             if request.form["label"] == "ad":
                 # print the ad label in a thread (prevent the website from hanging while it prints)
-                print_thread(file="static/ad.png")
+                print_thread(logger, file="static/ad.png")
             # if the depot label was submitted
             elif request.form["label"] == "depot":
                 # print the depot label in a thread
-                print_thread(file="static/depot.png")
+                print_thread(logger, file="static/depot.png")
             # if the ewaste label was submitted
             elif request.form["label"] == "ewaste":
                 # get the form data
@@ -81,7 +81,7 @@ def server():
                     ),  # if Complete, set to True; if Incomplete, set to False; otherwise (Unnecessary), set to None
                 )
                 # print the ewaste label in a thread
-                print_thread()
+                print_thread(logger)
             elif request.form["label"] == "macsetup":
                 macsetup(
                     ritm_text,
@@ -92,7 +92,7 @@ def server():
                     str(request.form["printers"]),
                     "admin" in request.form,
                 )
-                print_thread()
+                print_thread(logger)
             elif request.form["label"] == "notes_printer":
                 notes_printer(
                     ritm_text,
@@ -101,14 +101,14 @@ def server():
                     str(request.form["sw"]),
                     str(request.form["notes"]),
                 )
-                print_thread()
+                print_thread(logger)
             elif request.form["label"] == "notes":
                 notes(
                     ritm_text,
                     str(request.form["sw"]),
                     str(request.form["notes"]),
                 )
-                print_thread()
+                print_thread(logger)
             elif request.form["label"] == "ritm":
                 ritm(
                     ritm_text,
@@ -126,12 +126,12 @@ def server():
                     ),
                     f"{str(request.form['index_1'])} of {str(request.form['index_2'])}",
                 )
-                print_thread()
+                print_thread(logger)
             elif request.form["label"] == "tmpwd":
-                print_thread(file="static/tmpwd.png")
+                print_thread(logger, file="static/tmpwd.png")
             elif request.form["label"] == "username":
                 username(str(request.form["username"]))
-                print_thread()
+                print_thread(logger)
             elif request.form["label"] == "winsetup":
                 winsetup(
                     ritm_text,
@@ -142,22 +142,22 @@ def server():
                     "backup" in request.form,
                     str(request.form["printers"]),
                 )
-                print_thread()
+                print_thread(logger)
             elif request.form["label"] == "ritm_generic":
                 ritm_generic(
                     ritm_text,
                     str(request.form["notes"]),
                 )
-                print_thread()
+                print_thread(logger)
             elif request.form["label"] == "inc_generic":
                 inc_generic(
                     ritm_text,
                     str(request.form["notes"]),
                 )
-                print_thread()
+                print_thread(logger)
             flash(f"Printed { request.form['label'] }")
     except Exception as e:
-        print(e)
+        logger.error(e)
     return render_template("index.html")
 
 
@@ -170,8 +170,8 @@ def ritm_link(ritm_num):
             + ritm_text
         )
     except Exception as e:
-        print("error:")
-        print(e)
+        # print("error:")
+        logger.error(e)
         return redirect(url_for("server"))
 
 

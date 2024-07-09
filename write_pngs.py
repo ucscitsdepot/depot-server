@@ -1,8 +1,6 @@
 import fcntl
-import os
 import subprocess
 import time
-from pathlib import Path
 from threading import Thread
 
 from PIL import Image, ImageDraw, ImageFont
@@ -271,7 +269,7 @@ except:
     address = "file:///dev/usb/lp0"
 
 
-def print_label(file="tmp.png"):
+def print_label(logger, file="tmp.png"):
     # attempt to acquire a lock on the tmp file using flock
     f = check_file()
     # if check_file fails for some reason (it shouldn't though), repeat
@@ -280,7 +278,8 @@ def print_label(file="tmp.png"):
         f = check_file()
     # call printer library - this is blocking but non-exclusive, so multiple simultaneous calls to this will just cause one to succeed and the rest to error
     p = subprocess.run(
-        ["brother_ql", "-m", "QL-570", "-p", address, "print", "-l", "62", file]
+        ["brother_ql", "-m", "QL-570", "-p", address, "print", "-l", "62", file],
+        capture_output=True,
     )
     # while printer proces is still running, delay
     while type(p) is not subprocess.CompletedProcess:
@@ -290,10 +289,15 @@ def print_label(file="tmp.png"):
     # close tmp file (optional since we're not writing to the file itself)
     f.close()
 
+    if p.stdout:
+        logger.info(f"brother_ql stdout: {p.stdout}")
+    if p.stderr:
+        logger.info(f"brother_ql stderr: {p.stderr}")
 
-def print_thread(file="tmp.png"):
+
+def print_thread(logger, file="tmp.png"):
     # create a thread & run print_label in it, so the website can reload after the POST request and not just hang while waiting for the printer process to finish
-    thr = Thread(target=print_label, args=(), kwargs={"file": file})
+    thr = Thread(target=print_label, args=(logger), kwargs={"file": file})
     thr.start()
 
 

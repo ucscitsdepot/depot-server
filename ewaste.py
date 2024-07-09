@@ -1,6 +1,3 @@
-import re
-
-
 # class for Ewaste tickets
 class Ewaste:
     def __init__(self, RITM):
