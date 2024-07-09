@@ -297,7 +297,7 @@ def print_label(logger, file="tmp.png"):
 
 def print_thread(logger, file="tmp.png"):
     # create a thread & run print_label in it, so the website can reload after the POST request and not just hang while waiting for the printer process to finish
-    thr = Thread(target=print_label, args=(logger), kwargs={"file": file})
+    thr = Thread(target=print_label, args=(), kwargs={"logger": logger, "file": file})
     thr.start()
 
 

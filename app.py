@@ -39,7 +39,7 @@ logger = logging.getLogger("gunicorn.error")
 # define this function to be the root page, accepts both GET requests (loading the page) and POST requests (submitted a form)
 @app.route("/", methods=("GET", "POST"))
 def server():
-    print("help")
+    # print("help")
     # try/except in case something fails
     try:
         # if a form was submitted
