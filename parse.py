@@ -72,7 +72,6 @@ def strip_accents(data):
 
 # setup pngs and print labels
 def labelExecute(label):
-    # TODO: instead of appending processes to a list and having a 5 second delay, use a single "process" variable, then wait for the previous process to exit before starting the next one (while loop)
     # if label is a windows setup
     if label.getType() == "Windows":
         # iterate through serial numbers if multiple are provided in one ticket
@@ -412,6 +411,7 @@ if __name__ == "__main__":
                                     label.returnLoc = None
 
                         if SVC:
+                            logger.info("SVC, skipping")
                             continue
                         # print text of label to console
                         logger.info(label)
