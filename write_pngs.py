@@ -5,6 +5,8 @@ from threading import Thread
 
 from PIL import Image, ImageDraw, ImageFont
 
+from history import log
+
 
 # find correct textlength to fit in desired size
 # derived from https://stackoverflow.com/questions/58041361/break-long-drawn-text-to-multiple-lines-with-pillow
@@ -37,7 +39,8 @@ def fit_text(img, text, color, font, x, y, w, h):
 
 
 # setup ewaste label
-def ewaste(ritm, date, serial, erase_type, export, jamf):
+def ewaste(ritm: str, date: str, serial: str, erase_type: str, export: str, jamf: bool):
+    log("ewaste", ritm, date, serial, erase_type, export, jamf)
     img = Image.open("static/ewaste.png", "r").convert("RGB")
     imgdraw = ImageDraw.Draw(img)
 
@@ -68,7 +71,15 @@ def ewaste(ritm, date, serial, erase_type, export, jamf):
     img.save("tmp.png")
 
 
-def ritm(ritm, client_name, requestor_name, date, migration, index):
+def ritm(
+    ritm: str,
+    client_name: str,
+    requestor_name: str,
+    date: str,
+    migration: bool,
+    index: str,
+):
+    log("ritm", ritm, client_name, requestor_name, date, migration, index)
     img = Image.open("static/ritm.png", "r").convert("RGB")
     imgdraw = ImageDraw.Draw(img)
 
@@ -125,7 +136,16 @@ def ritm(ritm, client_name, requestor_name, date, migration, index):
     img.save("tmp.png")
 
 
-def macsetup(ritm, dept, serial, client_name, backup, printers, localA):
+def macsetup(
+    ritm: str,
+    dept: str,
+    serial: str,
+    client_name: str,
+    backup: bool,
+    printers: str,
+    localA: bool,
+):
+    log("macsetup", ritm, dept, serial, client_name, backup, printers, localA)
     img = Image.open("static/macsetup.png", "r").convert("RGB")
     imgdraw = ImageDraw.Draw(img)
     ritm_font = ImageFont.truetype("Roboto-Regular.ttf", 350)
@@ -158,7 +178,8 @@ def macsetup(ritm, dept, serial, client_name, backup, printers, localA):
     img.save("tmp.png")
 
 
-def notes_printer(ritm, printerip, printermodel, sw, notes):
+def notes_printer(ritm: str, printerip: str, printermodel: str, sw: str, notes: str):
+    log("notes_printer", ritm, printerip, printermodel, sw, notes)
     img = Image.open("static/notes_printer.png", "r").convert("RGB")
     imgdraw = ImageDraw.Draw(img)
     ritm_font = ImageFont.truetype("Roboto-Regular.ttf", 350)
@@ -178,7 +199,8 @@ def notes_printer(ritm, printerip, printermodel, sw, notes):
     img.save("tmp.png")
 
 
-def notes(ritm, sw, notes):
+def notes(ritm: str, sw: str, notes: str):
+    log("notes", ritm, sw, notes)
     img = Image.open("static/notes.png", "r").convert("RGB")
     imgdraw = ImageDraw.Draw(img)
     ritm_font = ImageFont.truetype("Roboto-Regular.ttf", 350)
@@ -194,7 +216,8 @@ def notes(ritm, sw, notes):
     img.save("tmp.png")
 
 
-def username(username):
+def username(username: str):
+    log("username", username)
     img = Image.open("static/username.png", "r").convert("RGB")
     imgdraw = ImageDraw.Draw(img)
     font = ImageFont.truetype("Roboto-Medium.ttf", 230)
@@ -204,7 +227,16 @@ def username(username):
     img.save("tmp.png")
 
 
-def winsetup(ritm, dept, servicetag, domain, client_name, backup, printers):
+def winsetup(
+    ritm: str,
+    dept: str,
+    servicetag: str,
+    domain: str,
+    client_name: str,
+    backup: bool,
+    printers: str,
+):
+    log("winsetup", ritm, dept, servicetag, domain, client_name, backup, printers)
     img = Image.open("static/winsetup.png", "r").convert("RGB")
     imgdraw = ImageDraw.Draw(img)
     ritm_font = ImageFont.truetype("Roboto-Regular.ttf", 350)
@@ -231,7 +263,8 @@ def winsetup(ritm, dept, servicetag, domain, client_name, backup, printers):
     img.save("tmp.png")
 
 
-def ritm_generic(ritm, notes):
+def ritm_generic(ritm: str, notes: str):
+    log("ritm_generic", ritm, notes)
     img = Image.open("static/ritm_generic.png", "r").convert("RGB")
     imgdraw = ImageDraw.Draw(img)
     ritm_font = ImageFont.truetype("Roboto-Regular.ttf", 330)
@@ -245,7 +278,8 @@ def ritm_generic(ritm, notes):
     img.save("tmp.png")
 
 
-def inc_generic(inc, notes):
+def inc_generic(inc: str, notes: str):
+    log("inc_generic", inc, notes)
     img = Image.open("static/inc_generic.png", "r").convert("RGB")
     imgdraw = ImageDraw.Draw(img)
     ritm_font = ImageFont.truetype("Roboto-Regular.ttf", 330)

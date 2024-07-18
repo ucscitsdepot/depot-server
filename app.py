@@ -8,6 +8,7 @@ import mammoth
 from flask import Flask, flash, redirect, render_template, request, url_for
 from html2image import Html2Image
 
+from history import get_history, reprint
 from print import *
 from write_pngs import *
 
@@ -41,6 +42,9 @@ logger = logging.getLogger("gunicorn.error")
 def server():
     # print("help")
     # try/except in case something fails
+    h = None
+    selected_type = None
+    data = []
     try:
         # if a form was submitted
         if request.method == "POST":
@@ -155,10 +159,18 @@ def server():
                     str(request.form["notes"]),
                 )
                 print_thread(logger)
-            flash(f"Printed { request.form['label'] }")
+            elif request.form["label"] == "history":
+                row_num = int(request.form["row_num"])
+                print(row_num)
+                selected_type, data = reprint(row_num)
+            flash(f"Reload to repeat {request.form['label']}")
+
+        h = get_history(10)
     except Exception as e:
         logger.error(e)
-    return render_template("index.html")
+    return render_template(
+        "index.html", history=h, selected_type=selected_type, data=data
+    )
 
 
 @app.route("/<ritm_num>")

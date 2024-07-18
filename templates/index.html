@@ -56,7 +56,8 @@
             <img src="{{ url_for('static', filename='ewaste.png') }}">
             <form method="post">
                 <input type="hidden" name="label" value="ewaste">
-                RITM: <input type="number" name="ritm" placeholder="0000000">
+                RITM: <input type="number" name="ritm" placeholder="0000000"
+                    value="{{ data[0] if selected_type == 'ewaste' else '' }}">
                 <br>
                 Serial: <input type="text" name="serial" placeholder="">
                 <br>
@@ -157,8 +158,8 @@
                     <option value="Unnecessary">Unnecessary</option>
                 </select>
                 <br>
-                Index: <input style="width: 50px;" type="number" name="index_1" placeholder="0"> of <input style="width: 50px;" type="number" name="index_2"
-                    placeholder="0">
+                Index: <input style="width: 50px;" type="number" name="index_1" placeholder="0"> of <input
+                    style="width: 50px;" type="number" name="index_2" placeholder="0">
                 <br>
                 <button type="submit" name="submit_ritm">Print ritm</button>
             </form>
@@ -237,6 +238,21 @@
             </form>
         </div>
     </div>
+
+    {% for row in history %}
+    <div>
+        <form method="post">
+            <input type="hidden" name="label" value="history">
+            <input type="hidden" name="row_num" value={{row[0]}}>
+            {{row[2]}}: {{row[1]}}
+            <br>
+            {{ ("RITM" + row[3]) if row[4] else row[3] }} <button type="submit"
+                name="submit_history_{{row[0]}}">Recall</button>
+        </form>
+        <br>
+    </div>
+    <!-- <p>row_num: {{row[0]}}, time: {{row[1]}}, type: {{row[2]}}, data: {{ ("RITM" + row[3]) if row[4] else row[3] }}</p> -->
+    {% endfor %}
 </body>
 
 </html>
