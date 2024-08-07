@@ -1,3 +1,5 @@
+import fcntl
+from threading import Thread
 import time
 
 import numpy as np
@@ -29,9 +31,29 @@ try:
 except:
     print_history = np.array([[""] * (2 + MAX_ARGS)])
 
+active_write_path = "/tmp/active_write_history"
+
+
+def check_file():
+    f = open(active_write_path, "a+")
+    if f.writable():
+        fcntl.flock(f, fcntl.LOCK_EX)
+        return f
+
+    return False
+
 
 def log(label_type, *args):
     global print_history
+
+    cf = check_file()
+
+    while not cf:
+        time.sleep(0.1)
+        cf = check_file()
+
+    get_history()
+
     f = open("print_history.csv", "a+")
     row = (
         [str(int(time.time())), label_type]
@@ -44,8 +66,17 @@ def log(label_type, *args):
     f.write(row[-1] + "\n")
     f.close()
 
+    fcntl.flock(cf, fcntl.LOCK_UN)
+    cf.close()
+
+
+def log_thread(label_type, *args):
+    t = Thread(target=log, args=[label_type] + list(args))
+    t.start()
+
 
 def reprint(row_num):
+    # get_history()
     row = print_history[row_num]
     # func_name = row[1]
     # args = row[2 : ARG_COUNT[func_name] - MAX_ARGS]
@@ -61,7 +92,7 @@ def reprint(row_num):
     return (row[1], row[2:])
 
 
-def get_history(count):
+def get_history(count=None):
     try:
         print_history = np.genfromtxt("print_history.csv", dtype=str, delimiter=",")
         if len(print_history) < 1:
@@ -69,16 +100,17 @@ def get_history(count):
     except:
         print_history = np.array([[""] * (2 + MAX_ARGS)])
 
-    h = print_history[-min(count, len(print_history)) :]
+    if count:
+        h = print_history[-min(count, len(print_history)) :]
 
-    if h[0][0] == "":
-        h = h[1:]
+        if h[0][0] == "":
+            h = h[1:]
 
-    return [
-        (i, time.ctime(int(r[0]))[3:-5], r[1], r[2], r[1] not in NON_RITM_TYPES)
-        # (i, r[0], r[1], r[2:])
-        for i, r in enumerate(h, start=-min(count, len(h)))
-    ]
+        return [
+            (i, time.ctime(int(r[0]))[3:-5], r[1], r[2], r[1] not in NON_RITM_TYPES)
+            # (i, r[0], r[1], r[2:])
+            for i, r in enumerate(h, start=-min(count, len(h)))
+        ]
 
 
 if __name__ == "__main__":

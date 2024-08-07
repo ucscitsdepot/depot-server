@@ -2,7 +2,7 @@
 /*.txt
 .env
 tmp.png
-active_write
+active_write_*
 address
 logs/
 print_history.csv

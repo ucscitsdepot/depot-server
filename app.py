@@ -161,19 +161,19 @@ def server():
                 print_thread(logger)
             elif request.form["label"] == "history":
                 row_num = int(request.form["row_num"])
-                print(row_num)
                 selected_type, data = reprint(row_num)
             flash(f"Reload to repeat {request.form['label']}")
 
-        h = get_history(10)
+        h = get_history(23)
     except Exception as e:
         logger.error(e)
     return render_template(
-        "index.html", history=h, selected_type=selected_type, data=data
+        "index.html", history=reversed(h), history_count=-1 * len(h), selected_type=selected_type, data=data
     )
 
 
 @app.route("/<ritm_num>")
+@app.route("/<ritm_num>/")
 def ritm_link(ritm_num):
     try:
         ritm_text = str("RITM%07d" % int(re.sub("[^\d\.]", "", ritm_num)))

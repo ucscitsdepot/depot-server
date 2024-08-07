@@ -5,7 +5,7 @@ from threading import Thread
 
 from PIL import Image, ImageDraw, ImageFont
 
-from history import log
+from history import log_thread
 
 
 # find correct textlength to fit in desired size
@@ -40,7 +40,7 @@ def fit_text(img, text, color, font, x, y, w, h):
 
 # setup ewaste label
 def ewaste(ritm: str, date: str, serial: str, erase_type: str, export: str, jamf: bool):
-    log("ewaste", ritm, date, serial, erase_type, export, jamf)
+    log_thread("ewaste", ritm, date, serial, erase_type, export, jamf)
     img = Image.open("static/ewaste.png", "r").convert("RGB")
     imgdraw = ImageDraw.Draw(img)
 
@@ -79,7 +79,7 @@ def ritm(
     migration: bool,
     index: str,
 ):
-    log("ritm", ritm, client_name, requestor_name, date, migration, index)
+    log_thread("ritm", ritm, client_name, requestor_name, date, migration, index)
     img = Image.open("static/ritm.png", "r").convert("RGB")
     imgdraw = ImageDraw.Draw(img)
 
@@ -145,7 +145,7 @@ def macsetup(
     printers: str,
     localA: bool,
 ):
-    log("macsetup", ritm, dept, serial, client_name, backup, printers, localA)
+    log_thread("macsetup", ritm, dept, serial, client_name, backup, printers, localA)
     img = Image.open("static/macsetup.png", "r").convert("RGB")
     imgdraw = ImageDraw.Draw(img)
     ritm_font = ImageFont.truetype("Roboto-Regular.ttf", 350)
@@ -179,7 +179,7 @@ def macsetup(
 
 
 def notes_printer(ritm: str, printerip: str, printermodel: str, sw: str, notes: str):
-    log("notes_printer", ritm, printerip, printermodel, sw, notes)
+    log_thread("notes_printer", ritm, printerip, printermodel, sw, notes)
     img = Image.open("static/notes_printer.png", "r").convert("RGB")
     imgdraw = ImageDraw.Draw(img)
     ritm_font = ImageFont.truetype("Roboto-Regular.ttf", 350)
@@ -200,7 +200,7 @@ def notes_printer(ritm: str, printerip: str, printermodel: str, sw: str, notes: 
 
 
 def notes(ritm: str, sw: str, notes: str):
-    log("notes", ritm, sw, notes)
+    log_thread("notes", ritm, sw, notes)
     img = Image.open("static/notes.png", "r").convert("RGB")
     imgdraw = ImageDraw.Draw(img)
     ritm_font = ImageFont.truetype("Roboto-Regular.ttf", 350)
@@ -217,7 +217,7 @@ def notes(ritm: str, sw: str, notes: str):
 
 
 def username(username: str):
-    log("username", username)
+    log_thread("username", username)
     img = Image.open("static/username.png", "r").convert("RGB")
     imgdraw = ImageDraw.Draw(img)
     font = ImageFont.truetype("Roboto-Medium.ttf", 230)
@@ -236,7 +236,7 @@ def winsetup(
     backup: bool,
     printers: str,
 ):
-    log("winsetup", ritm, dept, servicetag, domain, client_name, backup, printers)
+    log_thread("winsetup", ritm, dept, servicetag, domain, client_name, backup, printers)
     img = Image.open("static/winsetup.png", "r").convert("RGB")
     imgdraw = ImageDraw.Draw(img)
     ritm_font = ImageFont.truetype("Roboto-Regular.ttf", 350)
@@ -264,7 +264,7 @@ def winsetup(
 
 
 def ritm_generic(ritm: str, notes: str):
-    log("ritm_generic", ritm, notes)
+    log_thread("ritm_generic", ritm, notes)
     img = Image.open("static/ritm_generic.png", "r").convert("RGB")
     imgdraw = ImageDraw.Draw(img)
     ritm_font = ImageFont.truetype("Roboto-Regular.ttf", 330)
@@ -279,7 +279,7 @@ def ritm_generic(ritm: str, notes: str):
 
 
 def inc_generic(inc: str, notes: str):
-    log("inc_generic", inc, notes)
+    log_thread("inc_generic", inc, notes)
     img = Image.open("static/inc_generic.png", "r").convert("RGB")
     imgdraw = ImageDraw.Draw(img)
     ritm_font = ImageFont.truetype("Roboto-Regular.ttf", 330)
@@ -294,7 +294,7 @@ def inc_generic(inc: str, notes: str):
 
 
 # file path to lock on, the exact path is not important as long as it's identical across processes
-active_write_path = "/tmp/active_write"
+active_write_path = "/tmp/active_write_print"
 
 # device address for printer
 try:
