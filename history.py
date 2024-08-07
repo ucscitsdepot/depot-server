@@ -102,7 +102,9 @@ def get_history(count=None):
         return [
             (
                 i,
-                time.ctime(int(print_history[i][0]))[3:-5],
+                time.strftime(
+                    "%b %d %I:%M %p", time.localtime(int(print_history[i][0]))
+                ),
                 print_history[i][1],
                 print_history[i][2],
                 print_history[i][1] not in NON_RITM_TYPES,
