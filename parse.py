@@ -12,6 +12,7 @@ from datetime import datetime
 # .env file not included in git repo for obvious reasons (: i've been using scp to transfer it between computers
 from dotenv import load_dotenv
 
+from local_admins import log_thread as log_admin
 from print import *
 
 # Change directory to current file location
@@ -117,6 +118,13 @@ def labelExecute(label):
                 # print label
                 print_label(logger)
 
+                log_admin(
+                    "RITM" + str(label.RITM),
+                    str(serial),
+                    strip_accents(str(label.client_name)),
+                    label.getUsername(),
+                )
+
     # if label is a mac setup
     elif label.getType() == "Mac":
         # iterate through serial numbers if multiple are provided in one ticket
@@ -149,6 +157,14 @@ def labelExecute(label):
 
             # export password label
             print_label(logger, "static/tmpwd.png")
+
+            if label.localA is not None:
+                log_admin(
+                    "RITM" + str(label.RITM),
+                    str(serial),
+                    strip_accents(str(label.client_name)),
+                    label.getUsername(),
+                )
 
     # if label is an ewaste
     elif label.getType() == "Ewaste":

@@ -5,10 +5,11 @@ import shutil
 from datetime import datetime
 
 import mammoth
-from flask import Flask, flash, redirect, render_template, request, url_for
+from flask import Flask, flash, jsonify, redirect, render_template, request, url_for
 from html2image import Html2Image
 
 from history import get_history, reprint
+from local_admins import lookup_local_admin
 from print import *
 from write_pngs import *
 
@@ -168,7 +169,11 @@ def server():
     except Exception as e:
         logger.error(e)
     return render_template(
-        "index.html", history=reversed(h), history_count=-1 * len(h), selected_type=selected_type, data=data
+        "index.html",
+        history=reversed(h),
+        history_count=-1 * len(h),
+        selected_type=selected_type,
+        data=data,
     )
 
 
@@ -185,6 +190,11 @@ def ritm_link(ritm_num):
         # print("error:")
         logger.error(e)
         return redirect(url_for("server"))
+
+
+@app.route("/admin/<serial>")
+def local_admin(serial):
+    return jsonify(lookup_local_admin(serial))
 
 
 @app.route("/ship")

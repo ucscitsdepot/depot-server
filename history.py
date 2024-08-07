@@ -4,8 +4,6 @@ import time
 
 import numpy as np
 
-# import write_pngs
-
 MAX_ARGS = 7
 
 ARG_COUNT = {
@@ -21,7 +19,7 @@ ARG_COUNT = {
 }
 
 # label types to not append "RITM" to
-NON_RITM_TYPES = ["username"]
+NON_RITM_TYPES = ["username", "inc_generic"]
 
 print_history = None
 try:
@@ -41,6 +39,11 @@ def check_file():
         return f
 
     return False
+
+
+def close_file(f):
+    fcntl.flock(f, fcntl.LOCK_UN)
+    f.close()
 
 
 def log(label_type, *args):
@@ -66,8 +69,7 @@ def log(label_type, *args):
     f.write(row[-1] + "\n")
     f.close()
 
-    fcntl.flock(cf, fcntl.LOCK_UN)
-    cf.close()
+    close_file(cf)
 
 
 def log_thread(label_type, *args):
