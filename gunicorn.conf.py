@@ -12,12 +12,17 @@ max_requests_jitter = 50
 path = os.path.dirname(os.path.abspath(__file__))
 os.chdir(path)
 
+# get date & datetime strings
+now = datetime.now()
+dt = now.strftime("%Y-%m-%d")
+dttm = now.strftime("%Y-%m-%d %H:%M:%S")
+
 # Create a new directory for logs if it doesn't exist
-if not os.path.exists(path + "/logs/ui"):
-    os.makedirs(path + "/logs/ui")
+if not os.path.exists(path + "/logs/ui/" + dt):
+    os.makedirs(path + "/logs/ui/" + dt)
 
 # Set log path using timestamp
-log_path = f"{str(datetime.now())}.log"
+log_path = f"{dt}/{dttm}.log"
 
 errorlog = path + "/logs/ui/" + log_path
 accesslog = path + "/logs/ui/" + log_path

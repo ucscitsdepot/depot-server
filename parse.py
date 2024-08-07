@@ -19,16 +19,21 @@ from print import *
 path = os.path.dirname(os.path.abspath(__file__))
 os.chdir(path)
 
+# get date & datetime strings
+now = datetime.now()
+dt = now.strftime("%Y-%m-%d")
+dttm = now.strftime("%Y-%m-%d %H:%M:%S")
+
 # Create a new directory for logs if it doesn't exist
-if not os.path.exists(path + "/logs/parse"):
-    os.makedirs(path + "/logs/parse")
+if not os.path.exists(path + "/logs/parse/" + dt):
+    os.makedirs(path + "/logs/parse/" + dt)
 
 # create new logger with all levels
 logger = logging.getLogger("root")
 logger.setLevel(logging.DEBUG)
 
 # create file handler which logs debug messages (and above - everything)
-fh = logging.FileHandler(f"logs/parse/{str(datetime.now())}.log")
+fh = logging.FileHandler(f"logs/parse/{dt}/{dttm}.log")
 fh.setLevel(logging.DEBUG)
 
 # create console handler which only logs warnings (and above)
