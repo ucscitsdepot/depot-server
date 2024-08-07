@@ -78,19 +78,7 @@ def log_thread(label_type, *args):
 
 
 def reprint(row_num):
-    # get_history()
     row = print_history[row_num]
-    # func_name = row[1]
-    # args = row[2 : ARG_COUNT[func_name] - MAX_ARGS]
-    # func = getattr(write_pngs, func_name)
-    # if len(args) != len(func.__annotations__):
-    #     return
-
-    # for i, t in enumerate(list(func.__annotations__.values())):
-    #     if t is not str:
-    #         args[i] = t(args[i])
-
-    # func(*args)
     return (row[1], row[2:])
 
 
@@ -103,15 +91,23 @@ def get_history(count=None):
         print_history = np.array([[""] * (2 + MAX_ARGS)])
 
     if count:
-        h = print_history[-min(count, len(print_history)) :]
+        if len(print_history) == 1 and print_history[0][0] == "":
+            return []
 
-        if h[0][0] == "":
-            h = h[1:]
+        if count >= len(print_history):
+            count = len(print_history)
+            if print_history[0][0] == "":
+                count -= 1
 
         return [
-            (i, time.ctime(int(r[0]))[3:-5], r[1], r[2], r[1] not in NON_RITM_TYPES)
-            # (i, r[0], r[1], r[2:])
-            for i, r in enumerate(h, start=-min(count, len(h)))
+            (
+                i,
+                time.ctime(int(print_history[i][0]))[3:-5],
+                print_history[i][1],
+                print_history[i][2],
+                print_history[i][1] not in NON_RITM_TYPES,
+            )
+            for i in range((len(print_history) - count), len(print_history))
         ]
 
 

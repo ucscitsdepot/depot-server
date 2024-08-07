@@ -37,12 +37,6 @@
             text-align: center;
         }
     </style>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-    <script>
-        window.addEventListener('resize', function (event) {
-            window.location.reload();
-        }, true);
-    </script>
 </head>
 
 <body>
@@ -234,7 +228,7 @@
                 <form method="post">
                     <input type="hidden" name="label" value="username">
                     Username: <input type="text" name="username" placeholder=""
-                        value=" {{ data[0] if selected_type=='username' else '' }}">
+                        value="{{ data[0] if selected_type=='username' else '' }}">
                     <br>
                     <button type="submit" name="submit_username">Print username</button>
                 </form>
@@ -297,7 +291,7 @@
                 <img src="{{ url_for('static', filename='inc_generic.png') }}">
                 <form method="post">
                     <input type="hidden" name="label" value="inc_generic">
-                    INC: <input type="number" name="ritm" placeholder="0000000" value="{{ data[0] if
+                    INC: <input type="number" name="ritm" placeholder="0000000" value="{{ data[0][3:] if
                     selected_type=='inc_generic' else '' }}">
                     <br>
                     Notes: <input type="text" name="notes" placeholder="" value="{{ data[1] if
@@ -319,25 +313,11 @@
                     {{ ("RITM" + row[3]) if row[4] else row[3] }} <button type="submit"
                         name="submit_history_{{row[0]}}">Recall</button>
                 </form>
-                {{ ("<br>" if row[0] != history_count else "") | safe }}
-                {# <br> #}
+                {{ ("<br>" if row[0] != last_row_num else "") | safe }}
             </div>
-            <!-- <p>row_num: {{row[0]}}, time: {{row[1]}}, type: {{row[2]}}, data: {{ ("RITM" + row[3]) if row[4] else row[3] }}</p> -->
             {% endfor %}
         </div>
     </div>
-
-    <script>
-        console.log(document.querySelector("#labels").offsetHeight);
-        console.log(document.querySelector("#history").offsetHeight);
-        /*while (document.querySelector("#labels").offsetHeight < document.querySelector("#history").offsetHeight) {
-            //document.querySelector("#history").children.last().remove();
-            $('#history').children().last().remove();
-            console.log("removed item");
-            console.log(document.querySelector("#history").offsetHeight);
-        }*/
-        console.log("ran!");
-    </script>
 </body>
 
 </html>

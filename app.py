@@ -163,15 +163,18 @@ def server():
             elif request.form["label"] == "history":
                 row_num = int(request.form["row_num"])
                 selected_type, data = reprint(row_num)
-            flash(f"Reload to repeat {request.form['label']}")
+
+            if request.form["label"] != "history":
+                flash(f"Reload to repeat {request.form['label']}")
 
         h = get_history(23)
     except Exception as e:
         logger.error(e)
+
     return render_template(
         "index.html",
         history=reversed(h),
-        history_count=-1 * len(h),
+        last_row_num=h[0][0],
         selected_type=selected_type,
         data=data,
     )
