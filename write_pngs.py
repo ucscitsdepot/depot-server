@@ -237,7 +237,9 @@ def winsetup(
     backup: bool,
     printers: str,
 ):
-    log_history("winsetup", ritm, dept, servicetag, domain, client_name, backup, printers)
+    log_history(
+        "winsetup", ritm, dept, servicetag, domain, client_name, backup, printers
+    )
     img = Image.open("static/winsetup.png", "r").convert("RGB")
     imgdraw = ImageDraw.Draw(img)
     ritm_font = ImageFont.truetype("Roboto-Regular.ttf", 350)
@@ -290,6 +292,69 @@ def inc_generic(inc: str, notes: str):
 
     if len(notes) > 0:
         fit_text(img, notes, (0, 0, 0), small_font, 90, 520, 2800, 160)
+
+    img.save("tmp.png")
+
+
+def kiosk(
+    servicetag: str,
+    date: str,
+):
+    # log_history("kiosk", ritm, dept, servicetag, domain, client_name, backup, printers)
+    img = Image.open("static/kiosk.png", "r").convert("RGB")
+    imgdraw = ImageDraw.Draw(img)
+
+    ritm_font = ImageFont.truetype("Roboto-Regular.ttf", 250)
+    font = ImageFont.truetype("Roboto-Regular.ttf", 200)
+    name_font = ImageFont.truetype("Roboto-Italic.ttf", 200)
+    small_font = ImageFont.truetype("Roboto-Regular.ttf", 120)
+    st_font = ImageFont.truetype("Roboto-Medium.ttf", 200)
+
+    imgdraw.text((100, 120), f"SCP-{servicetag}-KSK", (0, 0, 0), font=ritm_font)
+    imgdraw.text((100, 400), "Service Tag:", (0, 0, 0), font=st_font)
+    imgdraw.text((1250, 410), servicetag, (0, 0, 0), font=font)
+
+    def rect(x, y):
+        box_w = 200
+        box_h = 200
+        y += 20
+        imgdraw.rectangle((x, y, x + box_w, y + box_h), None, "black", 10)
+
+    items = [
+        "BIOS",
+        "Image",
+        "DeleteAU",
+        "DefaultSW",
+        "CC",
+        "WEPA",
+        "Battery",
+        "MATLAB",
+        "Guard",
+        "Kurz",
+        "Shortcuts",
+        "DCU",
+        "Encrypt",
+        "BindAU",
+        "gpupdate",
+    ]
+
+    x_start = 100  # left align
+    y_start = 650  # top of first row
+    x_pos = x_start
+    y_pos = y_start
+    for text in items:
+        # if text will overflow (w/ a 50px margin)
+        if x_pos + font.getlength(text) + 20 + 250 > img.size[0] - 100:
+            x_pos = x_start  # start back at beginning of line (left)
+            y_pos += 250  # go down one line
+        imgdraw.text((x_pos, y_pos), text, (0, 0, 0), font=font)  # draw text
+        x_pos += font.getlength(text) + 20  # move x_pos after text w/ 20px margin
+        rect(x_pos, y_pos)  # draw box
+        x_pos += 250  # move x_pos after box w/ some margin
+
+    imgdraw.text(
+        (img.size[0] - 100, y_pos + 40), f"Imgd {date}", (0, 0, 0), font=name_font, anchor="rt"
+    )
 
     img.save("tmp.png")
 
@@ -350,7 +415,7 @@ def check_file():
 
 
 if __name__ == "__main__":
-    process = list()
+    # process = list()
     # ewaste("87654", "10/31/2023", "H4TKT0ENQ6X3", "3 Pass", "Ewaste", None)
     # process.append(print_label())
     # ritm(
@@ -405,7 +470,14 @@ if __name__ == "__main__":
     #     "0012345",
     #     "the quick brown fox jumped over the lazy dog. the quick brown fox jumped over the lazy dog. the quick brown fox jumped over the lazy dog. the quick brown fox jumped over the lazy dog. the quick brown fox jumped over the lazy dog.",
     # )
-    inc_generic(
-        "0012345",
-        "the quick brown fox jumped over the lazy dog. the quick brown fox jumped over the lazy dog. the quick brown fox jumped over the lazy dog. the quick brown fox jumped over the lazy dog. the quick brown fox jumped over the lazy dog.",
-    )
+    # inc_generic(
+    #     "0012345",
+    #     "the quick brown fox jumped over the lazy dog. the quick brown fox jumped over the lazy dog. the quick brown fox jumped over the lazy dog. the quick brown fox jumped over the lazy dog. the quick brown fox jumped over the lazy dog.",
+    # )
+
+    from datetime import datetime
+    date = datetime.now().strftime("%m/%d/%Y")
+    kiosk("7ZRCMN3", date)
+    kiosk("                  ", "00/00/0000")
+    # kiosk("SRVICETAG", date)
+    # kiosk("BCWNLN3", date)

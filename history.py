@@ -78,15 +78,19 @@ def log_thread(label_type, *args):
 
 
 def reprint(row_num):
+    get_history()
     row = print_history[row_num]
     return (row[1], row[2:])
 
 
 def get_history(count=None):
+    global print_history
     try:
         print_history = np.genfromtxt("print_history.csv", dtype=str, delimiter=",")
         if len(print_history) < 1:
             raise Exception
+        elif len(print_history) > 1 and print_history[0][0] == "":
+            print_history = print_history[1:]
     except:
         print_history = np.array([[""] * (2 + MAX_ARGS)])
 

@@ -41,7 +41,6 @@ logger = logging.getLogger("gunicorn.error")
 # define this function to be the root page, accepts both GET requests (loading the page) and POST requests (submitted a form)
 @app.route("/", methods=("GET", "POST"))
 def server():
-    # print("help")
     # try/except in case something fails
     h = None
     selected_type = None
@@ -49,7 +48,6 @@ def server():
     try:
         # if a form was submitted
         if request.method == "POST":
-            # print("post")
             # if the form response includes a RITM, capture it as a properly-formatted string
             ritm_text = (
                 "0000000"
@@ -173,7 +171,7 @@ def server():
 
     return render_template(
         "index.html",
-        history=reversed(h),
+        history=[] if not h else reversed(h),
         last_row_num=h[0][0],
         selected_type=selected_type,
         data=data,
@@ -190,7 +188,6 @@ def ritm_link(ritm_num):
             + ritm_text
         )
     except Exception as e:
-        # print("error:")
         logger.error(e)
         return redirect(url_for("server"))
 
