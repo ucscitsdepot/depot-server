@@ -61,14 +61,13 @@ class Label:
         self.client_name = user[: user.find("(") - 1]
 
     # group username
-    def setGroupLogin(self, group):
+    def setGroupLogin(self, group: str):
         self.group = True
-        self.client_name = group.replace(",", " ")
+        self.client_cruzid = group.replace(" ", "")
 
     # group's full user name
-    def setGroupName(self, group):
-        self.client_cruzid = group.replace(" ", "")
-        self.client_name = group
+    def setGroupName(self, group: str):
+        self.client_name = group.replace(",", " ")
 
     # requestor name (may be same as client)
     def setRequestor(self, user):
@@ -92,20 +91,14 @@ class Label:
         self.localA = ""
         if self.domain is not None and self.domain != "Unknown":
             self.localA += ".\\"
-        if self.group is False:
-            self.localA += "admin.%s" % self.client_cruzid
-        else:
-            self.localA += "admin.%s" % self.client_name
+        self.localA += "admin.%s" % self.client_cruzid
 
     # set local username
     def getUsername(self):
         username = ""
         if self.domain is not None:
             username += ".\\"
-        if self.group is False:
-            username += "admin.%s" % self.client_cruzid
-        else:
-            username += "admin.%s" % self.client_name
+        username += "admin.%s" % self.client_cruzid
         return username
 
     # get department from csv file, then set the pcname using it

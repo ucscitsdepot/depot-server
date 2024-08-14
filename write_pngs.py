@@ -1,4 +1,5 @@
 import fcntl
+import os
 import subprocess
 import time
 from threading import Thread
@@ -380,23 +381,27 @@ def print_label(logger, file="tmp.png"):
     while not f:
         time.sleep(0.1)
         f = check_file()
-    # call printer library - this is blocking but non-exclusive, so multiple simultaneous calls to this will just cause one to succeed and the rest to error
-    p = subprocess.run(
-        ["brother_ql", "-m", "QL-570", "-p", address, "print", "-l", "62", file],
-        capture_output=True,
-    )
-    # while printer proces is still running, delay
-    while type(p) is not subprocess.CompletedProcess:
-        time.sleep(0.05)
+
+    # temp file to disable printing
+    if "NOPRINT" not in os.listdir():
+        # call printer library - this is blocking but non-exclusive, so multiple simultaneous calls to this will just cause one to succeed and the rest to error
+        p = subprocess.run(
+            ["brother_ql", "-m", "QL-570", "-p", address, "print", "-l", "62", file],
+            capture_output=True,
+        )
+        # while printer proces is still running, delay
+        while type(p) is not subprocess.CompletedProcess:
+            time.sleep(0.05)
+
+        if p.stdout:
+            logger.info(f"brother_ql stdout: {p.stdout}")
+        if p.stderr:
+            logger.info(f"brother_ql stderr: {p.stderr}")
+
     # release lock on tmp file
     fcntl.flock(f, fcntl.LOCK_UN)
     # close tmp file (optional since we're not writing to the file itself)
     f.close()
-
-    if p.stdout:
-        logger.info(f"brother_ql stdout: {p.stdout}")
-    if p.stderr:
-        logger.info(f"brother_ql stderr: {p.stderr}")
 
 
 def print_thread(logger, file="tmp.png"):
