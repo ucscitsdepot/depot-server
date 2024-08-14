@@ -85,6 +85,11 @@ def server():
                 )
                 # print the ewaste label in a thread
                 print_thread(logger)
+            elif request.form["label"] == "kiosk":
+                # get the form data
+                kiosk(str(request.form["serial"]), date)
+                # print the kiosk label in a thread
+                print_thread(logger)
             elif request.form["label"] == "macsetup":
                 macsetup(
                     ritm_text,

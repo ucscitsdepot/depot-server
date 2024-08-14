@@ -300,7 +300,7 @@ def kiosk(
     servicetag: str,
     date: str,
 ):
-    # log_history("kiosk", ritm, dept, servicetag, domain, client_name, backup, printers)
+    log_history("kiosk", servicetag)
     img = Image.open("static/kiosk.png", "r").convert("RGB")
     imgdraw = ImageDraw.Draw(img)
 
@@ -353,7 +353,11 @@ def kiosk(
         x_pos += 250  # move x_pos after box w/ some margin
 
     imgdraw.text(
-        (img.size[0] - 100, y_pos + 40), f"Imgd {date}", (0, 0, 0), font=name_font, anchor="rt"
+        (img.size[0] - 100, y_pos + 40),
+        f"Imgd {date}",
+        (0, 0, 0),
+        font=name_font,
+        anchor="rt",
     )
 
     img.save("tmp.png")
@@ -476,6 +480,7 @@ if __name__ == "__main__":
     # )
 
     from datetime import datetime
+
     date = datetime.now().strftime("%m/%d/%Y")
     kiosk("7ZRCMN3", date)
     kiosk("                  ", "00/00/0000")

@@ -41,7 +41,7 @@
 </head>
 
 <body>
-    <h1>Depot Label Printer</h1>
+    <a href="/" style="color: black; text-decoration: none;"><h1>Depot Label Printer</h1></a>
 
     {% for message in get_flashed_messages() %}
     <div class="alert">{{ message }}</div>
@@ -102,6 +102,18 @@
                     </select>
                     <br>
                     <button type="submit" name="submit_ewaste">Print ewaste</button>
+                </form>
+            </div>
+
+            <div> <!-- kiosk -->
+                <h2>Kiosk</h2>
+                <img src="{{ url_for('static', filename='kiosk_template.png') }}">
+                <form method="post">
+                    <input type="hidden" name="label" value="kiosk">
+                    Serial: <input type="text" name="serial" placeholder=""
+                        value="{{ data[0] if selected_type=='kiosk' else '' }}">
+                    <br>
+                    <button type="submit" name="submit_kiosk">Print kiosk</button>
                 </form>
             </div>
 

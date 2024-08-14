@@ -1,8 +1,6 @@
 /__pycache__/
-/*.txt
 .env
 tmp.png
-active_write_*
 address
 logs/
 print_history.csv

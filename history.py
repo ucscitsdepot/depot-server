@@ -16,10 +16,11 @@ ARG_COUNT = {
     "winsetup": 7,
     "ritm_generic": 2,
     "inc_generic": 2,
+    "kiosk": 1,
 }
 
 # label types to not append "RITM" to
-NON_RITM_TYPES = ["username", "inc_generic"]
+NON_RITM_TYPES = ["username", "inc_generic", "kiosk"]
 
 print_history = None
 try:
