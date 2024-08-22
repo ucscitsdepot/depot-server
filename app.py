@@ -201,7 +201,7 @@ def ritm_link(ritm_num):
 def local_admin(serial):
     return jsonify(lookup_local_admin(serial))
 
-import random
+
 @app.route("/kiosk-tv/")
 def kiosk_tv():
     return redirect("https://calendar.google.com")
