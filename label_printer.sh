@@ -1,5 +1,6 @@
 #!/bin/bash
 
+tmux send-keys -t label_printer_ui C-c
 tmux kill-session -t label_printer
 tmux kill-session -t label_printer_ui
 

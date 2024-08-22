@@ -34,6 +34,7 @@ cmd = "lp -o fill blue_page.png"
 # initialize flask app
 app = Flask(__name__)
 app.secret_key = os.urandom(12).hex()
+app.url_map.strict_slashes = True
 
 logger = logging.getLogger("gunicorn.error")
 
@@ -183,7 +184,6 @@ def server():
     )
 
 
-@app.route("/<ritm_num>")
 @app.route("/<ritm_num>/")
 def ritm_link(ritm_num):
     try:
@@ -197,17 +197,22 @@ def ritm_link(ritm_num):
         return redirect(url_for("server"))
 
 
-@app.route("/admin/<serial>")
+@app.route("/admin/<serial>/")
 def local_admin(serial):
     return jsonify(lookup_local_admin(serial))
 
+import random
+@app.route("/kiosk-tv/")
+def kiosk_tv():
+    return redirect("https://calendar.google.com")
 
-@app.route("/ship")
+
+@app.route("/ship/")
 def index():
     return render_template("ship.html")
 
 
-@app.route("/submit", methods=["POST"])
+@app.route("/submit/", methods=["POST"])
 def submit():
     name = request.form["name"]
     date = request.form["date"]

@@ -228,6 +228,8 @@ if __name__ == "__main__":
 
             # loop indefinitely
             while not login_again:
+                print_this_round = False
+
                 try:
                     # get Labels mailbox
                     mail.select("Labels", False)
@@ -262,6 +264,9 @@ if __name__ == "__main__":
                                 message = part.get_payload(decode=True)
                                 labels.append(message.decode())
                                 break
+
+                    if labels:
+                        print_this_round = True
 
                     # iterate over list of labels (as email text)
                     for label in labels:
@@ -492,6 +497,9 @@ if __name__ == "__main__":
                                 labels.append(message.decode())
                                 break
 
+                    if labels:
+                        print_this_round = True
+
                     # iterate over list of labels (as email text)
                     for label in labels:
                         # remove carriage returns
@@ -532,6 +540,9 @@ if __name__ == "__main__":
                     if "socket error" in str(e):
                         # gmail will throw a socket error if we have been logged in for too long.
                         login_again = True
+
+                if print_this_round:
+                    logger.info("Done")
 
                 # delay 1 second between runs
                 time.sleep(1)

@@ -3,7 +3,7 @@
 # https://docs.gunicorn.org/en/stable/settings.html
 import multiprocessing
 import os
-from datetime import datetime, timedelta
+from datetime import datetime
 
 max_requests = 1000
 max_requests_jitter = 50
