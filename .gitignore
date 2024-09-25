@@ -7,3 +7,4 @@ print_history.csv
 local_admins.csv
 NOPRINT
 venv/
+*.db
