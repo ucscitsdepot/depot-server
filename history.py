@@ -1,10 +1,40 @@
 import fcntl
-from threading import Thread
+import sqlite3
 import time
+from threading import Thread
 
 import numpy as np
 
-MAX_ARGS = 7
+
+def get_sqlite3_thread_safety():
+
+    # Map value from SQLite's THREADSAFE to Python's DBAPI 2.0
+    # threadsafety attribute.
+    sqlite_threadsafe2python_dbapi = {0: 0, 2: 1, 1: 3}
+    conn = sqlite3.connect(":memory:")
+    threadsafety = conn.execute(
+        """
+select * from pragma_compile_options
+where compile_options like 'THREADSAFE=%'
+"""
+    ).fetchone()[0]
+    conn.close()
+
+    threadsafety_value = int(threadsafety.split("=")[1])
+
+    return sqlite_threadsafe2python_dbapi[threadsafety_value]
+
+
+if sqlite3.threadsafety == 3 or get_sqlite3_thread_safety() == 3:
+    check_same_thread = False
+else:
+    check_same_thread = True
+
+db = sqlite3.connect(
+    "print_history.db", autocommit=True, check_same_thread=check_same_thread
+)
+cursor = db.cursor()
+sql = cursor.execute
 
 ARG_COUNT = {
     "ewaste": 6,
@@ -19,58 +49,23 @@ ARG_COUNT = {
     "kiosk": 1,
 }
 
+MAX_ARGS = max(ARG_COUNT.values())
+
+ARG_TEXT = ", ".join([f"data{i} TEXT" for i in range(MAX_ARGS)])
+
+sql(f"CREATE TABLE IF NOT EXISTS history (timestamp INTEGER, type TEXT, {ARG_TEXT})")
+
 # label types to not append "RITM" to
 NON_RITM_TYPES = ["username", "inc_generic", "kiosk"]
 
-print_history = None
-try:
-    print_history = np.genfromtxt("print_history.csv", dtype=str, delimiter=",")
-    if len(print_history) < 1:
-        raise Exception
-except:
-    print_history = np.array([[""] * (2 + MAX_ARGS)])
-
-active_write_path = "/tmp/active_write_history"
-
-
-def check_file():
-    f = open(active_write_path, "a+")
-    if f.writable():
-        fcntl.flock(f, fcntl.LOCK_EX)
-        return f
-
-    return False
-
-
-def close_file(f):
-    fcntl.flock(f, fcntl.LOCK_UN)
-    f.close()
-
 
 def log(label_type, *args):
-    global print_history
-
-    cf = check_file()
-
-    while not cf:
-        time.sleep(0.1)
-        cf = check_file()
-
-    get_history()
-
-    f = open("print_history.csv", "a+")
-    row = (
-        [str(int(time.time())), label_type]
-        + [str(a) for a in args]
-        + [""] * (MAX_ARGS - len(args))
+    arg_text = ", ".join([f"data{i}" for i in range(len(args))])
+    q_marks = ", ".join(["?"] * (len(args) + 2))
+    sql(
+        f"INSERT INTO history (timestamp, type, {arg_text}) VALUES ({q_marks})",
+        (int(time.time()), label_type) + tuple([str(a) for a in args]),
     )
-    print_history = np.vstack([print_history, row])
-    for r in row[:-1]:
-        f.write(r + ",")
-    f.write(row[-1] + "\n")
-    f.close()
-
-    close_file(cf)
 
 
 def log_thread(label_type, *args):
@@ -79,60 +74,50 @@ def log_thread(label_type, *args):
 
 
 def reprint(row_num):
-    get_history()
-    row = print_history[row_num]
+    row = sql("SELECT * FROM history WHERE ROWID = ?", (row_num,)).fetchone()
     return (row[1], row[2:])
 
 
-def get_history(count=None):
-    global print_history
-    try:
-        print_history = np.genfromtxt("print_history.csv", dtype=str, delimiter=",")
-        if len(print_history) < 1:
-            raise Exception
-        elif len(print_history) > 1 and print_history[0][0] == "":
-            print_history = print_history[1:]
-    except:
-        print_history = np.array([[""] * (2 + MAX_ARGS)])
+def get_history(count):
+    print_history = sql(
+        "SELECT * FROM history ORDER BY ROWID DESC LIMIT ?", (count,)
+    ).fetchall()
 
-    if count:
-        if len(print_history) == 1 and print_history[0][0] == "":
-            return []
-
-        if count >= len(print_history):
-            count = len(print_history)
-            if print_history[0][0] == "":
-                count -= 1
-
-        return [
-            (
-                i,
-                time.strftime(
-                    "%b %d %I:%M %p", time.localtime(int(print_history[i][0]))
-                ),
-                print_history[i][1],
-                print_history[i][2],
-                print_history[i][1] not in NON_RITM_TYPES,
-            )
-            for i in range((len(print_history) - count), len(print_history))
-        ]
+    return [
+        (
+            i,
+            time.strftime("%b %d %I:%M %p", time.localtime(int(print_history[i][0]))),
+            print_history[i][1],
+            print_history[i][2],
+            print_history[i][1] not in NON_RITM_TYPES,
+        )
+        for i in range(len(print_history))
+    ]
 
 
 if __name__ == "__main__":
-    print(print_history, len(print_history))
-    print()
+    h = get_history(10)
+    print(h, len(h))
+    # print()
 
-    log(
-        "ewaste",
-        "0098765",
-        "7/17/2024",
-        "ASDF123",
-        "3-Pass",
-        "Surplus",
-        True,
-    )
+    # log(
+    #     "ewaste",
+    #     "0098765",
+    #     "7/17/2024",
+    #     "ASDF123",
+    #     "3-Pass",
+    #     "Surplus",
+    #     True,
+    # )
 
-    print(print_history, len(print_history))
-    print()
+    # h = get_history(10)
+    # print(h, len(h))
+    # print()
 
-    # reprint(1)
+    # with open("print_history.csv") as f:
+    #     for line in f.readlines():
+    #         line = line.strip().strip('\n').split(',')
+    #         line[0] = int(line[0])
+    #         log(line[1], line[0], *line[2:])
+
+    print(reprint(1))

@@ -1,0 +1,4 @@
+numpy
+flask
+python-dotenv
+Pillow

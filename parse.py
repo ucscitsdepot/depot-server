@@ -13,7 +13,8 @@ from datetime import datetime
 from dotenv import load_dotenv
 
 from local_admins import log_thread as log_admin
-from print import *
+
+# from print import *
 
 # Change directory to current file location
 path = os.path.dirname(os.path.abspath(__file__))
