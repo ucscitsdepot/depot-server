@@ -80,16 +80,16 @@ def reprint(row_num):
 
 def get_history(count):
     print_history = sql(
-        "SELECT * FROM history ORDER BY ROWID DESC LIMIT ?", (count,)
+        "SELECT ROWID, timestamp, type, data0 FROM history ORDER BY ROWID DESC LIMIT ?", (count,)
     ).fetchall()
 
     return [
         (
-            i,
-            time.strftime("%b %d %I:%M %p", time.localtime(int(print_history[i][0]))),
-            print_history[i][1],
+            print_history[i][0],
+            time.strftime("%b %d %I:%M %p", time.localtime(int(print_history[i][1]))),
             print_history[i][2],
-            print_history[i][1] not in NON_RITM_TYPES,
+            print_history[i][3],
+            print_history[i][2] not in NON_RITM_TYPES,
         )
         for i in range(len(print_history))
     ]
