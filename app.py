@@ -186,6 +186,15 @@ def server():
     )
 
 
+@app.route("/kiosk/<serial>/")
+def print_kiosk(serial):
+    # create kiosk label w/ serial & date
+    kiosk(str(serial).upper(), datetime.now().strftime("%m/%d/%Y"))
+    # print the kiosk label in a thread
+    print_thread(logger)
+    return jsonify([])
+
+
 @app.route("/<ritm_num>/")
 def ritm_link(ritm_num):
     try:
