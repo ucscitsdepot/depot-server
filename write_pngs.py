@@ -9,6 +9,24 @@ from PIL import Image, ImageDraw, ImageFont
 from history import log_thread as log_history
 from local_admins import log_thread as log_admin
 
+fonts = {}
+
+def FONT_REG(size):
+    if f"reg_{size}" not in fonts:
+        fonts[f"reg_{size}"] = ImageFont.truetype("Roboto-Regular.ttf", size)
+    return fonts[f"reg_{size}"]
+
+def FONT_ITALIC(size):
+    if f"italic_{size}" not in fonts:
+        fonts[f"italic_{size}"] = ImageFont.truetype("Roboto-Italic.ttf", size)
+    return fonts[f"italic_{size}"]
+
+def FONT_BOLD(size):
+    if f"bold_{size}" not in fonts:
+        fonts[f"bold_{size}"] = ImageFont.truetype("Roboto-Medium.ttf", size)
+    return fonts[f"bold_{size}"]
+
+FONT_RITM = FONT_REG(350)
 
 # find correct textlength to fit in desired size
 # derived from https://stackoverflow.com/questions/58041361/break-long-drawn-text-to-multiple-lines-with-pillow
@@ -47,11 +65,10 @@ def ewaste(ritm: str, date: str, serial: str, erase_type: str, export: str, jamf
     imgdraw = ImageDraw.Draw(img)
 
     # import fonts
-    ritm_font = ImageFont.truetype("Roboto-Regular.ttf", 350)
-    font = ImageFont.truetype("Roboto-Regular.ttf", 250)
+    font = FONT_REG(250)
 
     # draw text for ritm, date, export type, serial, and erase type
-    imgdraw.text((900, 120), ritm, (0, 0, 0), font=ritm_font)
+    imgdraw.text((900, 120), ritm, (0, 0, 0), font=FONT_RITM)
     imgdraw.text((70, 530), date, (0, 0, 0), font=font)
     imgdraw.text((1570, 530), export, (0, 0, 0), font=font)
     imgdraw.text((800, 870), serial, (0, 0, 0), font=font)
@@ -86,11 +103,11 @@ def ritm(
     imgdraw = ImageDraw.Draw(img)
 
     # import fonts
-    ritm_font = ImageFont.truetype("Roboto-Regular.ttf", 350)
-    font = ImageFont.truetype("Roboto-Regular.ttf", 230)
-    name_font = ImageFont.truetype("Roboto-Italic.ttf", 200)
-    large_name_font = ImageFont.truetype("Roboto-Italic.ttf", 230)
-    small_font = ImageFont.truetype("Roboto-Regular.ttf", 160)
+    ritm_font = FONT_RITM
+    font = FONT_REG(230)
+    name_font = FONT_ITALIC(200)
+    large_name_font = FONT_ITALIC(230)
+    small_font = FONT_REG(160)
 
     # draw text for ritm, date, requestor name, client name
     imgdraw.text((900, 190), ritm, (0, 0, 0), font=ritm_font)
@@ -108,9 +125,6 @@ def ritm(
     else:
         imgdraw.text((1815, 1660), index, (0, 0, 0), font=small_font)
 
-    # # print return location, wrap text
-    # fit_text(img, returnloc, (0, 0, 0), small_font, 70, 1750, 2800, 120)
-
     imgdraw.text((70, 1600), "Migration", (0, 0, 0), font=font)
 
     box_x = 1100
@@ -127,12 +141,6 @@ def ritm(
         h = box_h - gap * 2
         imgdraw.rectangle((x, y, x + w, y + h), "black")
     elif migration is None:
-        # x = 70
-        # y = 1615
-        # w = 1070
-        # h = 0
-        # imgdraw.line((x, y) + (x + w, y + h), "black", width=20)
-        # imgdraw.line((x + w, y) + (x, y + h), "black", width=20)
         imgdraw.text((1400, 1620), "No", (0, 0, 0), font=name_font)
 
     img.save("tmp.png")
@@ -150,11 +158,12 @@ def macsetup(
     log_history("macsetup", ritm, dept, serial, client_name, backup, printers, localA)
     img = Image.open("static/macsetup.png", "r").convert("RGB")
     imgdraw = ImageDraw.Draw(img)
-    ritm_font = ImageFont.truetype("Roboto-Regular.ttf", 350)
+    ritm_font = FONT_REG(350)
+    font = FONT_REG(230)
+    name_font = FONT_ITALIC(200)
+    small_font = FONT_REG(120)
+    
     imgdraw.text((900, 120), ritm, (0, 0, 0), font=ritm_font)
-    font = ImageFont.truetype("Roboto-Regular.ttf", 230)
-    name_font = ImageFont.truetype("Roboto-Italic.ttf", 200)
-    small_font = ImageFont.truetype("Roboto-Regular.ttf", 120)
 
     if imgdraw.textlength(dept + "-" + serial[-7:], font) > 1800:
         imgdraw.text((1050, 500), dept + "-" + serial[-7:], (0, 0, 0), font=small_font)
@@ -184,10 +193,10 @@ def notes_printer(ritm: str, printerip: str, printermodel: str, sw: str, notes: 
     log_history("notes_printer", ritm, printerip, printermodel, sw, notes)
     img = Image.open("static/notes_printer.png", "r").convert("RGB")
     imgdraw = ImageDraw.Draw(img)
-    ritm_font = ImageFont.truetype("Roboto-Regular.ttf", 350)
+    ritm_font = FONT_REG(350)
+    small_font = FONT_REG(160)
+
     imgdraw.text((920, 120), ritm, (0, 0, 0), font=ritm_font)
-    font = ImageFont.truetype("Roboto-Regular.ttf", 230)
-    small_font = ImageFont.truetype("Roboto-Regular.ttf", 160)
 
     if len(printerip) > 0:
         fit_text(img, printerip, (0, 0, 0), small_font, 90, 650, 2800, 160)
@@ -205,10 +214,10 @@ def notes(ritm: str, sw: str, notes: str):
     log_history("notes", ritm, sw, notes)
     img = Image.open("static/notes.png", "r").convert("RGB")
     imgdraw = ImageDraw.Draw(img)
-    ritm_font = ImageFont.truetype("Roboto-Regular.ttf", 350)
+    ritm_font = FONT_REG(350)
+    small_font = FONT_REG(160)
+    
     imgdraw.text((920, 120), ritm, (0, 0, 0), font=ritm_font)
-    font = ImageFont.truetype("Roboto-Regular.ttf", 230)
-    small_font = ImageFont.truetype("Roboto-Regular.ttf", 160)
 
     if len(sw) > 0:
         fit_text(img, sw, (0, 0, 0), small_font, 90, 670, 2800, 160)
@@ -222,7 +231,7 @@ def username(username: str):
     log_history("username", username)
     img = Image.open("static/username.png", "r").convert("RGB")
     imgdraw = ImageDraw.Draw(img)
-    font = ImageFont.truetype("Roboto-Medium.ttf", 230)
+    font = FONT_BOLD(230)
 
     imgdraw.text((1450, 540), username, (0, 0, 0), font=font, anchor="mt")
 
@@ -243,12 +252,12 @@ def winsetup(
     )
     img = Image.open("static/winsetup.png", "r").convert("RGB")
     imgdraw = ImageDraw.Draw(img)
-    ritm_font = ImageFont.truetype("Roboto-Regular.ttf", 350)
-    imgdraw.text((930, 120), ritm, (0, 0, 0), font=ritm_font)
-    font = ImageFont.truetype("Roboto-Regular.ttf", 230)
-    name_font = ImageFont.truetype("Roboto-Italic.ttf", 200)
-    small_font = ImageFont.truetype("Roboto-Regular.ttf", 120)
+    ritm_font = FONT_REG(350)
+    font = FONT_REG(230)
+    name_font = FONT_ITALIC(200)
+    small_font = FONT_REG(120)
 
+    imgdraw.text((930, 120), ritm, (0, 0, 0), font=ritm_font)
     imgdraw.text((1300, 450), servicetag, (0, 0, 0), font=font)
 
     if imgdraw.textlength(dept + "-" + servicetag, font) > 2800:
@@ -271,10 +280,10 @@ def ritm_generic(ritm: str, notes: str):
     log_history("ritm_generic", ritm, notes)
     img = Image.open("static/ritm_generic.png", "r").convert("RGB")
     imgdraw = ImageDraw.Draw(img)
-    ritm_font = ImageFont.truetype("Roboto-Regular.ttf", 330)
+    ritm_font = FONT_REG(330)
+    small_font = FONT_REG(160)
+    
     imgdraw.text((860, 25), ritm, (0, 0, 0), font=ritm_font)
-    font = ImageFont.truetype("Roboto-Regular.ttf", 230)
-    small_font = ImageFont.truetype("Roboto-Regular.ttf", 160)
 
     if len(notes) > 0:
         fit_text(img, notes, (0, 0, 0), small_font, 90, 520, 2800, 160)
@@ -286,10 +295,10 @@ def inc_generic(inc: str, notes: str):
     log_history("inc_generic", "INC" + inc, notes)
     img = Image.open("static/inc_generic.png", "r").convert("RGB")
     imgdraw = ImageDraw.Draw(img)
-    ritm_font = ImageFont.truetype("Roboto-Regular.ttf", 330)
+    ritm_font = FONT_REG(330)
+    small_font = FONT_REG(160)
+    
     imgdraw.text((630, 25), inc, (0, 0, 0), font=ritm_font)
-    font = ImageFont.truetype("Roboto-Regular.ttf", 230)
-    small_font = ImageFont.truetype("Roboto-Regular.ttf", 160)
 
     if len(notes) > 0:
         fit_text(img, notes, (0, 0, 0), small_font, 90, 520, 2800, 160)
@@ -305,11 +314,10 @@ def kiosk(
     img = Image.open("static/kiosk.png", "r").convert("RGB")
     imgdraw = ImageDraw.Draw(img)
 
-    ritm_font = ImageFont.truetype("Roboto-Regular.ttf", 250)
-    font = ImageFont.truetype("Roboto-Regular.ttf", 200)
-    name_font = ImageFont.truetype("Roboto-Italic.ttf", 200)
-    small_font = ImageFont.truetype("Roboto-Regular.ttf", 120)
-    st_font = ImageFont.truetype("Roboto-Medium.ttf", 200)
+    ritm_font = FONT_REG(250)
+    font = FONT_REG(200)
+    name_font = FONT_ITALIC(200)
+    st_font = FONT_BOLD(200)
 
     imgdraw.text((100, 120), f"SCP-{servicetag}-KSK", (0, 0, 0), font=ritm_font)
     imgdraw.text((100, 400), "Service Tag:", (0, 0, 0), font=st_font)
@@ -484,10 +492,11 @@ if __name__ == "__main__":
     #     "the quick brown fox jumped over the lazy dog. the quick brown fox jumped over the lazy dog. the quick brown fox jumped over the lazy dog. the quick brown fox jumped over the lazy dog. the quick brown fox jumped over the lazy dog.",
     # )
 
-    from datetime import datetime
+    # from datetime import datetime
 
-    date = datetime.now().strftime("%m/%d/%Y")
-    kiosk("7ZRCMN3", date)
-    kiosk("                  ", "00/00/0000")
+    # date = datetime.now().strftime("%m/%d/%Y")
+    # kiosk("7ZRCMN3", date)
+    # kiosk("                  ", "00/00/0000")
     # kiosk("SRVICETAG", date)
     # kiosk("BCWNLN3", date)
+    pass
