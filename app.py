@@ -192,7 +192,7 @@ def print_kiosk(serial):
     kiosk(str(serial).upper(), datetime.now().strftime("%m/%d/%Y"))
     # print the kiosk label in a thread
     print_thread(logger)
-    return jsonify([])
+    return "Printed kiosk label for " + str(serial)
 
 
 @app.route("/<ritm_num>/")

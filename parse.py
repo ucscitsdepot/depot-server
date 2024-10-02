@@ -215,6 +215,7 @@ def labelExecute(label):
 
 
 if __name__ == "__main__":
+    logger.info("Starting...")
     while True:
         try:
             # get gmail account's username and password from environment variables
