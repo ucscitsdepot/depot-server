@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Depot Calendar</title>
+    <style>
+        body {
+            display: flex;
+            flex-flow: row;
+            justify-content: space-between;
+            align-items: stretch;
+            align-content: stretch;
+            margin: 0;
+            padding: 0;
+        }
+
+        #list {
+            width: 50vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: flex-start;
+            align-content: flex-start;
+            overflow: hidden;
+        }
+
+        #current {
+            width: 50vw;
+            height: 100vh;
+            /* display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: flex-start;
+            align-content: flex-start; */
+        }
+
+        .container {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: stretch;
+            align-content: stretch;
+        }
+
+        .event {
+            padding: 1px;
+            border-radius: 10px;
+            min-width: 0;
+        }
+
+        .day {
+            min-width: 160px;
+        }
+
+        .time {
+            min-width: 150px;
+        }
+
+        h1 {
+            margin: 0 0.25em 0.25em 0.25em;
+        }
+
+        h2 {
+            margin: 0.25em 0.25em 0 0.25em;
+            /* white-space: nowrap; */
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="list">
+        {% for event in events %}
+        <div class="container">
+            <h1 class="day">{{ event["day"] }}</h1>
+            <h1 class="time">{{ event["time"] }}:</h1>
+            <div class="event" {% if event["now"] %} style="border: 5px solid red;" {% endif %}>
+                <h1>{{ event["name"] }} ({{ event["ticket"] }}) </h1>
+                <h2>{{ event["loc"] }}</h2>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    <div id="current">
+        <!-- text2 -->
+    </div>
+</body>
+
+</html>

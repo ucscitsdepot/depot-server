@@ -8,3 +8,5 @@ local_admins.csv
 NOPRINT
 venv/
 *.db
+credentials.json
+token.json

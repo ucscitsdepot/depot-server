@@ -6,9 +6,9 @@ from datetime import datetime
 
 from flask import Flask, flash, jsonify, redirect, render_template, request, url_for
 
+import cal
 from history import get_history, reprint
 from local_admins import lookup_local_admin
-
 from write_pngs import *
 
 # note: using authbind & gunicorn to host on port 80:
@@ -202,7 +202,9 @@ def local_admin(serial):
 
 @app.route("/kiosk-tv/")
 def kiosk_tv():
-    return redirect("https://calendar.google.com")
+    # return redirect("https://calendar.google.com")
+    days, events = cal.get_events()
+    return render_template("calendar.html", days=days, events=events)
 
 
 if __name__ == "__main__":
