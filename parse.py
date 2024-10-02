@@ -1,7 +1,6 @@
 # import necessary libraries
 import email
 import imaplib
-import logging
 import os
 import re
 import time
@@ -13,6 +12,7 @@ from datetime import datetime
 from dotenv import load_dotenv
 
 from local_admins import log_thread as log_admin
+from log import setup_logs
 
 # from print import *
 
@@ -20,35 +20,7 @@ from local_admins import log_thread as log_admin
 path = os.path.dirname(os.path.abspath(__file__))
 os.chdir(path)
 
-# get date & datetime strings
-now = datetime.now()
-dt = now.strftime("%Y-%m-%d")
-dttm = now.strftime("%Y-%m-%d %H:%M:%S")
-
-# Create a new directory for logs if it doesn't exist
-if not os.path.exists(path + "/logs/parse/" + dt):
-    os.makedirs(path + "/logs/parse/" + dt)
-
-# create new logger with all levels
-logger = logging.getLogger("root")
-logger.setLevel(logging.DEBUG)
-
-# create file handler which logs debug messages (and above - everything)
-fh = logging.FileHandler(f"logs/parse/{dt}/{dttm}.log")
-fh.setLevel(logging.DEBUG)
-
-# create console handler which only logs warnings (and above)
-ch = logging.StreamHandler()
-ch.setLevel(logging.WARNING)
-
-# create formatter and add it to the handlers
-formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s: %(message)s")
-fh.setFormatter(formatter)
-ch.setFormatter(formatter)
-
-# add the handlers to the logger
-logger.addHandler(fh)
-logger.addHandler(ch)
+logger = setup_logs("parse", str(path))
 
 # import Ewaste/Label classes, all functions to output png files
 from ewaste import Ewaste
@@ -253,7 +225,7 @@ if __name__ == "__main__":
                         _, data = mail.fetch(num, "(RFC822)")
                         _, bytes_data = data[0]
                         # mark email as read
-                        mail.store(num, "+FLAGS", "\Seen")
+                        mail.store(num, "+FLAGS", "\\Seen")
 
                         # parse string of bytes into readable email message, then iterate over it
                         email_message = email.message_from_bytes(bytes_data)
@@ -485,7 +457,7 @@ if __name__ == "__main__":
                         _, data = mail.fetch(num, "(RFC822)")
                         _, bytes_data = data[0]
                         # mark email as read
-                        mail.store(num, "+FLAGS", "\Seen")
+                        mail.store(num, "+FLAGS", "\\Seen")
 
                         # parse string of bytes into readable email message, then iterate over it
                         email_message = email.message_from_bytes(bytes_data)

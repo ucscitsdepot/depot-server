@@ -3,7 +3,8 @@
 # https://docs.gunicorn.org/en/stable/settings.html
 import multiprocessing
 import os
-from datetime import datetime
+
+from log import setup_logs
 
 max_requests = 1000
 max_requests_jitter = 50
@@ -12,20 +13,11 @@ max_requests_jitter = 50
 path = os.path.dirname(os.path.abspath(__file__))
 os.chdir(path)
 
-# get date & datetime strings
-now = datetime.now()
-dt = now.strftime("%Y-%m-%d")
-dttm = now.strftime("%Y-%m-%d %H:%M:%S")
-
-# Create a new directory for logs if it doesn't exist
-if not os.path.exists(path + "/logs/ui/" + dt):
-    os.makedirs(path + "/logs/ui/" + dt)
-
 # Set log path using timestamp
-log_path = f"{dt}/{dttm}.log"
+log_path = setup_logs("ui", path, True)
 
-errorlog = path + "/logs/ui/" + log_path
-accesslog = path + "/logs/ui/" + log_path
+errorlog = log_path
+accesslog = log_path
 
 # don't use syslog
 syslog = False

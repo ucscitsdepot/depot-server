@@ -1,5 +1,8 @@
 #!/bin/bash
 
+pkill python
+pkill gunicorn
+
 cd /home/depot/Auto-Label-Generator
 source venv/bin/activate
 
