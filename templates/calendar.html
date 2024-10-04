@@ -15,8 +15,8 @@
         }
 
         #list {
-            width: 50vw;
-            height: 100vh;
+            width: 49vw;
+            height: 99vh;
             display: flex;
             flex-direction: column;
             flex-wrap: wrap;
@@ -24,16 +24,15 @@
             align-items: flex-start;
             align-content: flex-start;
             overflow: hidden;
+            margin: 0;
+            padding: 0.5vh 0.5vw 0.5vh 0.5vw;
         }
 
         #current {
-            width: 50vw;
-            height: 100vh;
-            /* display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            align-items: flex-start;
-            align-content: flex-start; */
+            width: 49vw;
+            height: 99vh;
+            margin: 0;
+            padding: 0.5vh 0.5vw 0.5vh 0.5vw;
         }
 
         .container {
@@ -51,19 +50,21 @@
         }
 
         .day {
-            min-width: 160px;
+            min-width: 200px;
         }
 
         .time {
-            min-width: 150px;
+            min-width: 190px;
         }
 
         h1 {
-            margin: 0.25em;
+            margin: 0.15em;
+            font-size: 2.5em;
         }
-        
+
         h2 {
-            margin: 0.25em;
+            margin: 0.15em;
+            font-size: 2em;
         }
     </style>
 </head>
@@ -73,7 +74,10 @@
         {% for event in events %}
         <div class="container">
             <h1 class="day">{{ event["day"] }}</h1>
-            <h1 class="time">{{ event["time"] }}:</h1>
+            <div>
+                <h1 class="time">{{ event["time"] }}</h1>
+                <h1 class="dir">{{ event["dir"] }}</h1>
+            </div>
             <div class="event" {% if event["now"] %} style="border: 5px solid red;" {% endif %}>
                 <h1>{{ event["name"] }} ({{ event["ticket"] }}) </h1>
                 <h2>{{ event["loc"] }}</h2>

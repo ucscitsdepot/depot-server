@@ -7,7 +7,6 @@ from threading import Thread
 from PIL import Image, ImageDraw, ImageFont
 
 from history import log_thread as log_history
-from local_admins import log_thread as log_admin
 
 fonts = {}
 

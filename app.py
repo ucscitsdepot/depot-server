@@ -207,5 +207,19 @@ def kiosk_tv():
     return render_template("calendar.html", days=days, events=events)
 
 
+locker_files = {
+    "anyconnect_linux": "cisco-secure-client-linux64-5.1.5.65-predeploy-k9.tar.gz",
+    "linux_installer": "linux-test.sh",
+    "slack_linux": "slack-desktop-4.39.95-amd64.deb",
+}
+
+
+@app.route("/lockers/<filename>/")
+def locker(filename):
+    if filename not in locker_files:
+        return "file does not exist", 400
+    return redirect(url_for("static", filename="lockers/" + locker_files[filename]))
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)

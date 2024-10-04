@@ -10,11 +10,11 @@ from googleapiclient.errors import HttpError
 # If modifying these scopes, delete the file token.json.
 SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"]
 
-TYPE_INBOUND_EWASTE = -2
-TYPE_INBOUND_COMPUTER = -1
-TYPE_UNKNOWN = 0
-TYPE_OUTBOUND = 1
-TYPE_EWASTE = 2
+TYPE_INBOUND_EWASTE = "🔥🗑️🔥"
+TYPE_INBOUND_COMPUTER = "📦"
+TYPE_UNKNOWN = "⁉️"
+TYPE_OUTBOUND = "🖥️✨"
+TYPE_EWASTE = "🚚"
 
 TICKET_STRING = "RITM or INC #\n--------------------\n"
 
@@ -47,7 +47,7 @@ def get_events():
             .replace(hour=0, minute=0, second=0, microsecond=0)
             .astimezone(timezone.utc)
         ).isoformat()
-        
+
         events_result = (
             service.events()
             .list(
@@ -79,11 +79,15 @@ def get_events():
                 e["now"] = True
             elif datetime.fromisoformat(str(event["end"]["dateTime"])) < datetime.now(
                 timezone.utc
+            ) or datetime.fromisoformat(str(event["end"]["dateTime"])) > datetime.now(
+                timezone.utc
+            ) + timedelta(
+                days=7
             ):
                 continue
             else:
                 e["now"] = False
-            
+
             if e["time"].date() == date.today():
                 e["day"] = "Today"
                 e["time"] = e["time"].strftime("%I:%M %p")
@@ -104,7 +108,11 @@ def get_events():
 
             e["name"] = str(event["summary"]).split(" -- ")[-1]
 
-            if "(Inbound) Receive Computer" in str(event["summary"]):
+            # print(event["summary"])
+            # print(event["description"])
+            event["description"] = str(event["description"]).replace("<br>", "\n")
+
+            if "(Inbound) Receive Computer" in str(event["summary"]) or "(Inbound) Give Computer to Depot" in str(event["summary"]):
                 e["dir"] = TYPE_INBOUND_COMPUTER
             elif "(Inbound) Receive e-Waste" in str(event["summary"]):
                 e["dir"] = TYPE_INBOUND_EWASTE
@@ -135,7 +143,9 @@ def get_events():
                 if "depot" in str(event["location"]).lower():
                     e["loc"] = "🏠 Depot"
                 else:
-                    e["loc"] = "📍 " + str(event["location"]).replace(", Santa Cruz, CA, USA", "")
+                    e["loc"] = "📍 " + str(event["location"]).replace(
+                        ", Santa Cruz, CA, USA", ""
+                    )
 
             if TICKET_STRING in str(event["description"]):
                 ticket_start = str(event["description"]).index(TICKET_STRING) + len(

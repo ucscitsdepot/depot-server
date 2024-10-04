@@ -14,8 +14,6 @@ from dotenv import load_dotenv
 from local_admins import log_thread as log_admin
 from log import setup_logs
 
-# from print import *
-
 # Change directory to current file location
 path = os.path.dirname(os.path.abspath(__file__))
 os.chdir(path)
@@ -26,19 +24,6 @@ logger = setup_logs("parse", str(path))
 from ewaste import Ewaste
 from label import Label
 from write_pngs import *
-
-printship = False
-
-name = ""
-phone = ""
-address1 = ""
-address2 = ""
-city = ""
-state = ""
-zip_code = ""
-mail_code = ""
-approver = ""
-tracking_email = ""
 
 # load environment variables
 load_dotenv()
@@ -359,52 +344,6 @@ if __name__ == "__main__":
                                     "Serial Number or Service Tag: ", ""
                                 )
                                 label.serial = label.serial.split(", ")
-                            elif (
-                                "How would you like us to return the computer to you:"
-                                in field
-                            ):
-                                if "Ship" in field:
-                                    printship = True
-
-                                else:
-                                    printship = False
-                            elif "Mail Code: " in field:
-                                mail_code = field.replace("Mail Code: ", "")
-                            # elif "Signature Confirmation: " in field:
-                            #     sig_conf = True if "true" in field else False
-                            elif "Mail Code approver: " in field:
-                                approver = field.replace("Mail Code approver: ", "")
-                            elif "Shipping Address: " in field:
-                                if (
-                                    False and field != ""
-                                ):  # TODO: find some other way to parse addresses
-                                    address_parts = field.replace(
-                                        "Shipping Address: ", ""
-                                    ).split()
-                                    if len(address_parts) >= 6:
-                                        address1 = " ".join(address_parts[:3])
-                                        address2 = " ".join(address_parts[3:4])
-                                        city = address_parts[4:5]
-                                        state = address_parts[5:6]
-                                        zip_code = address_parts[6]
-                                    elif len(address_parts) == 5:
-                                        address1 = " ".join(address_parts[:3])
-                                        address2 = ""
-                                        city = address_parts[3:4]
-                                        state = address_parts[4:5]
-                                        zip_code = [6]
-                                    elif len(address_parts) == 4:
-                                        address1 = " ".join(address_parts[:3])
-                                        address2 = ""
-                                        city = address_parts[3:4]
-                                        state = ""
-                                        zip_code = ""
-                                    else:
-                                        address1 = ""
-                                        address2 = ""
-                                        city = ""
-                                        state = ""
-                                        zip_code = ""
                             elif "Return: " in field:
                                 label.returnLoc = field.replace("Return: ", "")
                                 if label.returnLoc == "":
@@ -415,24 +354,7 @@ if __name__ == "__main__":
                             continue
                         # print text of label to console
                         logger.info(label)
-                        if (
-                            False and printship == True
-                        ):  # TODO: remove "False and" when address parsing is fixed
-                            printship = False
-                            print("I AM PRINTING SHIPPING LABEL")
-                            printcall(
-                                str(label.client_name),
-                                str(phone),
-                                str(address1),
-                                str(address2),
-                                str(city),
-                                str(state),
-                                str(zip_code),
-                                str(mail_code),
-                                "____",
-                                str(approver),
-                                str(label.RITM),
-                            )
+                        
                         # setup label for printing & print it
                         labelExecute(label)
                         # print("==========================================\n")
