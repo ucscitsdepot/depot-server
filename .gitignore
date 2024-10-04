@@ -10,3 +10,4 @@ venv/
 *.db
 credentials.json
 token.json
+/static/lockers/*
