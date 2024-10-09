@@ -200,11 +200,31 @@ def local_admin(serial):
     return jsonify(lookup_local_admin(serial))
 
 
-@app.route("/kiosk-tv/")
-def kiosk_tv():
-    # return redirect("https://calendar.google.com")
+@app.route("/calendar/")
+def calendar():
     days, events = cal.get_events()
-    return render_template("calendar.html", days=days, events=events)
+    return render_template("calendar.html", days=days, events=events, today="Today" in days)
+
+
+@app.route("/ip-db/")
+def ip_db():
+    name = request.args.get("name")
+    ip = request.args.get("ip")
+
+    logger.info(f"IP db: name: {name}, ip: {ip}")
+
+    db_path = os.path.dirname(os.path.abspath(__file__)) + "/ip_db"
+
+    if not name or not ip:
+        return "fail", 400
+
+    if not os.path.exists(db_path):
+        os.makedirs(db_path)
+
+    with open(db_path + "/" + name, "w") as f:
+        f.write(ip)
+
+    return "success"
 
 
 locker_files = {
