@@ -1,61 +1,51 @@
 import fcntl
-from threading import Thread
+import sqlite3
 import time
+from threading import Thread
 
 import numpy as np
 
-ARG_COUNT = 5  # date, ritm, serial, name, username
 
-local_admins = None
-active_write_path = "/tmp/active_write_local_admins"
+def get_sqlite3_thread_safety():
+
+    # Map value from SQLite's THREADSAFE to Python's DBAPI 2.0
+    # threadsafety attribute.
+    sqlite_threadsafe2python_dbapi = {0: 0, 2: 1, 1: 3}
+    conn = sqlite3.connect(":memory:")
+    threadsafety = conn.execute(
+        """
+select * from pragma_compile_options
+where compile_options like 'THREADSAFE=%'
+"""
+    ).fetchone()[0]
+    conn.close()
+
+    threadsafety_value = int(threadsafety.split("=")[1])
+
+    return sqlite_threadsafe2python_dbapi[threadsafety_value]
 
 
-def check_file():
-    f = open(active_write_path, "a+")
-    if f.writable():
-        fcntl.flock(f, fcntl.LOCK_EX)
-        return f
+if sqlite3.threadsafety == 3 or get_sqlite3_thread_safety() == 3:
+    check_same_thread = False
+else:
+    check_same_thread = True
 
-    return False
+db = sqlite3.connect(
+    "local_admins.db", autocommit=True, check_same_thread=check_same_thread
+)
+cursor = db.cursor()
+sql = cursor.execute
 
-
-def close_file(f):
-    fcntl.flock(f, fcntl.LOCK_UN)
-    f.close()
-
-
-THIRTY_DAYS = 60 * 60 * 24 * 30  # in seconds
+sql(
+    f"CREATE TABLE IF NOT EXISTS local_admins (timestamp INTEGER, ritm TEXT, serial TEXT, name TEXT, username TEXT)"
+)
 
 
 def log(ritm, serial, name, username):
-    global local_admins
-
-    cf = check_file()
-
-    while not cf:
-        time.sleep(0.1)
-        cf = check_file()
-
-    f = open("local_admins.csv", "r")
-    lines = f.read().splitlines(True)
-    f.close()
-    for i, line in enumerate(lines):
-        if time.time() - int(line.split(",")[0]) <= THIRTY_DAYS:
-            with open("local_admins.csv", "w") as f:
-                f.writelines(lines[i:])
-            break
-
-    get_local_admins()
-
-    f = open("local_admins.csv", "a+")
-    row = [str(int(time.time())), ritm, serial, name, username]
-    local_admins = np.vstack([local_admins, row])
-    for r in row[:-1]:
-        f.write(r + ",")
-    f.write(row[-1] + "\n")
-    f.close()
-
-    close_file(cf)
+    sql(
+        "INSERT INTO local_admins (timestamp, ritm, serial, name, username) VALUES (?, ?, ?, ?, ?)",
+        (int(time.time()), ritm, serial, name, username),
+    )
 
 
 def log_thread(ritm, serial, name, username):
@@ -64,47 +54,19 @@ def log_thread(ritm, serial, name, username):
 
 
 def lookup_local_admin(serial):
-    get_local_admins()
-    for line in reversed(local_admins):
-        if str(line[2]).lower() == str(serial).lower():
-            return [str(line[3]), str(line[4])]
-    return ["null"]
-
-
-def get_local_admins():
-    global local_admins
-    try:
-        local_admins = np.genfromtxt("local_admins.csv", dtype=str, delimiter=",")
-        if len(local_admins) < 1:
-            raise Exception
-    except Exception as e:
-        local_admins = np.array([[""] * (ARG_COUNT)])
+    row = sql(
+        "SELECT name, username FROM local_admins WHERE serial = ? ORDER BY ROWID DESC",
+        (serial,),
+    ).fetchone()
+    if row:
+        return row
+    else:
+        return ["null"]
 
 
 if __name__ == "__main__":
-    get_local_admins()
-    print("b", local_admins, len(local_admins))
-    print()
-
-    # log(
-    #     "ewaste",
-    #     "0098765",
-    #     "7/17/2024",
-    #     "ASDF123",
-    #     "3-Pass",
-    #     "Surplus",
-    #     True,
-    # )
-
-    log("0012345", "ASDF123", "Admin Ishan Madan", "admin.imadan1")
-    # print("c", local_admins, len(local_admins))
-    log("0012346", "ASDF124", "Admin Ishan Madan 1", "admin.imadan2")
-    # print("d", local_admins, len(local_admins))
-    log("0012347", "ASDF125", "Admin Ishan Madan 2", "admin.imadan3")
-
-    print("e", local_admins, len(local_admins))
-    print()
-
-    print("f", lookup_local_admin("ASDF125"))
-
-    # reprint(1)
+    # log("0012345", "ASDF123", "Admin Ishan Madan", "admin.imadan1")
+    # log("0012346", "ASDF124", "Admin Ishan Madan 1", "admin.imadan2")
+    # log("0012347", "ASDF125", "Admin Ishan Madan 2", "admin.imadan3")
+    # log("0012348", "ASDF123", "Admin Ishan Madan 3", "admin.imadan4")
+    print(lookup_local_admin("ASDF123"))
