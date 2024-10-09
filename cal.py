@@ -70,7 +70,10 @@ def get_events():
         for event in events:
             if event["summary"] == "Lunch":
                 continue
-
+            
+            #import json
+            #print(json.dumps(event, indent=4))
+            
             e = dict()
             e["time"] = datetime.fromisoformat(str(event["start"]["dateTime"]))
             if e["time"] < datetime.now(timezone.utc) and datetime.fromisoformat(
@@ -110,7 +113,8 @@ def get_events():
 
             # print(event["summary"])
             # print(event["description"])
-            event["description"] = str(event["description"]).replace("<br>", "\n")
+            if "description" in event:
+                event["description"] = str(event["description"]).replace("<br>", "\n")
 
             if "(Inbound) Receive Computer" in str(event["summary"]) or "(Inbound) Give Computer to Depot" in str(event["summary"]):
                 e["dir"] = TYPE_INBOUND_COMPUTER
@@ -140,14 +144,16 @@ def get_events():
                 e["dir"] = TYPE_UNKNOWN
 
             if "loc" not in e:
-                if "depot" in str(event["location"]).lower():
+                if "location" not in event:
+                    e["loc"] = "🗺️❓ Unknown"
+                elif "depot" in str(event["location"]).lower():
                     e["loc"] = "🏠 Depot"
                 else:
                     e["loc"] = "📍 " + str(event["location"]).replace(
                         ", Santa Cruz, CA, USA", ""
                     )
 
-            if TICKET_STRING in str(event["description"]):
+            if "description" in event and TICKET_STRING in str(event["description"]):
                 ticket_start = str(event["description"]).index(TICKET_STRING) + len(
                     TICKET_STRING
                 )
