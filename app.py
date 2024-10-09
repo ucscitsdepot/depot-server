@@ -77,7 +77,7 @@ def server():
                 print_thread(logger)
             elif request.form["label"] == "kiosk":
                 # get the form data
-                kiosk(str(request.form["serial"]), date)
+                kiosk(str(request.form["serial"]), date, str(request.form["destination"]))
                 # print the kiosk label in a thread
                 print_thread(logger)
             elif request.form["label"] == "macsetup":
@@ -173,13 +173,16 @@ def server():
     )
 
 
-@app.route("/kiosk/<serial>/")
-def print_kiosk(serial):
+@app.route("/kiosk/")
+def print_kiosk():
+    serial = request.args.get("serial")
+    destination = request.args.get("destination")
+
     # create kiosk label w/ serial & date
-    kiosk(str(serial).upper(), datetime.now().strftime("%m/%d/%Y"))
+    kiosk(serial.upper(), datetime.now().strftime("%m/%d/%Y"), destination)
     # print the kiosk label in a thread
     print_thread(logger)
-    return "Printed kiosk label for " + str(serial)
+    return "Printed kiosk label for " + serial + " going to " + destination
 
 
 @app.route("/<ritm_num>/")

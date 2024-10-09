@@ -10,22 +10,27 @@ from history import log_thread as log_history
 
 fonts = {}
 
+
 def FONT_REG(size):
     if f"reg_{size}" not in fonts:
         fonts[f"reg_{size}"] = ImageFont.truetype("Roboto-Regular.ttf", size)
     return fonts[f"reg_{size}"]
+
 
 def FONT_ITALIC(size):
     if f"italic_{size}" not in fonts:
         fonts[f"italic_{size}"] = ImageFont.truetype("Roboto-Italic.ttf", size)
     return fonts[f"italic_{size}"]
 
+
 def FONT_BOLD(size):
     if f"bold_{size}" not in fonts:
         fonts[f"bold_{size}"] = ImageFont.truetype("Roboto-Medium.ttf", size)
     return fonts[f"bold_{size}"]
 
+
 FONT_RITM = FONT_REG(350)
+
 
 # find correct textlength to fit in desired size
 # derived from https://stackoverflow.com/questions/58041361/break-long-drawn-text-to-multiple-lines-with-pillow
@@ -161,7 +166,7 @@ def macsetup(
     font = FONT_REG(230)
     name_font = FONT_ITALIC(200)
     small_font = FONT_REG(120)
-    
+
     imgdraw.text((900, 120), ritm, (0, 0, 0), font=ritm_font)
 
     if imgdraw.textlength(dept + "-" + serial[-7:], font) > 1800:
@@ -215,7 +220,7 @@ def notes(ritm: str, sw: str, notes: str):
     imgdraw = ImageDraw.Draw(img)
     ritm_font = FONT_REG(350)
     small_font = FONT_REG(160)
-    
+
     imgdraw.text((920, 120), ritm, (0, 0, 0), font=ritm_font)
 
     if len(sw) > 0:
@@ -253,24 +258,62 @@ def winsetup(
     imgdraw = ImageDraw.Draw(img)
     ritm_font = FONT_REG(350)
     font = FONT_REG(230)
-    name_font = FONT_ITALIC(200)
     small_font = FONT_REG(120)
+    name_font = FONT_ITALIC(200)
+    small_name_font = FONT_ITALIC(120)
+    label_font = FONT_BOLD(220)
 
-    imgdraw.text((930, 120), ritm, (0, 0, 0), font=ritm_font)
-    imgdraw.text((1300, 450), servicetag, (0, 0, 0), font=font)
+    imgdraw.text((100, 70), "RITM" + ritm, (0, 0, 0), font=ritm_font)
+    imgdraw.text((100, 430), "PC Name:", (0, 0, 0), font=label_font)
 
-    if imgdraw.textlength(dept + "-" + servicetag, font) > 2800:
-        imgdraw.text((100, 850), dept + "-" + servicetag, (0, 0, 0), font=small_font)
+    if imgdraw.textlength(dept + "-" + servicetag, font) > 1785:
+        imgdraw.text((1100, 500), dept + "-" + servicetag, (0, 0, 0), font=small_font)
     else:
-        imgdraw.text((100, 850), dept + "-" + servicetag, (0, 0, 0), font=font)
+        imgdraw.text((1100, 430), dept + "-" + servicetag, (0, 0, 0), font=font)
 
-    imgdraw.text((100, 1300), client_name, (0, 0, 0), font=name_font)
-    imgdraw.text((2300, 1500), domain, (0, 0, 0), font=font)
+    imgdraw.text((100, 680), "Full User's Name:", (0, 0, 0), font=label_font)
 
-    if backup is False:
-        imgdraw.text((1200, 2170), "No", (0, 0, 0), font=font)
+    if imgdraw.textlength(client_name, name_font) > 2770:
+        imgdraw.text((100, 910), client_name, (0, 0, 0), font=small_name_font)
+    else:
+        imgdraw.text((100, 910), client_name, (0, 0, 0), font=name_font)
 
-    imgdraw.text((1000, 2400), printers, (0, 0, 0), font=font)
+    def rect(x, y):
+        box_w = 200
+        box_h = 200
+        y += 20
+        imgdraw.rectangle((x, y, x + box_w, y + box_h), None, "black", 10)
+
+    items = [
+        f"BACKUP{' (No)' if not backup else '!!!'}",
+        "BIOS",
+        "Image",
+        "DCU",
+        "Encrypt",
+        "Default SW",
+        "Other SW",
+        f"Domain ({domain})",
+        "Printers",
+    ]
+
+    x_start = 100  # left align
+    y_start = 1130  # top of first row
+    x_pos = x_start
+    y_pos = y_start
+    for text in items:
+        # if text will overflow (w/ a 50px margin)
+        if (
+            text == "Printers"
+            or x_pos + font.getlength(text) + 20 + 250 > img.size[0] - 100
+        ):
+            x_pos = x_start  # start back at beginning of line (left)
+            y_pos += 270  # go down one line
+        imgdraw.text((x_pos, y_pos), text, (0, 0, 0), font=font)  # draw text
+        x_pos += font.getlength(text) + 20  # move x_pos after text w/ 20px margin
+        rect(x_pos, y_pos)  # draw box
+        x_pos += 250  # move x_pos after box w/ some margin
+
+    imgdraw.text((x_pos, y_pos), printers, (0, 0, 0), font=font)
 
     img.save("tmp.png")
 
@@ -281,7 +324,7 @@ def ritm_generic(ritm: str, notes: str):
     imgdraw = ImageDraw.Draw(img)
     ritm_font = FONT_REG(330)
     small_font = FONT_REG(160)
-    
+
     imgdraw.text((860, 25), ritm, (0, 0, 0), font=ritm_font)
 
     if len(notes) > 0:
@@ -296,7 +339,7 @@ def inc_generic(inc: str, notes: str):
     imgdraw = ImageDraw.Draw(img)
     ritm_font = FONT_REG(330)
     small_font = FONT_REG(160)
-    
+
     imgdraw.text((630, 25), inc, (0, 0, 0), font=ritm_font)
 
     if len(notes) > 0:
@@ -305,11 +348,8 @@ def inc_generic(inc: str, notes: str):
     img.save("tmp.png")
 
 
-def kiosk(
-    servicetag: str,
-    date: str,
-):
-    log_history("kiosk", servicetag)
+def kiosk(servicetag: str, date: str, destination: str):
+    log_history("kiosk", servicetag, destination)
     img = Image.open("static/kiosk.png", "r").convert("RGB")
     imgdraw = ImageDraw.Draw(img)
 
@@ -367,6 +407,8 @@ def kiosk(
         font=name_font,
         anchor="rt",
     )
+
+    imgdraw.text((100, y_pos + 40 + 250), destination, (0, 0, 0), font=name_font)
 
     img.save("tmp.png")
 
@@ -473,13 +515,7 @@ if __name__ == "__main__":
     # username(".\\admin.imadan1")
     # process.append(print_label())
     # winsetup(
-    #     "123456",
-    #     "DGE-loaner-___",
-    #     "7PCA52G",
-    #     "__",
-    #     "Ishan Madan",
-    #     False,
-    #     "No",
+    #     "0000000", "ITS", "ASDF123", "AU", "Ishan Madan (imadan1)", False, "No"
     # )
     # process.append(print_label())
     # ritm_generic(
@@ -491,11 +527,11 @@ if __name__ == "__main__":
     #     "the quick brown fox jumped over the lazy dog. the quick brown fox jumped over the lazy dog. the quick brown fox jumped over the lazy dog. the quick brown fox jumped over the lazy dog. the quick brown fox jumped over the lazy dog.",
     # )
 
-    # from datetime import datetime
+    from datetime import datetime
 
-    # date = datetime.now().strftime("%m/%d/%Y")
+    date = datetime.now().strftime("%m/%d/%Y")
     # kiosk("7ZRCMN3", date)
     # kiosk("                  ", "00/00/0000")
     # kiosk("SRVICETAG", date)
-    # kiosk("BCWNLN3", date)
+    kiosk("BCWNLN3", date, "McHenry")
     pass

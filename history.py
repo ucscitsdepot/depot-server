@@ -43,7 +43,7 @@ ARG_COUNT = {
     "winsetup": 7,
     "ritm_generic": 2,
     "inc_generic": 2,
-    "kiosk": 1,
+    "kiosk": 2,
 }
 
 MAX_ARGS = max(ARG_COUNT.values())

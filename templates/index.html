@@ -113,6 +113,15 @@
                     Serial: <input type="text" name="serial" placeholder=""
                         value="{{ data[0] if selected_type=='kiosk' else '' }}">
                     <br>
+                    Destination: <select name="destination">
+                        <option value="McHenry" {{ ("selected" if selected_type=='kiosk' and data[1]=='McHenry' else '' )
+                        | safe }}>McHenry</option>
+                        <option value="Sci&Eng" {{ ("selected" if selected_type=='kiosk' and data[1]=='Sci&Eng' else '' )
+                        | safe }}>Sci&Eng</option>
+                        <option value="Depot (Spare)" {{ ("selected" if selected_type=='kiosk' and data[1]=='Depot (Spare)' else '' )
+                        | safe }}>Depot (Spare)</option>
+                    </select>
+                    <br>
                     <button type="submit" name="submit_kiosk">Print kiosk</button>
                 </form>
             </div>
@@ -249,7 +258,7 @@
 
             <div> <!-- winsetup -->
                 <h2>Winsetup</h2>
-                <img src="{{ url_for('static', filename='winsetup.png') }}">
+                <img src="{{ url_for('static', filename='winsetup_template.png') }}">
                 <form method="post">
                     <input type="hidden" name="label" value="winsetup">
                     RITM: <input type="number" name="ritm" placeholder="0000000" value="{{ data[0] if
