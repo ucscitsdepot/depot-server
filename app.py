@@ -234,6 +234,8 @@ locker_files = {
     "anyconnect_linux": "cisco-secure-client-linux64-5.1.5.65-predeploy-k9.tar.gz",
     "linux_installer": "linux-test.sh",
     "slack_linux": "slack-desktop-4.39.95-amd64.deb",
+    "secureconnect_setup": "cisco_setup.sh",
+    "csc_prelogin": "prelogin.sh",
 }
 
 

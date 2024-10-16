@@ -14,8 +14,16 @@
             padding: 0;
         }
 
-        #list, #current {
-            width: 49vw;
+        #list {
+            width: 69vw;
+        }
+
+        #current {
+            width: 29vw;
+        }
+
+        #list,
+        #current {
             height: 99vh;
             display: flex;
             flex-direction: column;
@@ -24,7 +32,7 @@
             align-items: flex-start;
             align-content: flex-start;
             overflow: hidden;
-	    column-gap: 25vw;
+            column-gap: 25vw;
             margin: 0;
             padding: 0.5vh 0.5vw 0.5vh 0.5vw;
         }
@@ -33,13 +41,13 @@
             display: flex;
             flex-direction: row;
             justify-content: space-between;
-            align-items: stretch;
-            align-content: stretch;
+            align-items: flex-start;
+            align-content: flex-start;
+            border-radius: 10px;
         }
 
         .event {
             padding: 1px;
-            border-radius: 10px;
             min-width: 0;
         }
 
@@ -51,19 +59,19 @@
             min-width: 190px;
         }
 
-	#types {
-	    height: 11em;
-	    width: 100%;
-	    display: flex;
-	    flex-direction: column;
-	    flex-wrap: wrap;
-	    justify-content: flex-start;
-	    align-items: flex-start;
-	    align-content: space-between;
-	    overflow: hidden;
-	    margin: 0;
-	    padding: 0;
-	}
+        #types {
+            /* height: 11em; */
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            flex-wrap: wrap;
+            justify-content: flex-start;
+            align-items: flex-start;
+            align-content: space-between;
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+        }
 
         h1 {
             margin: 0.15em;
@@ -75,9 +83,9 @@
             font-size: 2em;
         }
 
-	hr {
-	    width: 100%
-	}
+        hr {
+            width: 100%
+        }
     </style>
 </head>
 
@@ -89,33 +97,38 @@
         </div>
         {% endif %}
         {% for event in events %}
-		{% if event["day"] not in ["Today", ""] %}
-		<hr>
-		{% endif %}
-        <div class="container">
-		    <h1 class="day">{{ event["day"] }}</h1>
+        {% if event["day"] not in ["Today", ""] %}
+        <hr>
+        {% endif %}
+        <div class="container" {% if event["now"] %} style="border: 5px solid red;" {% endif %}>
             <div>
-                <h1 class="time">{{ event["time"] }}</h1>
-                <h1 class="dir">{{ event["dir"] }}</h1>
+                <h1 class="day" {% if event["now"] %} style="font-size: 3em;" {% endif %}>{{ event["day"] }}</h1>
             </div>
-            <div class="event" {% if event["now"] %} style="border: 5px solid red;" {% endif %}>
-                <h1>{{ event["name"] }} ({{ event["ticket"] }}) </h1>
-                <h2>{{ event["loc"] }}</h2>
+            <div>
+                <h1 class="time" {% if event["now"] %} style="font-size: 3em;" {% endif %}>{{ event["time"] }}</h1>
+                <h1 class="dir" {% if event["now"] %} style="font-size: 3em;" {% endif %}>{{ event["dir"] }}</h1>
+            </div>
+            {% if event["name"] == "Ryan Meckel" %}
+            <img src="{{ url_for('static', filename='ryan.jpeg') }}" style="height: 7.5em; float: left; margin: 1em;">
+            {% endif %}
+            <div class="event">
+                <h1 {% if event["now"] %} style="font-size: 3em;" {% endif %}>{{ event["name"] }} ({{ event["ticket"] }}) </h1>
+                <h2 {% if event["now"] %} style="font-size: 2.5em;" {% endif %}>{{ event["loc"] }}</h2>
             </div>
         </div>
         {% endfor %}
     </div>
-    <div id="current">
-	<div style="width: 100%">
-	    <h1>Types:</h1>
-	    <div id="types">
-	        <h2>📦: Inbound Computer</h2>
-	        <h2>🖥️✨: Outbound</h2>
-	        <h2>🔥🗑️🔥: Inbound Ewaste</h2>
-	        <h2>🚚: Ewaste (to receiving)</h2>
-	        <h2>⁉️: Unknown</h2>
-	    </div>
-	</div>
+<div id="current">
+        <div width="100%">
+            <h1>Types:</h1>
+            <div id="types">
+                <h2>📦: Inbound Computer</h2>
+                <h2>🖥️✨: Outbound</h2>
+                <h2>🔥🗑️🔥: Inbound Ewaste</h2>
+                <h2>🚚: Ewaste (to receiving)</h2>
+                <h2>⁉️: Unknown</h2>
+            </div>
+        </div>
     </div>
 </body>
 
