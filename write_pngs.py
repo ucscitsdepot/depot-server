@@ -428,8 +428,6 @@ except:
 model = "QL-570"
 backend = "linux_kernel"
 label_id = "62"
-qlr = BrotherQLRaster(model)
-qlr.exception_on_warning = True
 
 
 def print_label(logger, file="tmp.png"):
@@ -443,6 +441,8 @@ def print_label(logger, file="tmp.png"):
     # temp file to disable printing
     if "NOPRINT" not in os.listdir():
         # call printer library - this is blocking but non-exclusive, so multiple simultaneous calls to this will just cause one to succeed and the rest to error
+        qlr = BrotherQLRaster(model)
+        qlr.exception_on_warning = True
         instructions = convert(qlr=qlr, images=[file], label=label_id)
         send(
             instructions=instructions,
