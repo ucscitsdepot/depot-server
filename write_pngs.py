@@ -450,18 +450,6 @@ def print_label(logger, file="tmp.png"):
             backend_identifier=backend,
             blocking=True,
         )
-        # p = subprocess.run(
-        #     ["brother_ql", "-m", "QL-570", "-p", address, "print", "-l", "62", file],
-        #     capture_output=True,
-        # )
-        # # while printer proces is still running, delay
-        # while type(p) is not subprocess.CompletedProcess:
-        #     time.sleep(0.05)
-
-        # if p.stdout:
-        #     logger.info(f"write_pngs.print_label: brother_ql stdout: {p.stdout}")
-        # if p.stderr:
-        #     logger.info(f"write_pngs.print_label: brother_ql stderr: {p.stderr}")
 
     # release lock on tmp file
     fcntl.flock(f, fcntl.LOCK_UN)
