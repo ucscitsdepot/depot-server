@@ -77,7 +77,9 @@ def server():
                 print_thread(logger)
             elif request.form["label"] == "kiosk":
                 # get the form data
-                kiosk(str(request.form["serial"]), date, str(request.form["destination"]))
+                kiosk(
+                    str(request.form["serial"]), date, str(request.form["destination"])
+                )
                 # print the kiosk label in a thread
                 print_thread(logger)
             elif request.form["label"] == "macsetup":
@@ -162,7 +164,7 @@ def server():
 
         h = get_history(23)
     except Exception as e:
-        logger.error(e)
+        logger.error(f"app.server: {e}")
 
     return render_template(
         "index.html",
@@ -188,13 +190,16 @@ def print_kiosk():
 @app.route("/<ritm_num>/")
 def ritm_link(ritm_num):
     try:
+        if ritm_num == "":
+            return redirect(url_for("server"))
+
         ritm_text = str("RITM%07d" % int(re.sub("[^0-9]", "", ritm_num)))
         return redirect(
             "https://ucsc.service-now.com/sc_req_item.do?sysparm_query=number="
             + ritm_text
         )
     except Exception as e:
-        logger.error(e)
+        logger.error(f"app.ritm_link: {e}")
         return redirect(url_for("server"))
 
 
@@ -206,7 +211,9 @@ def local_admin(serial):
 @app.route("/calendar/")
 def calendar():
     days, events = cal.get_events()
-    return render_template("calendar.html", days=days, events=events, today="Today" in days)
+    return render_template(
+        "calendar.html", days=days, events=events, today="Today" in days
+    )
 
 
 @app.route("/ip-db/")
@@ -214,7 +221,7 @@ def ip_db():
     name = request.args.get("name")
     ip = request.args.get("ip")
 
-    logger.info(f"IP db: name: {name}, ip: {ip}")
+    logger.info(f"app.ip_db: name = '{name}', ip = '{ip}'")
 
     db_path = os.path.dirname(os.path.abspath(__file__)) + "/ip_db"
 

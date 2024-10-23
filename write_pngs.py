@@ -4,6 +4,9 @@ import subprocess
 import time
 from threading import Thread
 
+from brother_ql.backends.helpers import send
+from brother_ql.conversion import convert
+from brother_ql.raster import BrotherQLRaster
 from PIL import Image, ImageDraw, ImageFont
 
 from history import log_thread as log_history
@@ -416,11 +419,17 @@ def kiosk(servicetag: str, date: str, destination: str):
 # file path to lock on, the exact path is not important as long as it's identical across processes
 active_write_path = "/tmp/active_write_print"
 
-# device address for printer
+# printer details
 try:
     address = open("address").readline().strip()
 except:
     address = "file:///dev/usb/lp0"
+
+model = "QL-570"
+backend = "linux_kernel"
+label_id = "62"
+qlr = BrotherQLRaster(model)
+qlr.exception_on_warning = True
 
 
 def print_label(logger, file="tmp.png"):
@@ -434,18 +443,25 @@ def print_label(logger, file="tmp.png"):
     # temp file to disable printing
     if "NOPRINT" not in os.listdir():
         # call printer library - this is blocking but non-exclusive, so multiple simultaneous calls to this will just cause one to succeed and the rest to error
-        p = subprocess.run(
-            ["brother_ql", "-m", "QL-570", "-p", address, "print", "-l", "62", file],
-            capture_output=True,
+        instructions = convert(qlr=qlr, images=[file], label=label_id)
+        send(
+            instructions=instructions,
+            printer_identifier=address,
+            backend_identifier=backend,
+            blocking=True,
         )
-        # while printer proces is still running, delay
-        while type(p) is not subprocess.CompletedProcess:
-            time.sleep(0.05)
+        # p = subprocess.run(
+        #     ["brother_ql", "-m", "QL-570", "-p", address, "print", "-l", "62", file],
+        #     capture_output=True,
+        # )
+        # # while printer proces is still running, delay
+        # while type(p) is not subprocess.CompletedProcess:
+        #     time.sleep(0.05)
 
-        if p.stdout:
-            logger.info(f"brother_ql stdout: {p.stdout}")
-        if p.stderr:
-            logger.info(f"brother_ql stderr: {p.stderr}")
+        # if p.stdout:
+        #     logger.info(f"write_pngs.print_label: brother_ql stdout: {p.stdout}")
+        # if p.stderr:
+        #     logger.info(f"write_pngs.print_label: brother_ql stderr: {p.stderr}")
 
     # release lock on tmp file
     fcntl.flock(f, fcntl.LOCK_UN)

@@ -172,7 +172,7 @@ def labelExecute(label):
 
 
 if __name__ == "__main__":
-    logger.info("Starting...")
+    logger.info("parse: Starting...")
     while True:
         try:
             # get gmail account's username and password from environment variables
@@ -201,7 +201,7 @@ if __name__ == "__main__":
                     # print("==========================================\n")
                     if selected_mails[0].split():
                         logger.info(
-                            f"Total Intake Labels: {len(selected_mails[0].split())}"
+                            f"parse: {len(selected_mails[0].split())} intake labels found"
                         )
 
                     labels = []
@@ -350,10 +350,10 @@ if __name__ == "__main__":
                                     label.returnLoc = None
 
                         if SVC:
-                            logger.info("SVC, skipping")
+                            logger.info("parse: SVC, skipping")
                             continue
                         # print text of label to console
-                        logger.info(label)
+                        logger.info(f"parse: label to print: {label}")
                         
                         # setup label for printing & print it
                         labelExecute(label)
@@ -370,7 +370,7 @@ if __name__ == "__main__":
                     # print("==========================================\n")
                     if selected_mails[0].split():
                         logger.info(
-                            f"Total Ewaste Labels: {len(selected_mails[0].split())}"
+                            f"parse: {len(selected_mails[0].split())} ewaste labels found"
                         )
 
                     labels = []
@@ -425,22 +425,21 @@ if __name__ == "__main__":
                                 label.setJamf(field.replace("Jamf Status: ", ""))
 
                         # print text of label to console
-                        logger.info(label)
+                        logger.info(f"parse: label to print: {label}")
                         # setup label for printing & print it
                         labelExecute(label)
                         # print("==========================================\n")
 
                 except imaplib.IMAP4.abort as e:
-                    # print("Could not get mail from folder: ", e)
-                    logger.error(f"Could not get mail from folder: {e}")
+                    logger.error(f"parse: could not get mail from folder: {e}")
                     if "socket error" in str(e):
                         # gmail will throw a socket error if we have been logged in for too long.
                         login_again = True
 
                 if print_this_round:
-                    logger.info("Done")
+                    logger.info("parse: done")
 
                 # delay 1 second between runs
                 time.sleep(1)
         except Exception as e:
-            logger.error(e)
+            logger.error(f"parse: {e}")

@@ -29,7 +29,7 @@ def setup_logs(name="root", path=str(os.path.abspath(__file__)), path_only=False
 
     # create file handler which logs debug messages (and above - everything)
     fh = logging.FileHandler(log_path)
-    fh.setLevel(logging.DEBUG)
+    fh.setLevel(logging.INFO)
 
     # create console handler which only logs warnings (and above)
     ch = logging.StreamHandler()

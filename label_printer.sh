@@ -1,6 +1,6 @@
 #!/bin/bash
 
-pkill python
+pkill parse
 pkill gunicorn
 
 cd /home/depot/Auto-Label-Generator
