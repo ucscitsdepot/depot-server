@@ -41,7 +41,6 @@ def get_events():
         service = build("calendar", "v3", credentials=creds)
 
         # Call the Calendar API
-        # TODO: pushed back 2 days
         now = (
             datetime.now()
             .replace(hour=0, minute=0, second=0, microsecond=0)
@@ -79,17 +78,21 @@ def get_events():
             if e["time"] < datetime.now(timezone.utc) and datetime.fromisoformat(
                 str(event["end"]["dateTime"])
             ) > datetime.now(timezone.utc):
-                e["now"] = True
+                e["now"] = 0
             elif datetime.fromisoformat(str(event["end"]["dateTime"])) < datetime.now(
                 timezone.utc
-            ) or datetime.fromisoformat(str(event["end"]["dateTime"])) > datetime.now(
+            ):
+                e["now"] = -1
+            elif datetime.fromisoformat(str(event["end"]["dateTime"])) > datetime.now(
                 timezone.utc
             ) + timedelta(
                 days=7
             ):
                 continue
+            elif appointments[-1]["now"] > 0:
+                e["now"] = 1
             else:
-                e["now"] = False
+                e["now"] = 2
 
             if e["time"].date() == date.today():
                 e["day"] = "Today"
