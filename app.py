@@ -243,6 +243,11 @@ locker_files = {
     "slack_linux": "slack-desktop-4.39.95-amd64.deb",
     "secureconnect_setup": "cisco_setup.sh",
     "csc_prelogin": "prelogin.sh",
+    "fireeyesh": "fireeye.sh",
+    "fireeyepkg": "fireeye.tgz",
+    "sentinalonesh": "sentinal-one.sh",
+    "sentinalonepkg": "SentinelAgent_linux_x86_64_v24_3_1_29.deb",
+    
 }
 
 

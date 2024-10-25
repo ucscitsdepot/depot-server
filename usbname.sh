@@ -12,4 +12,13 @@ getdevice() {
     done
 }
 
-echo "$(getdevice 04f9:2028)"
+echo "$(getdevice 21c4:0809)"
+# echo ""
+# echo "$(getdevice 1d6b:0003)"
+# echo ""
+# echo "$(getdevice 8087:0a2b)"
+# echo ""
+# echo "$(getdevice 04f9:2028)"
+# echo ""
+# echo "$(getdevice 1d6b:0002)"
+# echo ""
