@@ -18,6 +18,11 @@ TYPE_EWASTE = "🚚"
 
 TICKET_STRING = "RITM or INC #\n--------------------\n"
 
+EARLIER = -1
+NOW = 0
+LATER = 1
+LATER_LINE = 2
+
 creds = None
 # The file token.json stores the user's access and refresh tokens, and is
 # created automatically when the authorization flow completes for the first
@@ -44,7 +49,7 @@ def get_events():
         now = (
             datetime.now()
             .replace(hour=0, minute=0, second=0, microsecond=0)
-            .astimezone(timezone.utc)
+            .astimezone(timezone.utc) - timedelta(days=1)
         ).isoformat()
 
         events_result = (
@@ -64,35 +69,40 @@ def get_events():
         appointments = []
 
         current_day = None
+        now_index = None
 
         # Prints the start and name of the next 10 events
         for event in events:
             if event["summary"] == "Lunch":
                 continue
             
-            #import json
-            #print(json.dumps(event, indent=4))
-            
             e = dict()
             e["time"] = datetime.fromisoformat(str(event["start"]["dateTime"]))
             if e["time"] < datetime.now(timezone.utc) and datetime.fromisoformat(
                 str(event["end"]["dateTime"])
             ) > datetime.now(timezone.utc):
-                e["now"] = 0
+                # if appointment is now, indicate NOW to draw a box around it
+                e["now"] = NOW
+                now_index = len(appointments)
             elif datetime.fromisoformat(str(event["end"]["dateTime"])) < datetime.now(
                 timezone.utc
             ):
-                e["now"] = -1
+                # if appointment was earlier, should be above NOW box/line
+                e["now"] = EARLIER
             elif datetime.fromisoformat(str(event["end"]["dateTime"])) > datetime.now(
                 timezone.utc
             ) + timedelta(
                 days=7
             ):
+                # if appointment is more than 7 days away, do not include it
                 continue
-            elif appointments[-1]["now"] > 0:
-                e["now"] = 1
+            elif appointments and appointments[-1]["now"] >= NOW:
+                # if this is not the first appointment now (there was already a NOW/LATER/LATER_LINE appointment before this one), generic LATER
+                e["now"] = LATER
             else:
-                e["now"] = 2
+                # if this is the first appointment after now (and there was no NOW appointment), mark as LATER_LINE to put the red line above it
+                e["now"] = LATER_LINE
+                now_index = len(appointments)
 
             if e["time"].date() == date.today():
                 e["day"] = "Today"
@@ -107,10 +117,10 @@ def get_events():
                 e["day"] = e["time"].strftime("%b %d")
                 e["time"] = e["time"].strftime("%I:%M %p")
 
-            if e["day"] == current_day:
-                e["day"] = ""
-            else:
-                current_day = e["day"]
+            # if e["day"] == current_day:
+            #     e["day"] = ""
+            # else:
+            #     current_day = e["day"]
 
             e["name"] = str(event["summary"]).split(" -- ")[-1]
 
@@ -171,10 +181,19 @@ def get_events():
             else:
                 e["ticket"] = "No ticket"
 
-            print(e)
+            e["first"] = False
             appointments.append(e)
 
-        appointments = appointments
+        appointments = appointments[max(0, now_index - 3):]
+        appointments[0]["first"] = True
+        
+        current_day = None
+        for appt in appointments:
+            if appt["day"] == current_day:
+                appt["day"] = ""
+            else:
+                current_day = appt["day"]
+
         days = [e["day"] for e in appointments]
 
         return days, appointments

@@ -56,7 +56,7 @@
         }
 
         .time {
-            min-width: 190px;
+            min-width: 210px;
         }
 
         #types {
@@ -87,6 +87,7 @@
             width: 100%
         }
     </style>
+
 </head>
 
 <body>
@@ -97,31 +98,31 @@
         </div>
         {% endif %}
         {% for event in events %}
-        {% if event["day"] not in ["Today", ""] %}
-        <!-- <hr> -->
+
         {% if event["now"] == 2 %}
-        <hr style="color: red;"
+        <hr style="border: none; height: 5px; color: red; background-color: red;">
+        {% elif event["day"] != "" and not event["first"] %}
+        <hr>
         {% endif %}
-        {% endif %}
-        <div class="container" {% if event["now"] == 0 %} style="border: 5px solid red;" {% endif %}>
+        <div class="container" {% if event["now"]==0 %} style="border: 5px solid red;" {% endif %}>
             <div>
-                <h1 class="day" {% if event["now"] == 0 %} style="font-size: 3em;" {% endif %}>{{ event["day"] }}</h1>
+                <h1 class="day" {% if event["now"]==0 %} style="font-size: 3em;" {% endif %}>{{ event["day"] }}</h1>
             </div>
             <div>
-                <h1 class="time" {% if event["now"] == 0 %} style="font-size: 3em;" {% endif %}>{{ event["time"] }}</h1>
-                <h1 class="dir" {% if event["now"] == 0 %} style="font-size: 3em;" {% endif %}>{{ event["dir"] }}</h1>
+                <h1 class="time" {% if event["now"]==0 %} style="font-size: 3em;" {% endif %}>{{ event["time"] }}</h1>
+                <h1 class="dir" {% if event["now"]==0 %} style="font-size: 3em;" {% endif %}>{{ event["dir"] }}</h1>
             </div>
             {% if event["name"] == "Ryan Meckel" %}
             <img src="{{ url_for('static', filename='ryan2.jpeg') }}" style="height: 7.5em; float: left; margin: 1em;">
             {% endif %}
             <div class="event">
-                <h1 {% if event["now"] == 0 %} style="font-size: 3em;" {% endif %}>{{ event["name"] }} ({{ event["ticket"] }}) </h1>
-                <h2 {% if event["now"] == 0 %} style="font-size: 2.5em;" {% endif %}>{{ event["loc"] }}</h2>
+                <h1 {% if event["now"]==0 %} style="font-size: 3em;" {% endif %}>{{ event["name"] }} ({{ event["ticket"] }}) </h1>
+                <h2 {% if event["now"]==0 %} style="font-size: 2.5em;" {% endif %}>{{ event["loc"] }}</h2>
             </div>
         </div>
         {% endfor %}
     </div>
-<div id="current">
+    <div id="current">
         <div width="100%">
             <h1>Types:</h1>
             <div id="types">
@@ -132,7 +133,37 @@
                 <h2>⁉️: Unknown</h2>
             </div>
         </div>
+        <div width="100%">
+            <h1 style="font-size: 5em; text-align: right;" id="clock" onload="showTime()"></h1>
+        </div>
     </div>
 </body>
+<script>
+    function showTime() {
+        let date = new Date();
+        var h = date.getHours();
+        var m = date.getMinutes();
+        var s = date.getSeconds();
+        var session = "AM";
+
+        if (h > 12) {
+            h -= 12;
+            session = "PM";
+        } else if (h == 0) {
+            h = 12;
+        }
+
+        h = (h < 10) ? "0" + h : h;
+        m = (m < 10) ? "0" + m : m;
+
+        let time = h + ":" + m + " " + session;
+        document.getElementById("clock").innerText = time;
+        document.getElementById("clock").textContent = time;
+
+        setTimeout(showTime, 1000);
+    }
+
+    showTime();
+</script>
 
 </html>
