@@ -1,12 +1,12 @@
-# Auto-Label-Generator
+# depot-server
 Automatic Label Printer for the ITS Depot
 
 ## First Setup:
-  Clone this repo into the home folder (ex: /home/depot/Auto-Label-Generator)
+  Clone this repo into the home folder (ex: /home/depot/depot-server)
   ```
   sudo apt install python3-pip  # install pip (if not already installed)
   pip install brother_ql  # install the label printer driver/API
-  cd Auto-Label-Generator  # change directory into the label printer repository
+  cd depot-server  # change directory into the label printer repository
   ~/.local/bin/brother_ql -b linux_kernel discover | grep 'file' | tr -d [:cntrl:] > address  # copy the printer address into the "address" file
   sudo ./usb_perms.sh  # make the printer's usb address writable
   export PATH="$PATH:/home/depot/.local/bin" >> ~/.bashrc  # add the brother_ql command to the PATH, so it can be executed normally
@@ -20,7 +20,7 @@ Automatic Label Printer for the ITS Depot
   ```
 
 ## Activate:
-  `./label_printer.sh`
+  `./start.sh`
   
 ## Usage:
   1. Navigate to Service Now RITM

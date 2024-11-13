@@ -3,7 +3,7 @@
 pkill python
 pkill gunicorn
 
-cd /home/depot/Auto-Label-Generator
+cd /home/depot/depot-server
 source venv/bin/activate
 
 parse_cmd="python parse.py"
