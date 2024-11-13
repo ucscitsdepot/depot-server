@@ -8,13 +8,13 @@ def setup_logs(name="root", path=str(os.path.abspath(__file__)), path_only=False
     now = datetime.now()
     path += f"/logs/{name}"
 
-    log_path = path + f"/{now.strftime("%Y-%m-%d")}"
+    log_path = path + f"/{now.strftime('%Y-%m-%d')}"
 
     # Create a new directory for logs if it doesn't exist
     if not os.path.exists(log_path):
         os.makedirs(log_path)
 
-    log_path += f"/{now.strftime("%Y-%m-%d %H:%M:%S")}.log"
+    log_path += f"/{now.strftime('%Y-%m-%d %H:%M:%S')}.log"
 
     if os.path.exists(path + "/latest.log"):
         os.remove(path + "/latest.log")

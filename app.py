@@ -190,7 +190,7 @@ def print_kiosk():
 @app.route("/<ritm_num>/")
 def ritm_link(ritm_num):
     try:
-        if ritm_num == "":
+        if not ritm_num or not re.sub("[^0-9]", "", ritm_num).isnumeric():
             return redirect(url_for("server"))
 
         ritm_text = str("RITM%07d" % int(re.sub("[^0-9]", "", ritm_num)))
