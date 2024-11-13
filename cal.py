@@ -73,7 +73,7 @@ def get_events():
 
         # Prints the start and name of the next 10 events
         for event in events:
-            if event["summary"] == "Lunch":
+            if "summary" in event and event["summary"] == "Lunch":
                 continue
             
             e = dict()
@@ -122,20 +122,23 @@ def get_events():
             # else:
             #     current_day = e["day"]
 
-            e["name"] = str(event["summary"]).split(" -- ")[-1]
+            if "summary" in event:
+                e["name"] = str(event["summary"]).split(" -- ")[-1]
+            else:
+                e["name"] = "(No title)"
 
             # print(event["summary"])
             # print(event["description"])
             if "description" in event:
                 event["description"] = str(event["description"]).replace("<br>", "\n")
 
-            if "(Inbound) Receive Computer" in str(event["summary"]) or "(Inbound) Give Computer to Depot" in str(event["summary"]):
+            if "summary" in event and ("(Inbound) Receive Computer" in str(event["summary"]) or "(Inbound) Give Computer to Depot" in str(event["summary"])):
                 e["dir"] = TYPE_INBOUND_COMPUTER
-            elif "(Inbound) Receive e-Waste" in str(event["summary"]):
+            elif "summary" in event and "(Inbound) Receive e-Waste" in str(event["summary"]):
                 e["dir"] = TYPE_INBOUND_EWASTE
-            elif "(Outbound)" in str(event["summary"]):
+            elif "summary" in event and "(Outbound)" in str(event["summary"]):
                 e["dir"] = TYPE_OUTBOUND
-            elif "Coming to Depot (Pickup or Dropoff)" in str(event["summary"]):
+            elif "summary" in event and "Coming to Depot (Pickup or Dropoff)" in str(event["summary"]):
                 e["loc"] = "🏠 Depot"
                 if (
                     "Type of appointment\n--------------------\nComputer Setup (Dropoff)"
@@ -149,7 +152,7 @@ def get_events():
                     e["dir"] = TYPE_OUTBOUND
                 else:
                     e["dir"] = TYPE_UNKNOWN
-            elif "e-waste to receiving" in str(event["summary"]):
+            elif "summary" in event and "e-waste to receiving" in str(event["summary"]):
                 e["name"] = "E-waste to Receiving"
                 e["loc"] = "🚚 Barn H"
                 e["dir"] = TYPE_EWASTE
