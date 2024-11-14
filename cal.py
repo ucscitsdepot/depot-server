@@ -49,7 +49,8 @@ def get_events():
         now = (
             datetime.now()
             .replace(hour=0, minute=0, second=0, microsecond=0)
-            .astimezone(timezone.utc) - timedelta(days=1)
+            .astimezone(timezone.utc)
+            - timedelta(days=1)
         ).isoformat()
 
         events_result = (
@@ -75,7 +76,7 @@ def get_events():
         for event in events:
             if "summary" in event and event["summary"] == "Lunch":
                 continue
-            
+
             e = dict()
             e["time"] = datetime.fromisoformat(str(event["start"]["dateTime"]))
             if e["time"] < datetime.now(timezone.utc) and datetime.fromisoformat(
@@ -91,9 +92,7 @@ def get_events():
                 e["now"] = EARLIER
             elif datetime.fromisoformat(str(event["end"]["dateTime"])) > datetime.now(
                 timezone.utc
-            ) + timedelta(
-                days=7
-            ):
+            ) + timedelta(days=7):
                 # if appointment is more than 7 days away, do not include it
                 continue
             elif appointments and appointments[-1]["now"] >= NOW:
@@ -132,13 +131,20 @@ def get_events():
             if "description" in event:
                 event["description"] = str(event["description"]).replace("<br>", "\n")
 
-            if "summary" in event and ("(Inbound) Receive Computer" in str(event["summary"]) or "(Inbound) Give Computer to Depot" in str(event["summary"])):
+            if "summary" in event and (
+                "(Inbound) Receive Computer" in str(event["summary"])
+                or "(Inbound) Give Computer to Depot" in str(event["summary"])
+            ):
                 e["dir"] = TYPE_INBOUND_COMPUTER
-            elif "summary" in event and "(Inbound) Receive e-Waste" in str(event["summary"]):
+            elif "summary" in event and "(Inbound) Receive e-Waste" in str(
+                event["summary"]
+            ):
                 e["dir"] = TYPE_INBOUND_EWASTE
             elif "summary" in event and "(Outbound)" in str(event["summary"]):
                 e["dir"] = TYPE_OUTBOUND
-            elif "summary" in event and "Coming to Depot (Pickup or Dropoff)" in str(event["summary"]):
+            elif "summary" in event and "Coming to Depot (Pickup or Dropoff)" in str(
+                event["summary"]
+            ):
                 e["loc"] = "🏠 Depot"
                 if (
                     "Type of appointment\n--------------------\nComputer Setup (Dropoff)"
@@ -187,9 +193,9 @@ def get_events():
             e["first"] = False
             appointments.append(e)
 
-        appointments = appointments[max(0, now_index - 3):]
+        appointments = appointments[max(0, now_index - 3) :]
         appointments[0]["first"] = True
-        
+
         current_day = None
         for appt in appointments:
             if appt["day"] == current_day:

@@ -247,7 +247,6 @@ locker_files = {
     "fireeyepkg": "fireeye.tgz",
     "sentinalonesh": "sentinal-one.sh",
     "sentinalonepkg": "SentinelAgent_linux_x86_64_v24_3_1_29.deb",
-    
 }
 
 

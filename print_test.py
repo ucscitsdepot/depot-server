@@ -12,4 +12,9 @@ qlr = BrotherQLRaster(model)
 qlr.exception_on_warning = True
 
 instructions = convert(qlr=qlr, images=images, label=label)
-send(instructions=instructions, printer_identifier=printer, backend_identifier=backend, blocking=True)
+send(
+    instructions=instructions,
+    printer_identifier=printer,
+    backend_identifier=backend,
+    blocking=True,
+)

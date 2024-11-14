@@ -11,14 +11,14 @@ from datetime import datetime
 # .env file not included in git repo for obvious reasons (: i've been using scp to transfer it between computers
 from dotenv import load_dotenv
 
+import log
 from local_admins import log_thread as log_admin
-from log import setup_logs
 
 # Change directory to current file location
 path = os.path.dirname(os.path.abspath(__file__))
 os.chdir(path)
 
-logger = setup_logs("parse", str(path))
+logger = log.setup_logs("parse", log.INFO)
 
 # import Ewaste/Label classes, all functions to output png files
 from ewaste import Ewaste
@@ -354,7 +354,7 @@ if __name__ == "__main__":
                             continue
                         # print text of label to console
                         logger.info(f"parse: label to print: {label}")
-                        
+
                         # setup label for printing & print it
                         labelExecute(label)
                         # print("==========================================\n")

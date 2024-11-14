@@ -12,3 +12,4 @@ credentials.json
 token.json
 /static/lockers/*
 /ip_db
+/.vscode

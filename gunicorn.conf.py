@@ -4,7 +4,7 @@
 import multiprocessing
 import os
 
-from log import setup_logs
+import log
 
 max_requests = 1000
 max_requests_jitter = 50
@@ -14,7 +14,7 @@ path = os.path.dirname(os.path.abspath(__file__))
 os.chdir(path)
 
 # Set log path using timestamp
-log_path = setup_logs("ui", path, True)
+log_path = log.setup_logs("ui", log.NOTSET, path_only=True)
 
 errorlog = log_path
 accesslog = log_path

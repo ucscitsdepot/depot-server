@@ -1,47 +1,108 @@
+import datetime
 import logging
 import os
-from datetime import datetime
+from logging.handlers import RotatingFileHandler
+
+CRITICAL = logging.CRITICAL
+FATAL = logging.FATAL
+ERROR = logging.ERROR
+WARNING = logging.WARNING
+WARN = logging.WARN
+INFO = logging.INFO
+DEBUG = logging.DEBUG
+NOTSET = logging.NOTSET
+
+loggers = {}
+file_handlers = {}
 
 
-def setup_logs(name="root", path=str(os.path.abspath(__file__)), path_only=False):
-    # get date & datetime strings
-    now = datetime.now()
-    path += f"/logs/{name}"
+def setup_logs(
+    name: str,
+    level: int = INFO,
+    path_only=False,
+    additional_handlers: list[tuple[str, int]] = [],
+):
+    if name in loggers and not path_only:
+        return loggers[name]
 
-    log_path = path + f"/{now.strftime('%Y-%m-%d')}"
+    # Change directory to repository root
+    logs_path = os.path.abspath(
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), "logs")
+    )
 
-    # Create a new directory for logs if it doesn't exist
-    if not os.path.exists(log_path):
-        os.makedirs(log_path)
-
-    log_path += f"/{now.strftime('%Y-%m-%d %H:%M:%S')}.log"
-
-    if os.path.exists(path + "/latest.log"):
-        os.remove(path + "/latest.log")
-    os.symlink(log_path, path + "/latest.log")
+    timestamp = datetime.datetime.now()
+    folder = timestamp.strftime("%Y-%m-%d")
+    filename = timestamp.strftime("%Y-%m-%d %H:%M:%S")
 
     if path_only:
-        return log_path
-    
-    # create new logger with all levels
-    logger = logging.getLogger("root")
-    logger.setLevel(logging.DEBUG)
+        # check for and remove existing latest symlink
+        if os.path.islink(
+            os.path.join(logs_path, name, "latest.log")
+        ) or os.path.exists(os.path.join(logs_path, name, "latest.log")):
+            os.remove(os.path.join(logs_path, name, "latest.log"))
 
-    # create file handler which logs debug messages (and above - everything)
-    fh = logging.FileHandler(log_path)
-    fh.setLevel(logging.INFO)
+        # Create a new symlink to the latest log file
+        os.symlink(
+            os.path.join(logs_path, name, folder, filename + ".log"),
+            os.path.join(logs_path, name, "latest.log"),
+        )
+        return os.path.join(logs_path, name, folder, filename + ".log")
+
+    # create new logger with all levels
+    logger = logging.getLogger(name)
+    logger.setLevel(DEBUG)
+
+    # create formatter
+    formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s: %(message)s")
+
+    # create list of handlers
+    handlers = []
+
+    additional_handlers.append((name, level))
+
+    for h_name, h_level in additional_handlers:
+        if h_name in file_handlers:
+            handlers.append(file_handlers[h_name])
+        else:
+            # Create a new directory for file handler if it doesn't exist
+            if not os.path.exists(os.path.join(logs_path, h_name, folder)):
+                os.makedirs(os.path.join(logs_path, h_name, folder))
+
+            fh = logging.FileHandler(
+                os.path.join(logs_path, h_name, folder, filename + ".log")
+            )
+            # set the level of the file handler (info by default) and the formatter
+            fh.setLevel(h_level)
+            fh.setFormatter(formatter)
+            # add the file handler to the list of handlers for this logger
+            handlers.append(fh)
+            # add the file handler to the list of additional handlers
+            file_handlers[h_name] = fh
+
+            # check for and remove existing latest symlink
+            if os.path.islink(
+                os.path.join(logs_path, h_name, "latest.log")
+            ) or os.path.exists(os.path.join(logs_path, h_name, "latest.log")):
+                os.remove(os.path.join(logs_path, h_name, "latest.log"))
+
+            # Create a new symlink to the latest log file
+            os.symlink(
+                os.path.join(logs_path, h_name, folder, filename + ".log"),
+                os.path.join(logs_path, h_name, "latest.log"),
+            )
 
     # create console handler which only logs warnings (and above)
     ch = logging.StreamHandler()
-    ch.setLevel(logging.WARNING)
-
-    # create formatter and add it to the handlers
-    formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s: %(message)s")
-    fh.setFormatter(formatter)
+    # set the level of the console handler (warnings and above) and the formatter
+    ch.setLevel(WARNING)
     ch.setFormatter(formatter)
+    # add the console handler to the list of handlers
+    handlers.append(ch)
 
-    # add the handlers to the logger
-    logger.addHandler(fh)
-    logger.addHandler(ch)
+    for handler in handlers:
+        # add the handlers to the logger
+        logger.addHandler(handler)
+
+    loggers[name] = logger
 
     return logger
