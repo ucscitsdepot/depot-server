@@ -35,6 +35,10 @@ def setup_logs(
     filename = timestamp.strftime("%Y-%m-%d %H:%M:%S")
 
     if path_only:
+        # Create a new directory for date if it doesn't exist
+        if not os.path.exists(os.path.join(logs_path, name, folder)):
+            os.makedirs(os.path.join(logs_path, name, folder))
+
         # check for and remove existing latest symlink
         if os.path.islink(
             os.path.join(logs_path, name, "latest.log")
