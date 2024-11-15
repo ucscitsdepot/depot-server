@@ -7,7 +7,7 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
-# If modifying these scopes, delete the file token.json.
+# If modifying these scopes, delete the file cal_token.json.
 SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"]
 
 TYPE_INBOUND_EWASTE = "🔥🗑️🔥"
@@ -24,11 +24,11 @@ LATER = 1
 LATER_LINE = 2
 
 creds = None
-# The file token.json stores the user's access and refresh tokens, and is
+# The file cal_token.json stores the user's access and refresh tokens, and is
 # created automatically when the authorization flow completes for the first
 # time.
-if os.path.exists("token.json"):
-    creds = Credentials.from_authorized_user_file("token.json", SCOPES)
+if os.path.exists("cal_token.json"):
+    creds = Credentials.from_authorized_user_file("cal_token.json", SCOPES)
 # If there are no (valid) credentials available, let the user log in.
 if not creds or not creds.valid:
     if creds and creds.expired and creds.refresh_token:
@@ -37,7 +37,7 @@ if not creds or not creds.valid:
         flow = InstalledAppFlow.from_client_secrets_file("credentials.json", SCOPES)
         creds = flow.run_local_server(port=0)
     # Save the credentials for the next run
-    with open("token.json", "w") as token:
+    with open("cal_token.json", "w") as token:
         token.write(creds.to_json())
 
 
@@ -69,8 +69,7 @@ def get_events():
 
         appointments = []
 
-        current_day = None
-        now_index = None
+        now_index = 0
 
         # Prints the start and name of the next 10 events
         for event in events:
@@ -116,18 +115,11 @@ def get_events():
                 e["day"] = e["time"].strftime("%b %d")
                 e["time"] = e["time"].strftime("%I:%M %p")
 
-            # if e["day"] == current_day:
-            #     e["day"] = ""
-            # else:
-            #     current_day = e["day"]
-
             if "summary" in event:
                 e["name"] = str(event["summary"]).split(" -- ")[-1]
             else:
                 e["name"] = "(No title)"
 
-            # print(event["summary"])
-            # print(event["description"])
             if "description" in event:
                 event["description"] = str(event["description"]).replace("<br>", "\n")
 

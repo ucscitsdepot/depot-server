@@ -1,9 +1,6 @@
-import fcntl
 import sqlite3
 import time
 from threading import Thread
-
-import numpy as np
 
 
 def get_sqlite3_thread_safety():

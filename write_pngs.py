@@ -1,6 +1,5 @@
 import fcntl
 import os
-import subprocess
 import time
 from threading import Thread
 
@@ -66,7 +65,9 @@ def fit_text(img, text, color, font, x, y, w, h):
 
 
 # setup ewaste label
-def ewaste(ritm: str, date: str, serial: str, erase_type: str, export: str, jamf: bool):
+def ewaste(
+    ritm: str, date: str, serial: str, erase_type: str, export: str, jamf: bool | None
+):
     log_history("ewaste", ritm, date, serial, erase_type, export, jamf)
     img = Image.open("static/ewaste.png", "r").convert("RGB")
     imgdraw = ImageDraw.Draw(img)
@@ -102,7 +103,7 @@ def ritm(
     client_name: str,
     requestor_name: str,
     date: str,
-    migration: bool,
+    migration: bool | None,
     index: str,
 ):
     log_history("ritm", ritm, client_name, requestor_name, date, migration, index)

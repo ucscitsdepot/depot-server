@@ -8,8 +8,7 @@ local_admins.csv
 NOPRINT
 venv/
 *.db
-credentials.json
-token.json
+*.json
 /static/lockers/*
 /ip_db
 /.vscode

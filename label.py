@@ -23,9 +23,9 @@ class Label:
             None  # requestor's full name (may be different from client)
         )
         self.localA = None  # does the user/group want a local admin
-        self.domain = None  # what domain to enroll the computer in
-        self.serial = ""  # computer's serial/service tag
-        self.returnLoc = None  # return location on campus
+        self.domain = ""  # what domain to enroll the computer in
+        self.serial = []  # computer's serial/service tag
+        self.returnLoc = ""  # return location on campus
         self.dept = None  # department prefix for computer name
         self.group = False  # group that will be using this computer
         self.printer = "No"  # does the user want a printer (No/Drivers/Drivers & Add)
@@ -79,9 +79,9 @@ class Label:
 
     # return type of computer (Mac/Windows/None for other)
     def getType(self):
-        if "Mac" in self.type:
+        if self.type and "Mac" in self.type:
             return "Mac"
-        elif "PC\Windows" in self.type:
+        elif self.type and "PC\\Windows" in self.type:
             return "Windows"
         else:
             return None
@@ -89,14 +89,14 @@ class Label:
     # set local admin username
     def setLocal(self):
         self.localA = ""
-        if self.domain is not None and self.domain != "Unknown":
+        if self.domain and self.domain != "Unknown":
             self.localA += ".\\"
         self.localA += "admin.%s" % self.client_cruzid
 
     # set local username
     def getUsername(self):
         username = ""
-        if self.domain is not None:
+        if self.domain:
             username += ".\\"
         username += "admin.%s" % self.client_cruzid
         return username

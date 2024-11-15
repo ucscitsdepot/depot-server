@@ -1,7 +1,6 @@
 import logging
 import os
 import re
-import shutil
 from datetime import datetime
 
 from flask import Flask, flash, jsonify, redirect, render_template, request, url_for
@@ -46,10 +45,10 @@ def server():
             )
             # get the current date
             date = datetime.now().strftime("%m/%d/%Y")
-            # if the ad label was submitted
-            if request.form["label"] == "ad":
-                # print the ad label in a thread (prevent the website from hanging while it prints)
-                print_thread(logger, file="static/ad.png")
+            # if the au label was submitted
+            if request.form["label"] == "au":
+                # print the au label in a thread (prevent the website from hanging while it prints)
+                print_thread(logger, file="static/au.png")
             # if the depot label was submitted
             elif request.form["label"] == "depot":
                 # print the depot label in a thread
@@ -180,11 +179,17 @@ def print_kiosk():
     serial = request.args.get("serial")
     destination = request.args.get("destination")
 
+    if not serial:
+        serial = ""
+
+    if not destination:
+        destination = ""
+
     # create kiosk label w/ serial & date
     kiosk(serial.upper(), datetime.now().strftime("%m/%d/%Y"), destination)
     # print the kiosk label in a thread
     print_thread(logger)
-    return "Printed kiosk label for " + serial + " going to " + destination
+    return f"Printed kiosk label for {serial} going to {destination}"
 
 
 @app.route("/<ritm_num>/")

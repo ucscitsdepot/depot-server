@@ -42,7 +42,7 @@ def labelExecute(label):
         for position, serial in enumerate(label.serial):
             serial = serial.replace(",", "")
             # set domain to be printed
-            if label.domain is None:
+            if not label.domain:
                 dom = "Local"
             elif "Unknown" in label.domain:
                 dom = "__"
@@ -172,12 +172,21 @@ def labelExecute(label):
 
 
 if __name__ == "__main__":
-    logger.info("parse: Starting...")
+    if type(logger) == log.logging.Logger:
+        logger.info("parse: Starting...")
+    else:
+        print("Incorrect logger setup for parse")
+        exit(1)
+
     while True:
         try:
             # get gmail account's username and password from environment variables
             app_username = os.getenv("app_username")
             app_password = os.getenv("app_password")
+
+            if not app_username or not app_password:
+                logger.error("parse: app username/password not found")
+                exit(1)
 
             # login to email using imap
             gmail_host = "imap.gmail.com"
@@ -208,12 +217,12 @@ if __name__ == "__main__":
                     # iterate over selected emails
                     for num in selected_mails[0].split():
                         _, data = mail.fetch(num, "(RFC822)")
-                        _, bytes_data = data[0]
+                        _, bytes_data = data[0]  # type: ignore
                         # mark email as read
                         mail.store(num, "+FLAGS", "\\Seen")
 
                         # parse string of bytes into readable email message, then iterate over it
-                        email_message = email.message_from_bytes(bytes_data)
+                        email_message = email.message_from_bytes(bytes(bytes_data))
                         for part in email_message.walk():
                             # if email part is readable text, decode it and append it to labels
                             if (
@@ -221,7 +230,7 @@ if __name__ == "__main__":
                                 or part.get_content_type() == "text/html"
                             ):
                                 message = part.get_payload(decode=True)
-                                labels.append(message.decode())
+                                labels.append(message.decode())  # type: ignore
                                 break
 
                     if labels:
@@ -336,18 +345,16 @@ if __name__ == "__main__":
                                 if "know" in field:
                                     label.domain = "Unknown"
                                 elif "None" in field:
-                                    label.domain = None
+                                    label.domain = ""
                                 else:
                                     label.domain = field.replace("Domain: ", "")
                             elif "Serial Number or Service Tag: " in field:
-                                label.serial = field.replace(
+                                serial = field.replace(
                                     "Serial Number or Service Tag: ", ""
                                 )
-                                label.serial = label.serial.split(", ")
+                                label.serial = serial.split(", ")
                             elif "Return: " in field:
                                 label.returnLoc = field.replace("Return: ", "")
-                                if label.returnLoc == "":
-                                    label.returnLoc = None
 
                         if SVC:
                             logger.info("parse: SVC, skipping")
@@ -377,12 +384,12 @@ if __name__ == "__main__":
                     # iterate over selected emails
                     for num in selected_mails[0].split():
                         _, data = mail.fetch(num, "(RFC822)")
-                        _, bytes_data = data[0]
+                        _, bytes_data = data[0]  # type: ignore
                         # mark email as read
                         mail.store(num, "+FLAGS", "\\Seen")
 
                         # parse string of bytes into readable email message, then iterate over it
-                        email_message = email.message_from_bytes(bytes_data)
+                        email_message = email.message_from_bytes(bytes(bytes_data))
                         for part in email_message.walk():
                             # if email part is readable text, decode it and append it to labels
                             if (
@@ -390,7 +397,7 @@ if __name__ == "__main__":
                                 or part.get_content_type() == "text/html"
                             ):
                                 message = part.get_payload(decode=True)
-                                labels.append(message.decode())
+                                labels.append(message.decode())  # type: ignore
                                 break
 
                     if labels:
