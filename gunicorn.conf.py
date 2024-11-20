@@ -36,3 +36,6 @@ wsgi_app = "app:app"
 
 # 0.0.0.0 makes site available externally, and bind to port 80 (default http port)
 bind = "0.0.0.0:80"
+
+# start gunicorn as a background process
+daemon = True

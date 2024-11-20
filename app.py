@@ -252,6 +252,7 @@ locker_files = {
     "fireeyepkg": "fireeye.tgz",
     "sentinalonesh": "sentinal-one.sh",
     "sentinalonepkg": "SentinelAgent_linux_x86_64_v24_3_1_29.deb",
+    "ubuntu_autoinstall.yaml": "autoinstall.yaml",  # endpoint must end in .yaml for ubuntu to accept it
 }
 
 

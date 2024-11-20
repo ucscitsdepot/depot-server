@@ -9,5 +9,4 @@ source venv/bin/activate
 parse_cmd="python parse.py"
 eval "${parse_cmd}" &>/dev/null & disown;
 
-ui_cmd="authbind gunicorn"
-eval "${ui_cmd}" &>/dev/null & disown;
+authbind gunicorn
