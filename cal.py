@@ -158,16 +158,17 @@ def get_events():
                 e["dir"] = TYPE_UNKNOWN
 
             if "loc" not in e:
-                loc = str(event["location"])
                 if "location" not in event:
                     e["loc"] = "🗺️❓ Unknown"
-                elif any(
-                    x in loc.lower()
-                    for x in ["depot", "communications 10", "comm 10", "comms 10"]
-                ):
-                    e["loc"] = "🏠 Depot"
                 else:
-                    e["loc"] = "📍 " + loc.replace(", Santa Cruz, CA, USA", "")
+                    loc = str(event["location"])
+                    if any(
+                        x in loc.lower()
+                        for x in ["depot", "communications 10", "comm 10", "comms 10"]
+                    ):
+                        e["loc"] = "🏠 Depot"
+                    else:
+                        e["loc"] = "📍 " + loc.replace(", Santa Cruz, CA, USA", "")
 
             if "description" in event and TICKET_STRING in str(event["description"]):
                 ticket_start = str(event["description"]).index(TICKET_STRING) + len(
