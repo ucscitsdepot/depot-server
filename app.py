@@ -263,5 +263,12 @@ def locker(filename):
     return redirect(url_for("static", filename="lockers/" + locker_files[filename]))
 
 
+@app.route("/docs/")
+def docs():
+    return redirect(
+        "https://drive.google.com/drive/folders/1PTKgPiy2x6h6OWhg23mexzbbkpQi6XQw"
+    )
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
