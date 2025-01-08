@@ -63,6 +63,8 @@ def fit_text(img, text, color, font, x, y, w, h):
         draw.text((x, y), t, font=font, fill=color)
         y += h
 
+    return len(pieces)
+
 
 # setup ewaste label
 def ewaste(
@@ -417,6 +419,47 @@ def kiosk(servicetag: str, date: str, destination: str):
     img.save("tmp.png")
 
 
+def refurbished(
+    name: str, cpu: str, ram: int, storage: int, storage_type: str, os: str, notes: str
+):
+    img = Image.new("RGB", (2900, 1250), color=(255, 255, 255))
+    imgdraw = ImageDraw.Draw(img)
+    ritm_font = FONT_REG(250)
+    font = FONT_REG(200)
+    st_font = FONT_BOLD(200)
+
+    name_shift = len(list(break_fix(name, 2800, ritm_font, imgdraw))) * 250
+    notes_shift = len(list(break_fix(notes, 2800, font, imgdraw))) * 200
+
+    img = Image.new(
+        "RGB",
+        (2900, 1250 + name_shift + notes_shift),
+        color=(255, 255, 255),
+    )
+    imgdraw = ImageDraw.Draw(img)
+
+    # imgdraw.text((100, 120), name, (0, 0, 0), font=ritm_font)
+    fit_text(img, name, (0, 0, 0), ritm_font, 100, 120, 2800, 250)
+    imgdraw.text((100, 150 + name_shift), "CPU:", (0, 0, 0), font=st_font)
+    imgdraw.text((950, 160 + name_shift), cpu, (0, 0, 0), font=font)
+
+    imgdraw.text((100, 400 + name_shift), "RAM:", (0, 0, 0), font=st_font)
+    imgdraw.text((950, 410 + name_shift), f"{ram}GB RAM", (0, 0, 0), font=font)
+
+    imgdraw.text((100, 650 + name_shift), "Storage:", (0, 0, 0), font=st_font)
+    imgdraw.text(
+        (950, 660 + name_shift), f"{storage}GB {storage_type}", (0, 0, 0), font=font
+    )
+
+    imgdraw.text((100, 900 + name_shift), "OS:", (0, 0, 0), font=st_font)
+    imgdraw.text((950, 910 + name_shift), os, (0, 0, 0), font=font)
+
+    if len(notes) > 0:
+        fit_text(img, notes, (0, 0, 0), font, 100, 1150 + name_shift, 2800, 200)
+
+    img.save("tmp.png")
+
+
 # file path to lock on, the exact path is not important as long as it's identical across processes
 active_write_path = "/tmp/active_write_print"
 
@@ -532,11 +575,15 @@ if __name__ == "__main__":
     #     "the quick brown fox jumped over the lazy dog. the quick brown fox jumped over the lazy dog. the quick brown fox jumped over the lazy dog. the quick brown fox jumped over the lazy dog. the quick brown fox jumped over the lazy dog.",
     # )
 
-    from datetime import datetime
+    # from datetime import datetime
 
-    date = datetime.now().strftime("%m/%d/%Y")
+    # date = datetime.now().strftime("%m/%d/%Y")
     # kiosk("7ZRCMN3", date)
     # kiosk("                  ", "00/00/0000")
     # kiosk("SRVICETAG", date)
-    kiosk("BCWNLN3", date, "McHenry")
+    # kiosk("BCWNLN3", date, "McHenry")
+
+    refurbished(
+        "Dell Latitude 7480 2017", "Intel Core i7", 16, 256, "SSD", "Windows 11", ""
+    )
     pass

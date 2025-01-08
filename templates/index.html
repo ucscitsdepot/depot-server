@@ -41,7 +41,9 @@
 </head>
 
 <body>
-    <a href="/" style="color: black; text-decoration: none;"><h1>Depot Label Printer</h1></a>
+    <a href="/" style="color: black; text-decoration: none;">
+        <h1>Depot Label Printer</h1>
+    </a>
 
     {% for message in get_flashed_messages() %}
     <div class="alert">{{ message }}</div>
@@ -114,12 +116,12 @@
                         value="{{ data[0] if selected_type=='kiosk' else '' }}">
                     <br>
                     Destination: <select name="destination">
-                        <option value="McHenry" {{ ("selected" if selected_type=='kiosk' and data[1]=='McHenry' else '' )
-                        | safe }}>McHenry</option>
-                        <option value="Sci&Eng" {{ ("selected" if selected_type=='kiosk' and data[1]=='Sci&Eng' else '' )
-                        | safe }}>Sci&Eng</option>
-                        <option value="Depot (Spare)" {{ ("selected" if selected_type=='kiosk' and data[1]=='Depot (Spare)' else '' )
-                        | safe }}>Depot (Spare)</option>
+                        <option value="McHenry" {{ ("selected" if selected_type=='kiosk' and data[1]=='McHenry' else ''
+                            ) | safe }}>McHenry</option>
+                        <option value="Sci&Eng" {{ ("selected" if selected_type=='kiosk' and data[1]=='Sci&Eng' else ''
+                            ) | safe }}>Sci&Eng</option>
+                        <option value="Depot (Spare)" {{ ("selected" if selected_type=='kiosk' and
+                            data[1]=='Depot (Spare)' else '' ) | safe }}>Depot (Spare)</option>
                     </select>
                     <br>
                     <button type="submit" name="submit_kiosk">Print kiosk</button>
@@ -201,6 +203,41 @@
                         value="{{ data[2] if selected_type == 'notes' else '' }}">
                     <br>
                     <button type="submit" name="submit_notes">Print notes</button>
+                </form>
+            </div>
+
+            <div> <!--refurbished-->
+                <h2>Refurbished</h2>
+                <img src="{{ url_for('static', filename='refurbished.png') }}">
+                <form method="post">
+                    <input type="hidden" name="label" value="refurbished">
+                    Name: <input type="text" name="name" placeholder=""
+                        value="{{ data[0] if selected_type=='refurbished' else '' }}">
+                    <br>
+                    CPU: <input type="text" name="cpu" placeholder=""
+                        value="{{ data[1] if selected_type=='refurbished' else '' }}">
+                    <br>
+                    RAM: <input type="number" name="ram" placeholder="0"
+                        value="{{ data[2] if selected_type=='refurbished' else '' }}">
+                    <br>
+                    Storage: <input type="number" name="storage" placeholder="0"
+                        value="{{ data[3] if selected_type=='refurbished' else '' }}">
+                    <select name="storage_type">
+                        <option value="HDD" {{ ("selected" if selected_type=='refurbished' and data[4]=='HDD' else '' )
+                            | safe }}>HDD</option>
+                        <option value="SSD" {{ ("selected" if selected_type=='refurbished' and data[4]=='SSD' else '' )
+                            | safe }}>SSD</option>
+                        <option value="None" {{ ("selected" if selected_type=='refurbished' and data[4]=='None' else ''
+                            ) | safe }}>None</option>
+                    </select>
+                    <br>
+                    OS: <input type="text" name="os" placeholder=""
+                        value="{{ data[5] if selected_type=='refurbished' else '' }}">
+                    <br>
+                    Notes: <input type="text" name="notes" placeholder=""
+                        value="{{ data[6] if selected_type=='refurbished' else '' }}">
+                    <br>
+                    <button type="submit" name="submit_refurbished">Print refurbished</button>
                 </form>
             </div>
 
