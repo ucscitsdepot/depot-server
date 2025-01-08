@@ -73,7 +73,7 @@ def get_events():
 
         # Prints the start and name of the next 10 events
         for event in events:
-            if "summary" in event and event["summary"] == "Lunch":
+            if ("summary" in event and event["summary"] == "Lunch") or "dateTime" not in event["start"]:
                 continue
 
             e = dict()
