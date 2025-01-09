@@ -157,6 +157,21 @@ def server():
             elif request.form["label"] == "history":
                 row_num = int(request.form["row_num"])
                 selected_type, data = reprint(row_num)
+            elif request.form["label"] == "refurbished":
+                refurbished(
+                    str(request.form["name"]),
+                    str(request.form["cpu"]),
+                    0 if request.form["ram"] == "" else int(request.form["ram"]),
+                    (
+                        0
+                        if request.form["storage"] == ""
+                        else int(request.form["storage"])
+                    ),
+                    str(request.form["storage_type"]),
+                    str(request.form["os"]),
+                    str(request.form["notes"]),
+                )
+                print_thread(logger)
 
             if request.form["label"] != "history":
                 flash(f"Reload to repeat {request.form['label']}")

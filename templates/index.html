@@ -217,10 +217,10 @@
                     CPU: <input type="text" name="cpu" placeholder=""
                         value="{{ data[1] if selected_type=='refurbished' else '' }}">
                     <br>
-                    RAM: <input type="number" name="ram" placeholder="0"
+                    RAM: <input type="number" name="ram" placeholder="0" min="0"
                         value="{{ data[2] if selected_type=='refurbished' else '' }}">
                     <br>
-                    Storage: <input type="number" name="storage" placeholder="0"
+                    Storage: <input type="number" name="storage" placeholder="0" min="0"
                         value="{{ data[3] if selected_type=='refurbished' else '' }}">
                     <select name="storage_type">
                         <option value="HDD" {{ ("selected" if selected_type=='refurbished' and data[4]=='HDD' else '' )
