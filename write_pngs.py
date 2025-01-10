@@ -420,7 +420,13 @@ def kiosk(servicetag: str, date: str, destination: str):
 
 
 def refurbished(
-    name: str, cpu: str, ram: int, storage: int, storage_type: str, os: str, notes: str
+    name: str,
+    cpu: str,
+    ram: int | str,
+    storage: int | str,
+    storage_type: str,
+    os: str,
+    notes: str,
 ):
     img = Image.new("RGB", (2900, 1250), color=(255, 255, 255))
     imgdraw = ImageDraw.Draw(img)
@@ -584,6 +590,6 @@ if __name__ == "__main__":
     # kiosk("BCWNLN3", date, "McHenry")
 
     refurbished(
-        "Dell Latitude 7480 2017", "Intel Core i7", 16, 256, "SSD", "Windows 11", ""
+        "[Computer Name]", "[CPU Name]", "[x]", "[x]", "[Type]", "[OS]", "[Notes]"
     )
     pass
