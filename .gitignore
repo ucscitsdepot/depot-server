@@ -12,3 +12,4 @@ venv/
 /static/lockers/*
 /ip_db
 /.vscode
+static/schedule.png
