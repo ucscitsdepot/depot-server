@@ -2,6 +2,7 @@ import logging
 import os
 import re
 from datetime import datetime
+import schedule
 
 from flask import Flask, flash, jsonify, redirect, render_template, request, url_for
 
@@ -231,6 +232,10 @@ def local_admin(serial):
 @app.route("/calendar/")
 def calendar():
     days, events = cal.get_events()
+    try:
+        schedule.get_events()
+    except:
+        pass
     return render_template(
         "calendar.html", days=days, events=events, today="Today" in days
     )

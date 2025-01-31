@@ -169,7 +169,6 @@ def get_events():
         #
         #     schedule[event[1]]["concurrent"] = concurrent
 
-
         shifted = False
         for hr in events_by_hour:
             starts = [e[0] for e in events_by_hour[hr] if e[1] == START]
@@ -276,6 +275,12 @@ def get_events():
                 font=font,
                 fill=(0, 0, 0),
             )
+
+        now = datetime.now()
+        if now.hour >= start.hour and now.hour <= end.hour:
+            y = get_y(now.hour + now.minute / 60)
+            d.line((10, y, w_img - 10, y), fill=(0, 0, 0), width=4)
+            d.circle((w_img - 10, y), 10, fill=(0, 0, 0))
 
         img.save("static/schedule.png")
 
