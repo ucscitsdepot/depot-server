@@ -297,8 +297,14 @@ if __name__ == "__main__":
                                 break
                             elif "Client Department: " in field:
                                 label.setDepartment(
-                                    field.replace("Client Department: ", "")
+                                    field.replace("Client Department: ", ""), weak=True
                                 )
+                                logger.info(f"client {label.dept}")
+                            elif "Computer User's Department: " in field:
+                                label.setDepartment(
+                                    field.replace("Computer User's Department: ", "")
+                                )
+                                logger.info(f"user {label.dept}")
                             elif "Back up: " in field:
                                 if "Yes" in field:
                                     label.backup = True
