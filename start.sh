@@ -1,9 +1,9 @@
 #!/bin/bash
 
-pkill python
+pkill -f "python parse.py"
 pkill gunicorn
 
-cd /home/depot/depot-server
+cd "$(dirname "$(readlink -f "$0")")"
 source venv/bin/activate
 
 parse_cmd="python parse.py"

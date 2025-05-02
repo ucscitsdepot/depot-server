@@ -475,7 +475,7 @@ try:
 except:
     address = "file:///dev/usb/lp0"
 
-model = "QL-570"
+model = "QL-800"
 backend = "linux_kernel"
 label_id = "62"
 
@@ -589,7 +589,7 @@ if __name__ == "__main__":
     # kiosk("SRVICETAG", date)
     # kiosk("BCWNLN3", date, "McHenry")
 
-    refurbished(
-        "[Computer Name]", "[CPU Name]", "[x]", "[x]", "[Type]", "[OS]", "[Notes]"
-    )
+    # refurbished(
+    #     "[Computer Name]", "[CPU Name]", "[x]", "[x]", "[Type]", "[OS]", "[Notes]"
+    # )
     pass

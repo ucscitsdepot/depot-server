@@ -33,3 +33,9 @@ Automatic Label Printer for the ITS Depot
   Departments can be added in departments.csv with the following format:
   `DEPTNAME,ABBREVIATION`
   Example: `Information Technology,ITS`
+
+
+## Nginx/HTTPS setup:
+- https://www.digitalocean.com/community/tutorials/how-to-serve-flask-applications-with-gunicorn-and-nginx-on-ubuntu-22-04
+- https://www.digitalocean.com/community/tutorials/how-to-create-a-self-signed-ssl-certificate-for-nginx-in-ubuntu
+- https://www.geeksforgeeks.org/how-to-generate-a-csr-certificate-signing-request-in-linux/
