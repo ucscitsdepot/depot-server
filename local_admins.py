@@ -1,5 +1,7 @@
+import re
 import sqlite3
 import time
+import traceback
 from threading import Thread
 
 
@@ -34,14 +36,37 @@ cursor = db.cursor()
 sql = cursor.execute
 
 sql(
-    f"CREATE TABLE IF NOT EXISTS local_admins (timestamp INTEGER, ritm TEXT, serial TEXT, name TEXT, username TEXT)"
+    f"CREATE TABLE IF NOT EXISTS local_admins (timestamp INTEGER, ritm TEXT, serial TEXT, serial_orig TEXT, name TEXT, username TEXT)"
 )
 
 
 def log(ritm, serial, name, username):
+
+    s = ""
+
+    try:
+        serial_list = serial.split(" ")
+
+        unlikely = []
+        likely = []
+
+        for i in serial_list:
+            if i != "" and i.isalnum() and (len(i) == 7 or 10 <= len(i) <= 12):
+                if not bool(re.search(r"\d", i)):
+                    unlikely.append(i)
+                else:
+                    likely.append(i)
+
+        if len(likely) > 0:
+            s = likely[-1]
+        elif len(unlikely) > 0:
+            s = unlikely[-1]
+    except Exception as e:
+        print(f"Error parsing serial: {traceback.format_exc()}")
+
     sql(
-        "INSERT INTO local_admins (timestamp, ritm, serial, name, username) VALUES (?, ?, ?, ?, ?)",
-        (int(time.time()), ritm, serial, name, username),
+        "INSERT INTO local_admins (timestamp, ritm, serial, serial_orig, name, username) VALUES (?, ?, ?, ?, ?, ?)",
+        (int(time.time()), ritm, s, serial, name, username),
     )
 
 
