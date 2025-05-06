@@ -2,19 +2,27 @@ import logging
 import os
 import re
 from datetime import datetime
-import schedule
 
 from flask import Flask, flash, jsonify, redirect, render_template, request, url_for
 
 import cal
+import schedule
 from history import get_history, reprint
 from local_admins import lookup_local_admin
-from write_pngs import *
-
-# note: using authbind & gunicorn to host on port 80:
-# https://stackoverflow.com/questions/16225872/getting-gunicorn-to-run-on-port-80
-# https://adamj.eu/tech/2021/12/29/set-up-a-gunicorn-configuration-file-and-test-it/
-# to start, just run 'authbind gunicorn'
+from write_pngs import (
+    ewaste,
+    inc_generic,
+    kiosk,
+    macsetup,
+    notes,
+    notes_printer,
+    print_thread,
+    refurbished,
+    ritm,
+    ritm_generic,
+    username,
+    winsetup,
+)
 
 # Change directory to current file location
 path = os.path.dirname(os.path.abspath(__file__))

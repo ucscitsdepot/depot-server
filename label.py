@@ -105,7 +105,7 @@ class Label:
     def setDepartment(self, dept, weak=False):
         if weak and self.dept is not None and self.dept != "___":
             return
-        
+
         match = difflib.get_close_matches(dept, departments.keys(), 1, 0.7)
         if match != []:
             self.dept = departments[match[0]]

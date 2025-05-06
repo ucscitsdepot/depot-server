@@ -1,7 +1,6 @@
 import datetime
 import logging
 import os
-from logging.handlers import RotatingFileHandler
 
 CRITICAL = logging.CRITICAL
 FATAL = logging.FATAL

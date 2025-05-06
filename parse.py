@@ -23,7 +23,16 @@ logger = log.setup_logs("parse", log.INFO)
 # import Ewaste/Label classes, all functions to output png files
 from ewaste import Ewaste
 from label import Label
-from write_pngs import *
+from write_pngs import (
+    ewaste,
+    macsetup,
+    notes,
+    notes_printer,
+    print_label,
+    ritm,
+    username,
+    winsetup,
+)
 
 # load environment variables
 load_dotenv()
