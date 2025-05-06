@@ -1,12 +1,11 @@
 #!/bin/bash
 
-pkill -f "python parse.py"
-pkill gunicorn
+parse_cmd="python parse.py"
+
+pkill -f "${parse_cmd}"
 
 cd "$(dirname "$(readlink -f "$0")")"
 source venv/bin/activate
 
-parse_cmd="python parse.py"
-eval "${parse_cmd}" &>/dev/null & disown;
-
-authbind gunicorn
+eval "${parse_cmd}" &>/dev/null &
+disown
