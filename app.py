@@ -1,6 +1,7 @@
 import logging
 import os
 import re
+import traceback
 from datetime import datetime
 
 from flask import Flask, flash, jsonify, redirect, render_template, request, url_for
@@ -186,8 +187,8 @@ def server():
                 flash(f"Reload to repeat {request.form['label']}")
 
         h = get_history(23)
-    except Exception as e:
-        logger.error(f"app.server: {e}")
+    except Exception:
+        logger.error(f"app.server: {traceback.format_exc()}")
 
     return render_template(
         "index.html",
@@ -227,8 +228,8 @@ def ritm_link(ritm_num):
             "https://ucsc.service-now.com/sc_req_item.do?sysparm_query=number="
             + ritm_text
         )
-    except Exception as e:
-        logger.error(f"app.ritm_link: {e}")
+    except Exception:
+        logger.error(f"app.ritm_link: {traceback.format_exc()}")
         return redirect(url_for("server"))
 
 

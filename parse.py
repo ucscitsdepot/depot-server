@@ -4,6 +4,7 @@ import imaplib
 import os
 import re
 import time
+import traceback
 import unicodedata
 from datetime import datetime
 
@@ -453,7 +454,9 @@ if __name__ == "__main__":
                         # print("==========================================\n")
 
                 except imaplib.IMAP4.abort as e:
-                    logger.error(f"parse: could not get mail from folder: {e}")
+                    logger.error(
+                        f"parse: could not get mail from folder: {traceback.format_exc()}"
+                    )
                     if "socket error" in str(e):
                         # gmail will throw a socket error if we have been logged in for too long.
                         login_again = True
@@ -463,5 +466,5 @@ if __name__ == "__main__":
 
                 # delay 1 second between runs
                 time.sleep(1)
-        except Exception as e:
-            logger.error(f"parse: {e}")
+        except Exception:
+            logger.error(f"parse: {traceback.format_exc()}")

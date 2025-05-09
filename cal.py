@@ -1,5 +1,6 @@
 import os.path
 from datetime import date, datetime, timedelta, timezone
+import traceback
 
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
@@ -204,8 +205,8 @@ def get_events():
 
         return days, appointments
 
-    except HttpError as error:
-        print(f"An error occurred: {error}")
+    except Exception:
+        print(f"cal.get_events: {traceback.format_exc()}")
         return []
 
 

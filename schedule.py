@@ -3,6 +3,7 @@ import math
 import os.path
 from collections import defaultdict
 from datetime import datetime, timedelta, timezone
+import traceback
 
 import numpy as np
 from google.auth.transport.requests import Request
@@ -286,8 +287,8 @@ def get_events():
 
         return schedule
 
-    except HttpError as e:
-        print(f"An error occurred: {e}")
+    except Exception:
+        print(f"schedule.get_events(): {traceback.format_exc()}")
         return []
 
 

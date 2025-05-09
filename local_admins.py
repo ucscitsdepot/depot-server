@@ -61,7 +61,7 @@ def log(ritm, serial, name, username):
             s = likely[-1]
         elif len(unlikely) > 0:
             s = unlikely[-1]
-    except Exception as e:
+    except Exception:
         print(f"Error parsing serial: {traceback.format_exc()}")
 
     sql(
