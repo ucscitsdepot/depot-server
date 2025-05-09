@@ -30,7 +30,7 @@ os.chdir(path)
 
 # initialize flask app
 app = Flask(__name__)
-app.secret_key = os.urandom(12).hex()
+app.config['secret_key'] = os.urandom(12).hex()
 app.url_map.strict_slashes = True
 
 logger = logging.getLogger("gunicorn.error")
