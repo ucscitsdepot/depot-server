@@ -28,11 +28,11 @@ creds = None
 # The file cal_token.json stores the user's access and refresh tokens, and is
 # created automatically when the authorization flow completes for the first
 # time.
+token_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), "cal_token.json")
+
 try:
-    if os.path.exists(
-        os.path.join(os.path.abspath(os.path.dirname(__file__)), "cal_token.json")
-    ):
-        creds = Credentials.from_authorized_user_file("cal_token.json", SCOPES)
+    if os.path.exists(token_path):
+        creds = Credentials.from_authorized_user_file(token_path, SCOPES)
 except:
     print(f"cal.py: {traceback.format_exc()}")
     creds = None
@@ -48,9 +48,9 @@ if not creds or not creds.valid:
             ),
             SCOPES,
         )
-        creds = flow.run_local_server(port=0)
+        creds = flow.run_local_server(port=0, open_browser=False)
     # Save the credentials for the next run
-    with open("cal_token.json", "w") as token:
+    with open(token_path, "w") as token:
         token.write(creds.to_json())
 
 
