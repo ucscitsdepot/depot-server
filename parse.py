@@ -122,7 +122,7 @@ def labelExecute(label: Label | Ewaste):
                 # export mac setup label (next to trackpad on laptop)
                 macsetup(
                     str(label.RITM),
-                    label.dept,
+                    str(label.dept),
                     serial,
                     strip_accents(str(label.client_name))
                     + f" ({str(label.client_cruzid)})",
