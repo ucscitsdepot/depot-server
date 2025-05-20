@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <title>Depot Label Printer</title>
+    <title>Depot Server</title>
     <style>
         img {
             max-width: 100%;
@@ -38,11 +38,12 @@
             text-align: center;
         }
     </style>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='ITS-Logo.png') }}">
 </head>
 
 <body>
     <a href="/" style="color: black; text-decoration: none;">
-        <h1>Depot Label Printer</h1>
+        <h1>Depot Server</h1>
     </a>
 
     {% for message in get_flashed_messages() %}

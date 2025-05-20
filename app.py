@@ -31,7 +31,7 @@ os.chdir(path)
 
 # initialize flask app
 app = Flask(__name__)
-app.config['secret_key'] = os.urandom(12).hex()
+app.config["secret_key"] = os.urandom(12).hex()
 app.url_map.strict_slashes = True
 
 logger = logging.getLogger("gunicorn.error")
@@ -186,6 +186,8 @@ def server():
             if request.form["label"] != "history":
                 flash(f"Reload to repeat {request.form['label']}")
 
+        # max number of history items that can generally fit on the page
+        # TODO: this could be changed to be dynamic based on the screen size
         h = get_history(23)
     except Exception:
         logger.error(f"app.server: {traceback.format_exc()}")

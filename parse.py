@@ -1,6 +1,6 @@
-# import necessary libraries
 import email
 import imaplib
+import logging
 import os
 import re
 import time
@@ -8,8 +8,6 @@ import traceback
 import unicodedata
 from datetime import datetime
 
-# library to load environment variables from .env file (printer ip, printer model, gmail username, gmail password)
-# .env file not included in git repo for obvious reasons (: i've been using scp to transfer it between computers
 from dotenv import load_dotenv
 
 import log
@@ -20,6 +18,10 @@ path = os.path.dirname(os.path.abspath(__file__))
 os.chdir(path)
 
 logger = log.setup_logs("parse", log.INFO)
+
+if type(logger) != logging.Logger:
+    print("parse: Incorrect logger setup")
+    exit(1)
 
 # import Ewaste/Label classes, all functions to output png files
 from ewaste import Ewaste
@@ -35,7 +37,7 @@ from write_pngs import (
     winsetup,
 )
 
-# load environment variables
+# load environment variables (gmail username, gmail password)
 load_dotenv()
 
 
@@ -45,102 +47,109 @@ def strip_accents(data):
 
 
 # setup pngs and print labels
-def labelExecute(label):
-    # if label is a windows setup
-    if label.getType() == "Windows":
-        # iterate through serial numbers if multiple are provided in one ticket
-        for position, serial in enumerate(label.serial):
-            serial = serial.replace(",", "")
-            # set domain to be printed
-            if not label.domain:
-                dom = "Local"
-            elif "Unknown" in label.domain:
-                dom = "__"
-            else:
-                dom = label.domain
+def labelExecute(label: Label | Ewaste):
+    if type(label) == Label:
+        # if label is a windows setup
+        if label.getType() == "Windows":
+            # iterate through serial numbers if multiple are provided in one ticket
+            for position, serial in enumerate(label.serial):
+                serial = serial.replace(",", "")
+                # set domain to be printed
+                if not label.domain:
+                    dom = "Local"
+                elif "Unknown" in label.domain:
+                    dom = "__"
+                else:
+                    dom = label.domain
 
-            # export ritm label (to be placed on outside of computer/box)
-            ritm(
-                str(label.RITM),
-                strip_accents(str(label.client_name)),
-                strip_accents(str(label.requestor_name)),
-                datetime.now().strftime("%m/%d/%Y"),
-                False,
-                str(position + 1) + " of " + str(len(label.serial)),
-            )
-            # print label
-            print_label(logger)
-
-            # export windows setup label (next to trackpad on laptop)
-            winsetup(
-                str(label.RITM),
-                str(label.dept),
-                str(serial),
-                str(dom),
-                strip_accents(str(label.client_name)),
-                label.backup,
-                str(label.printer),
-            )
-            # print label
-            print_label(logger)
-
-            # if client wants local admin
-            if label.localA is not None:
-                # export username/password label
-                username(label.getUsername())
+                # export ritm label (to be placed on outside of computer/box)
+                ritm(
+                    str(label.RITM),
+                    strip_accents(str(label.client_name)),
+                    strip_accents(str(label.requestor_name)),
+                    datetime.now().strftime("%m/%d/%Y"),
+                    False,
+                    str(position + 1) + " of " + str(len(label.serial)),
+                )
                 # print label
                 print_label(logger)
 
-                log_admin(
-                    "RITM" + str(label.RITM),
+                # export windows setup label (next to trackpad on laptop)
+                winsetup(
+                    str(label.RITM),
+                    str(label.dept),
                     str(serial),
+                    str(dom),
                     strip_accents(str(label.client_name)),
-                    label.getUsername(),
+                    label.backup,
+                    str(label.printer),
                 )
+                # print label
+                print_label(logger)
 
-    # if label is a mac setup
-    elif label.getType() == "Mac":
-        # iterate through serial numbers if multiple are provided in one ticket
-        for position, serial in enumerate(label.serial):
-            # export ritm label (to be placed on outside of computer/box)
-            ritm(
-                str(label.RITM),
-                strip_accents(str(label.client_name)),
-                strip_accents(str(label.requestor_name)),
-                datetime.now().strftime("%m/%d/%Y"),  # today's date (for intake date)
-                False,
-                str(position + 1) + " of " + str(len(label.serial)),
-            )
-            # print label
-            print_label(logger)
+                # if client wants local admin
+                if label.localA is not None:
+                    # export username/password label
+                    username(label.getUsername())
+                    # print label
+                    print_label(logger)
 
-            # export mac setup label (next to trackpad on laptop)
-            macsetup(
-                str(label.RITM),
-                label.dept,
-                serial,
-                strip_accents(str(label.client_name))
-                + f" ({str(label.client_cruzid)})",
-                label.backup,
-                label.printer,
-                label.localA is not None,
-            )
-            # print label
-            print_label(logger)
+                    log_admin(
+                        "RITM" + str(label.RITM),
+                        str(serial),
+                        strip_accents(str(label.client_name)),
+                        label.getUsername(),
+                    )
 
-            # export password label
-            print_label(logger, "static/tmpwd.png")
-
-            if label.localA is not None:
-                log_admin(
-                    "RITM" + str(label.RITM),
-                    str(serial),
+        # if label is a mac setup
+        elif label.getType() == "Mac":
+            # iterate through serial numbers if multiple are provided in one ticket
+            for position, serial in enumerate(label.serial):
+                # export ritm label (to be placed on outside of computer/box)
+                ritm(
+                    str(label.RITM),
                     strip_accents(str(label.client_name)),
-                    label.getUsername(),
+                    strip_accents(str(label.requestor_name)),
+                    datetime.now().strftime(
+                        "%m/%d/%Y"
+                    ),  # today's date (for intake date)
+                    False,
+                    str(position + 1) + " of " + str(len(label.serial)),
                 )
+                # print label
+                print_label(logger)
 
-    # if label is an ewaste
-    elif label.getType() == "Ewaste":
+                # export mac setup label (next to trackpad on laptop)
+                macsetup(
+                    str(label.RITM),
+                    label.dept,
+                    serial,
+                    strip_accents(str(label.client_name))
+                    + f" ({str(label.client_cruzid)})",
+                    label.backup,
+                    label.printer,
+                    label.localA is not None,
+                )
+                # print label
+                print_label(logger)
+
+                # export password label
+                print_label(logger, "static/tmpwd.png")
+
+                if label.localA is not None:
+                    log_admin(
+                        "RITM" + str(label.RITM),
+                        str(serial),
+                        strip_accents(str(label.client_name)),
+                        label.getUsername(),
+                    )
+
+        else:
+            logger.error(
+                f"parse: labelExecute: label type not recognized: {type(label)} {label}"
+            )
+            return
+    elif type(label) == Ewaste and label.getType() == "Ewaste":
         # setup ewaste label for printing
         ewaste(
             str(label.RITM),
@@ -152,9 +161,16 @@ def labelExecute(label):
         )
         # print label
         print_label(logger)
+    else:
+        logger.error(
+            f"parse: labelExecute: label type not recognized: {type(label)} {label}"
+        )
+        return
 
     # if label is a mac or windows
-    if label.getType() == "Windows" or label.getType() == "Mac":
+    if type(label) == Label and (
+        label.getType() == "Windows" or label.getType() == "Mac"
+    ):
         # if client wants a printer or has notes or has software requests (if notes need to be printed)
         if (
             label.printer.upper() != "NO"

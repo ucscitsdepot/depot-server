@@ -1,0 +1,21 @@
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    include snippets/self-signed.conf;
+    include snippets/ssl-params.conf;
+    server_name its-depot.ucsc.edu;
+
+    location / {
+        include proxy_params;
+        proxy_pass http://unix:/home/depot/depot-server/depot-server.sock;
+    }
+}
+
+server {
+    listen 80;
+    listen [::]:80;
+
+    server_name its-depot.ucsc.edu;
+
+    return 302 https://$server_name$request_uri;
+}

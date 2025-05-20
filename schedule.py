@@ -1,16 +1,15 @@
 import json
 import math
 import os.path
+import traceback
 from collections import defaultdict
 from datetime import datetime, timedelta, timezone
-import traceback
 
 import numpy as np
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
-from googleapiclient.errors import HttpError
 from PIL import Image, ImageDraw, ImageFont
 
 # If modifying these scopes, delete the file cal_token.json.
@@ -25,17 +24,29 @@ creds = None
 # The file cal_token.json stores the user's access and refresh tokens, and is
 # created automatically when the authorization flow completes for the first
 # time.
-if os.path.exists("cal_token.json"):
-    creds = Credentials.from_authorized_user_file("cal_token.json", SCOPES)
+token_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), "cal_token.json")
+
+try:
+    if os.path.exists(token_path):
+        creds = Credentials.from_authorized_user_file(token_path, SCOPES)
+except:
+    print(f"cal.py: {traceback.format_exc()}")
+    creds = None
+
 # If there are no (valid) credentials available, let the user log in.
 if not creds or not creds.valid:
     if creds and creds.expired and creds.refresh_token:
         creds.refresh(Request())
     else:
-        flow = InstalledAppFlow.from_client_secrets_file("credentials.json", SCOPES)
-        creds = flow.run_local_server(port=0)
+        flow = InstalledAppFlow.from_client_secrets_file(
+            os.path.join(
+                os.path.abspath(os.path.dirname(__file__)), "credentials.json"
+            ),
+            SCOPES,
+        )
+        creds = flow.run_local_server(port=0, open_browser=False)
     # Save the credentials for the next run
-    with open("cal_token.json", "w") as token:
+    with open(token_path, "w") as token:
         token.write(creds.to_json())
 
 

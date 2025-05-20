@@ -1,0 +1,13 @@
+[Unit]
+Description=Gunicorn instance to serve depot-server
+After=network.target
+
+[Service]
+User=depot
+Group=www-data
+WorkingDirectory=/home/depot/depot-server
+Environment="PATH=/home/depot/depot-server/venv/bin"
+ExecStart=/home/depot/depot-server/venv/bin/gunicorn -c /home/depot/depot-server/gunicorn.conf.py
+
+[Install]
+WantedBy=multi-user.target
