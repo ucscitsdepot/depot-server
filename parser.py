@@ -17,7 +17,7 @@ from local_admins import log_thread as log_admin
 path = os.path.dirname(os.path.abspath(__file__))
 os.chdir(path)
 
-logger = log.setup_logs("parse", log.INFO)
+logger = log.setup_logs("parser", log.INFO)
 
 if type(logger) != logging.Logger:
     print("parse: Incorrect logger setup")

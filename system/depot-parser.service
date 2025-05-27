@@ -7,7 +7,7 @@ User=depot
 Group=www-data
 WorkingDirectory=/home/depot/depot-server
 Environment="PATH=/home/depot/depot-server/venv/bin"
-ExecStart=/home/depot/depot-server/venv/bin/python /home/depot/depot-server/parse.py
+ExecStart=/home/depot/depot-server/venv/bin/python /home/depot/depot-server/parser.py
 
 [Install]
 WantedBy=multi-user.target

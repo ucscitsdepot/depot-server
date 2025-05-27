@@ -14,7 +14,7 @@ path = os.path.dirname(os.path.abspath(__file__))
 os.chdir(path)
 
 # Set log path using timestamp
-log_path = log.get_log_path("ui")
+log_path = log.get_log_path("server")
 
 errorlog = log_path
 accesslog = log_path
