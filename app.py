@@ -1,6 +1,7 @@
 import logging
 import os
 import re
+import secrets
 import traceback
 from datetime import datetime
 
@@ -31,7 +32,7 @@ os.chdir(path)
 
 # initialize flask app
 app = Flask(__name__)
-app.config["secret_key"] = os.urandom(12).hex()
+app.secret_key = secrets.token_hex()
 app.url_map.strict_slashes = True
 
 logger = logging.getLogger("gunicorn.error")

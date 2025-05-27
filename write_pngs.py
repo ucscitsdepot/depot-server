@@ -324,6 +324,9 @@ def winsetup(
     img.save("tmp.png")
 
 
+# TODO: shorten both generic labels vertically to only fit the height of the notes
+
+
 def ritm_generic(ritm: str, notes: str):
     log_history("ritm_generic", ritm, notes)
     img = Image.open("static/ritm_generic.png", "r").convert("RGB")
