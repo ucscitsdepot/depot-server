@@ -184,12 +184,18 @@ def get_events():
                     else:
                         e["loc"] = "📍 " + loc.replace(", Santa Cruz, CA, USA", "")
 
+            # TODO: use regex to find ticket number in description
             if "description" in event and TICKET_STRING in str(event["description"]):
                 ticket_start = str(event["description"]).index(TICKET_STRING) + len(
                     TICKET_STRING
                 )
-                ticket_end = str(event["description"]).index("\n", ticket_start)
+                if "\n" not in str(event["description"])[ticket_start:]:
+                    ticket_end = len(str(event["description"]))
+                else:
+                    ticket_end = str(event["description"]).index("\n", ticket_start)
+
                 e["ticket"] = str(event["description"])[ticket_start:ticket_end]
+
                 if (
                     "RITM" not in e["ticket"]
                     and "INC" not in e["ticket"]
@@ -218,7 +224,7 @@ def get_events():
 
     except Exception:
         print(f"cal.get_events: {traceback.format_exc()}")
-        return []
+        return [], []
 
 
 if __name__ == "__main__":

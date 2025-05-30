@@ -220,6 +220,8 @@ if __name__ == "__main__":
             mail.login(app_username, app_password)
             login_again = False
 
+            logger.info("parse: Successfully logged in to email")
+
             # loop indefinitely
             while not login_again:
                 print_this_round = False
