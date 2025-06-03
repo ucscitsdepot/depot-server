@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Depot Server</title>
+    <style>
+        #container {
+            display: flex;
+            flex-flow: row;
+            justify-content: space-evenly;
+            align-items: flex-start;
+            align-content: flex-start;
+        }
+
+        h1,
+        .alert {
+            text-align: center;
+        }
+
+        td,
+        th {
+            padding: 5px;
+        }
+    </style>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='ITS-Logo.png') }}">
+</head>
+
+<body>
+    <a href="/" style="color: black; text-decoration: none;">
+        <h1>Depot Lockers</h1>
+    </a>
+
+    {% for message in get_flashed_messages() %}
+    <div class="alert">{{ message }}</div>
+    {% endfor %}
+
+    <p style="text-align: center;">How to use the lockers: go to its-depot.ucsc.edu/[short link] in a browser, or with wget/curl, to download any of the following files.<br>Please see the Depot Server User Guide for instructions on adding more files.</p>
+
+    <div id="container">
+        <table id="labels">
+            <tr>
+                <th>Short Link</th>
+                <th>File</th>
+            </tr>
+            {% for link in locker_files %}
+            <tr>
+                <td>
+                    {{ link }}
+                </td>
+                <td>
+                    <a href="/lockers/{{ link }}" target="_blank">{{ locker_files[link] }}</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+</body>
+
+</html>

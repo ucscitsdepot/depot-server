@@ -5,7 +5,16 @@ import secrets
 import traceback
 from datetime import datetime
 
-from flask import Flask, flash, jsonify, redirect, render_template, request, url_for
+from flask import (
+    Flask,
+    flash,
+    jsonify,
+    redirect,
+    render_template,
+    request,
+    send_file,
+    url_for,
+)
 
 import cal
 import schedule
@@ -290,11 +299,21 @@ locker_files = {
 }
 
 
+@app.route("/lockers/")
+def locker_list():
+    return render_template("lockers.html", locker_files=locker_files)
+
+
 @app.route("/lockers/<filename>/")
 def locker(filename):
     if filename not in locker_files:
         return "file does not exist", 400
-    return redirect(url_for("static", filename="lockers/" + locker_files[filename]))
+
+    return send_file(
+        os.path.join("static", "lockers", locker_files[filename]),
+        as_attachment=True,
+        download_name=locker_files[filename],
+    )
 
 
 @app.route("/docs/")
