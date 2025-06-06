@@ -360,6 +360,18 @@
                     <button type="submit" name="submit_inc_generic">Print inc_generic</button>
                 </form>
             </div>
+
+            <div> <!-- blank -->
+                <h2>Blank</h2>
+                <img src="{{ url_for('static', filename='blank.png') }}">
+                <form method="post">
+                    <input type="hidden" name="label" value="blank">
+                    Text: <input type="text" name="text" placeholder="" value="{{ data[0] if
+                    selected_type=='blank' else '' }}">
+                    <br>
+                    <button type="submit" name="submit_blank">Print blank</button>
+                </form>
+            </div>
         </div>
 
         <div id="history">

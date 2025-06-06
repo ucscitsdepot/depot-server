@@ -36,7 +36,9 @@ FONT_RITM = FONT_REG(350)
 
 # find correct textlength to fit in desired size
 # derived from https://stackoverflow.com/questions/58041361/break-long-drawn-text-to-multiple-lines-with-pillow
-def break_fix(text, width, font, draw):
+def break_fix(
+    text: str, width: int, font: ImageFont.FreeTypeFont, draw: ImageDraw.ImageDraw
+):
     if not text:
         return
     lo = 0
@@ -56,11 +58,20 @@ def break_fix(text, width, font, draw):
 
 
 # draw text to fit within certain width using break_fix()
-def fit_text(img, text, color, font, x, y, w, h):
+def fit_text(
+    img: Image.Image,
+    text: str,
+    color: tuple[int, int, int],
+    font: ImageFont.FreeTypeFont,
+    x: int,
+    y: int,
+    w: int,
+    h: int,
+):
     draw = ImageDraw.Draw(img)
-    pieces = list(break_fix(text, w, font, draw))
+    pieces = list(break_fix(text.strip(), w, font, draw))
     for t, _ in pieces:
-        draw.text((x, y), t, font=font, fill=color)
+        draw.text((x, y), t.strip(), font=font, fill=color)
         y += h
 
     return len(pieces)
@@ -465,6 +476,37 @@ def refurbished(
 
     if len(notes) > 0:
         fit_text(img, notes, (0, 0, 0), font, 100, 1150 + name_shift, 2800, 200)
+
+    img.save("tmp.png")
+
+
+def blank(text: str):
+    if text.strip() != "":
+        # don't log an empty label
+        log_history("blank", text)
+
+    img = Image.new("RGB", (2900, 100), color=(255, 255, 255))
+
+    small_font = FONT_REG(160)
+
+    lines = fit_text(img, text, (0, 0, 0), small_font, 50, 50, 2800, 160)
+
+    if lines > 1:
+        height = 100 + lines * 160
+
+        img = Image.new("RGB", (2900, height), color=(255, 255, 255))
+        fit_text(img, text, (0, 0, 0), small_font, 50, 50, 2800, 160)
+    else:
+        img = Image.new("RGB", (2900, 260), color=(255, 255, 255))
+        imgdraw = ImageDraw.Draw(img)
+        imgdraw.text(
+            (2900 / 2, 50),
+            text,
+            (0, 0, 0),
+            font=small_font,
+            anchor="ma",
+            align="center",
+        )
 
     img.save("tmp.png")
 

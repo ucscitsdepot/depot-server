@@ -21,6 +21,7 @@ import schedule
 from history import get_history, reprint
 from local_admins import lookup_local_admin
 from write_pngs import (
+    blank,
     ewaste,
     inc_generic,
     kiosk,
@@ -191,6 +192,9 @@ def server():
                     str(request.form["os"]),
                     str(request.form["notes"]),
                 )
+                print_thread(logger)
+            elif request.form["label"] == "blank":
+                blank(str(request.form["text"]))
                 print_thread(logger)
 
             if request.form["label"] != "history":

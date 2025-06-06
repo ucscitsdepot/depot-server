@@ -44,6 +44,7 @@ ARG_COUNT = {
     "ritm_generic": 2,
     "inc_generic": 2,
     "kiosk": 2,
+    "blank": 1,
 }
 
 MAX_ARGS = max(ARG_COUNT.values())
@@ -53,10 +54,10 @@ ARG_TEXT = ", ".join([f"data{i} TEXT" for i in range(MAX_ARGS)])
 sql(f"CREATE TABLE IF NOT EXISTS history (timestamp INTEGER, type TEXT, {ARG_TEXT})")
 
 # label types to not append "RITM" to
-NON_RITM_TYPES = ["username", "inc_generic", "kiosk"]
+NON_RITM_TYPES = ["username", "inc_generic", "kiosk", "blank"]
 
 
-def log(label_type, *args):
+def log(label_type: str, *args):
     arg_text = ", ".join([f"data{i}" for i in range(len(args))])
     q_marks = ", ".join(["?"] * (len(args) + 2))
     sql(
@@ -65,7 +66,7 @@ def log(label_type, *args):
     )
 
 
-def log_thread(label_type, *args):
+def log_thread(label_type: str, *args):
     t = Thread(target=log, args=[label_type] + list(args))
     t.start()
 
