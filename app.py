@@ -323,7 +323,7 @@ def locker(filename):
 @app.route("/docs/")
 def docs():
     return redirect(
-        "https://drive.google.com/drive/folders/1PTKgPiy2x6h6OWhg23mexzbbkpQi6XQw"
+        "https://drive.google.com/drive/folders/1yelfRtY3j5PYGmq9COGCnsbaOOEot-2K"
     )
 
 
