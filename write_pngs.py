@@ -7,6 +7,7 @@ from brother_ql.backends.helpers import send
 from brother_ql.conversion import convert
 from brother_ql.raster import BrotherQLRaster
 from PIL import Image, ImageDraw, ImageFont
+import qrcode
 
 from history import log_thread as log_history
 
@@ -587,6 +588,18 @@ def resnet(
     font = FONT_REG(200)
     small_font = FONT_REG(160)
 
+    # Generate and place QR code to the RITM URL in the top-right corner
+    qr_url = f"https://ucsc.service-now.com/sc_req_item.do?sysparm_query=number=RITM{ritm}"
+    qr = qrcode.QRCode(border=2, box_size=10)
+    qr.add_data(qr_url)
+    qr.make(fit=True)
+    qr_img = qr.make_image(fill_color="black", back_color="white").convert("RGB")
+    max_qr = 500
+    qr_img = qr_img.resize((max_qr, max_qr), Image.NEAREST)
+    qr_x = img.size[0] - 100 - max_qr
+    qr_y = 80
+    img.paste(qr_img, (qr_x, qr_y))
+
     y = 100
     # Draw RITM first and bolded
     imgdraw.text((100, y), f"RITM{ritm}", (0, 0, 0), font=label_font)
@@ -626,8 +639,24 @@ def resnet(
     if os_version:
         imgdraw.text((100, y), f"OS Version: {os_version}", (0, 0, 0), font=font)
         y += 150
-    img.save("tmp.png")
+    img.save("rasnet.png")
 
+
+def resnet_name_ritm(name: str, ritm: str):
+    log_history("resnet_name_ritm", name, ritm)
+    img = Image.new("RGB", (2900, 700), color=(255, 255, 255))
+    draw = ImageDraw.Draw(img)
+    title_font = FONT_BOLD(260)
+    font = FONT_REG(220)
+
+    y = 100
+    # RITM first, bold
+    draw.text((100, y), f"RITM{ritm}", (0, 0, 0), font=title_font)
+    y += 220
+    # Name below, regular
+    draw.text((100, y), f"Name: {name}", (0, 0, 0), font=font)
+
+    img.save("rasnet_name_ritm.png")
 
 
 if __name__ == "__main__":
