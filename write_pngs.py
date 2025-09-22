@@ -639,7 +639,7 @@ def resnet(
     if os_version:
         imgdraw.text((100, y), f"OS Version: {os_version}", (0, 0, 0), font=font)
         y += 150
-    img.save("rasnet.png")
+    img.save("resnet.png")
 
 
 def resnet_name_ritm(name: str, ritm: str):
@@ -656,7 +656,7 @@ def resnet_name_ritm(name: str, ritm: str):
     # Name below, regular
     draw.text((100, y), f"Name: {name}", (0, 0, 0), font=font)
 
-    img.save("rasnet_name_ritm.png")
+    img.save("resnet_name_ritm.png")
 
 
 if __name__ == "__main__":
