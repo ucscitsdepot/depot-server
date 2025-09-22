@@ -35,6 +35,7 @@ from write_pngs import (
     ritm,
     username,
     winsetup,
+    resnet,
 )
 
 # load environment variables (gmail username, gmail password)
@@ -321,8 +322,8 @@ if __name__ == "__main__":
                             elif "ComputerType: " in field:
                                 label.setType(field.replace("ComputerType: ", ""))
                             elif "Scotts Valley: true" in field:
-                                SVC = True
-                                break
+                                SVC = False
+                                #break
                             elif "Client Department: " in field:
                                 label.setDepartment(
                                     field.replace("Client Department: ", ""), weak=True
@@ -471,6 +472,120 @@ if __name__ == "__main__":
                         labelExecute(label)
                         # print("==========================================\n")
 
+                    # Resnet mailbox (custom labels)
+                    mail.select("Resnet", False)
+                    # get unread resnet emails (folder already filtered), any unseen
+                    _, selected_mails = mail.search(None, "(UNSEEN)")
+                    if selected_mails[0].split():
+                        logger.info(
+                            f"parse: {len(selected_mails[0].split())} resnet labels found"
+                        )
+
+                    labels_resnet = []
+                    # iterate over selected emails
+                    for num in selected_mails[0].split():
+                        _, data = mail.fetch(num, "(RFC822)")
+                        _, bytes_data = data[0]  # type: ignore
+                        # mark email as read
+                        mail.store(num, "+FLAGS", "\\Seen")
+
+                        # parse string of bytes into readable email message, then iterate over it
+                        email_message = email.message_from_bytes(bytes(bytes_data))
+                        for part in email_message.walk():
+                            if (
+                                part.get_content_type() == "text/plain"
+                                or part.get_content_type() == "text/html"
+                            ):
+                                message = part.get_payload(decode=True)
+                                labels_resnet.append(message.decode())  # type: ignore
+                                break
+
+                    if labels_resnet:
+                        print_this_round = True
+
+                    for body in labels_resnet:
+                        try:
+                            raw = body.replace("\r", "")
+                            # Extract RITM from header or anywhere in the original body before stripping tags
+                            ritm_top = ""
+                            m = re.search(r"RITM\s*([0-9]+)", body, re.IGNORECASE)
+                            if not m:
+                                m = re.search(r"RITM\s*([0-9]+)", raw, re.IGNORECASE)
+                            if m:
+                                ritm_top = m.group(1)
+
+                            # Normalize HTML breaks and strip simple tags
+                            raw = re.sub(r"(?i)<br\s*/?>", "\n", raw)
+                            raw = re.sub(r"(?i)</?p>", "", raw)
+                            raw = re.sub(r"(?i)</?(html|body|head)>", "", raw)
+                            raw = re.sub(r"(?is)<h3[^>]*>.*?</h3>", "", raw)
+                            # Remove any other tags
+                            raw = re.sub(r"<[^>]+>", "", raw)
+
+                            lines = [ln.strip() for ln in raw.split("\n") if ln.strip()]
+
+                            opened_by = ""
+                            requestor = ""
+                            ritm_id = ""
+                            computer_model = ""
+                            device_serial = ""
+                            power_adapter = ""
+                            service_req = ""
+                            card_provided = ""
+                            card_serial = ""
+                            os_version = ""
+                            verified_access = False
+
+                            for ln in lines:
+                                if ln.startswith("Opened by:"):
+                                    opened_by = ln.split(":", 1)[1].strip()
+                                elif ln.startswith("Requestor:"):
+                                    requestor = ln.split(":", 1)[1].strip()
+                                elif ln.startswith("Originating Incident Number:"):
+                                    ritm_id = ln.split(":", 1)[1].strip()
+                                elif ln.startswith("Computer Model:"):
+                                    computer_model = ln.split(":", 1)[1].strip()
+                                elif ln.startswith("Serial Number:"):
+                                    device_serial = ln.split(":", 1)[1].strip()
+                                elif re.match(r"(?i)^Serial number:", ln):
+                                    card_serial = ln.split(":", 1)[1].strip()
+                                elif ln.startswith("Power Adapter:"):
+                                    power_adapter = ln.split(":", 1)[1].strip()
+                                elif ln.startswith("Select list for service requested:"):
+                                    service_req = ln.split(":", 1)[1].strip()
+                                elif ln.startswith("Card provided:"):
+                                    card_provided = ln.split(":", 1)[1].strip()
+                                elif ln.startswith("OS version:"):
+                                    os_version = ln.split(":", 1)[1].strip()
+                                elif ln.startswith("Verified Access:"):
+                                    val = ln.split(":", 1)[1].strip().lower()
+                                    verified_access = val in ("true", "yes", "y", "1", "checked", "x")
+
+                            name_val = requestor or opened_by
+                            name_val = strip_accents(name_val) if name_val else ""
+
+                            # Prefer RITM found in header; fall back to incident number if missing
+                            ritm_used = ritm_top or ritm_id
+
+                            # Build and print label
+                            resnet(
+                                name=name_val,
+                                serial=device_serial,
+                                ritm=ritm_used,
+                                power_adapter=power_adapter,
+                                service=service_req,
+                                card_number=card_serial,
+                                verified_access=verified_access,
+                                os_version=os_version,
+                            )
+                            print_label(logger, "resnet.png")
+                            logger.info(
+                                f"parse: resnet label: name={name_val}, serial={device_serial}, ritm={ritm_used}, power={power_adapter}, service={service_req}, card_serial={card_serial}, verified={verified_access}, os={os_version}"
+                            )
+                        except Exception:
+                            logger.error(
+                                f"parse: resnet parse error: {traceback.format_exc()}"
+                            )
                 except imaplib.IMAP4.abort as e:
                     logger.error(
                         f"parse: could not get mail from folder: {traceback.format_exc()}"

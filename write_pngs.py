@@ -570,6 +570,65 @@ def check_file():
 
     return False
 
+def resnet(
+    name: str,
+    serial: str,
+    ritm: str,
+    power_adapter: str,
+    service: str,
+    card_number: str = "",
+    verified_access: bool = False,
+    os_version: str = "",
+):
+    log_history("resnet", name, serial, ritm, power_adapter, service, card_number, verified_access, os_version)
+    img = Image.new("RGB", (2900, 1200), color=(255, 255, 255))
+    imgdraw = ImageDraw.Draw(img)
+    label_font = FONT_BOLD(220)
+    font = FONT_REG(200)
+    small_font = FONT_REG(160)
+
+    y = 100
+    # Draw RITM first and bolded
+    imgdraw.text((100, y), f"RITM{ritm}", (0, 0, 0), font=label_font)
+    y += 180
+    # Then draw Name in regular font (not bold)
+    imgdraw.text((100, y), f"Name: {name}", (0, 0, 0), font=font)
+    y += 150
+    imgdraw.text((100, y), f"Serial: {serial}", (0, 0, 0), font=font)
+    y += 150
+    imgdraw.text((100, y), f"Power Adapter: {power_adapter}", (0, 0, 0), font=font)
+    y += 150
+    # Draw service text and place checkbox right after the text end
+    service_text = f"Service: {service}"
+    imgdraw.text((100, y), service_text, (0, 0, 0), font=font)
+    text_w = imgdraw.textlength(service_text, font=font)
+    box_w = 200
+    box_h = 200
+    margin = 20
+    box_x = 100 + text_w + margin
+    box_x = min(box_x, img.size[0] - 100 - box_w)
+    # Match style used elsewhere: offset down a bit and use thicker border
+    box_y = y + 20
+    imgdraw.rectangle((box_x, box_y, box_x + box_w, box_y + box_h), None, "black", 10)
+    # Extra vertical spacing to accommodate 200px checkbox height
+    y += 270
+    if card_number:
+        imgdraw.text((100, y), f"Card Number: {card_number}", (0, 0, 0), font=font)
+        y += 150
+    if verified_access:
+        imgdraw.text((100, y), "Verified Access:", (0, 0, 0), font=font)
+        box_x = 700
+        box_y = y - 30
+        box_w = 100
+        box_h = 100
+        imgdraw.rectangle((box_x, box_y, box_x + box_w, box_y + box_h), None, "black", 7)
+        y += 150
+    if os_version:
+        imgdraw.text((100, y), f"OS Version: {os_version}", (0, 0, 0), font=font)
+        y += 150
+    img.save("tmp.png")
+
+
 
 if __name__ == "__main__":
     # process = list()
@@ -638,3 +697,5 @@ if __name__ == "__main__":
     #     "[Computer Name]", "[CPU Name]", "[x]", "[x]", "[Type]", "[OS]", "[Notes]"
     # )
     pass
+
+
