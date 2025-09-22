@@ -45,6 +45,9 @@ ARG_COUNT = {
     "inc_generic": 2,
     "kiosk": 2,
     "blank": 1,
+    # New label types
+    "resnet": 8,  # name, serial, ritm, power_adapter, service, card_number, verified_access, os_version
+    "resnet_name_ritm": 2,  # name, ritm
 }
 
 MAX_ARGS = max(ARG_COUNT.values())
@@ -52,6 +55,13 @@ MAX_ARGS = max(ARG_COUNT.values())
 ARG_TEXT = ", ".join([f"data{i} TEXT" for i in range(MAX_ARGS)])
 
 sql(f"CREATE TABLE IF NOT EXISTS history (timestamp INTEGER, type TEXT, {ARG_TEXT})")
+
+# Ensure all required dataN columns exist (handles DBs created with fewer columns)
+existing_cols = [row[1] for row in sql("PRAGMA table_info(history)").fetchall()]
+for i in range(MAX_ARGS):
+    col = f"data{i}"
+    if col not in existing_cols:
+        sql(f"ALTER TABLE history ADD COLUMN {col} TEXT")
 
 # label types to not append "RITM" to
 NON_RITM_TYPES = ["username", "inc_generic", "kiosk", "blank"]
