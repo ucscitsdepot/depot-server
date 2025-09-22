@@ -36,6 +36,7 @@ from write_pngs import (
     username,
     winsetup,
     resnet,
+    resnet_name_ritm,
 )
 
 # load environment variables (gmail username, gmail password)
@@ -579,6 +580,12 @@ if __name__ == "__main__":
                                 os_version=os_version,
                             )
                             print_label(logger, "resnet.png")
+
+                            # If the ticket says it has a power adapter, also print a Name/RITM-only label
+                            if power_adapter and power_adapter.strip().lower() not in {"no", "none", "n/a", "na", "false", "0"}:
+                                resnet_name_ritm(name=name_val, ritm=ritm_used)
+                                print_label(logger, "resnet_name_ritm.png")
+
                             logger.info(
                                 f"parse: resnet label: name={name_val}, serial={device_serial}, ritm={ritm_used}, power={power_adapter}, service={service_req}, card_serial={card_serial}, verified={verified_access}, os={os_version}"
                             )
