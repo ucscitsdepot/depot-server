@@ -8,6 +8,7 @@ from brother_ql.conversion import convert
 from brother_ql.raster import BrotherQLRaster
 from PIL import Image, ImageDraw, ImageFont
 import qrcode
+from qrcode.image.pil import PilImage
 
 from history import log_thread as log_history
 
@@ -131,7 +132,19 @@ def ritm(
     large_name_font = FONT_ITALIC(230)
     small_font = FONT_REG(160)
 
-    # draw text for ritm, date, requestor name, client name
+    # Draw QR top-right (short link, smaller)
+    try:
+        qr_side = 500
+        qr = qrcode.QRCode(border=2, box_size=10)
+        qr.add_data(f"https://its-depot.ucsc.edu/ritm{ritm}")
+        qr.make(fit=True)
+        qr_img = qr.make_image(image_factory=PilImage, fill_color="black", back_color="white").get_image()
+        qr_img = qr_img.resize((qr_side, qr_side), resample=Image.Resampling.NEAREST)
+        img.paste(qr_img, (img.size[0] - 100 - qr_side, 80))
+    except Exception:
+        pass
+
+    # draw text for ritm, date, requestor name, client name (no additional nudges)
     imgdraw.text((900, 190), ritm, (0, 0, 0), font=ritm_font)
     imgdraw.text((70, 625), "Client & Requestor:", (0, 0, 0), font=font)
     imgdraw.text((70, 850), client_name, (0, 0, 0), font=large_name_font)
@@ -361,6 +374,19 @@ def inc_generic(inc: str, notes: str):
     ritm_font = FONT_REG(330)
     small_font = FONT_REG(160)
 
+    # Add QR code (INC) top-right with short link, smaller
+    try:
+        qr_side = 500
+        qr = qrcode.QRCode(border=2, box_size=10)
+        inc_num = inc if str(inc).startswith("INC") else f"INC{inc}"
+        qr.add_data(f"https://its-depot.ucsc.edu/{inc_num.lower()}")
+        qr.make(fit=True)
+        qr_img = qr.make_image(image_factory=PilImage, fill_color="black", back_color="white").get_image()
+        qr_img = qr_img.resize((qr_side, qr_side), resample=Image.Resampling.NEAREST)
+        img.paste(qr_img, (img.size[0] - 100 - qr_side, 80))
+    except Exception:
+        pass
+
     imgdraw.text((630, 25), inc, (0, 0, 0), font=ritm_font)
 
     if len(notes) > 0:
@@ -582,81 +608,229 @@ def resnet(
     os_version: str = "",
 ):
     log_history("resnet", name, serial, ritm, power_adapter, service, card_number, verified_access, os_version)
-    img = Image.new("RGB", (2900, 1200), color=(255, 255, 255))
-    imgdraw = ImageDraw.Draw(img)
+
+    # Fonts and layout metrics
     label_font = FONT_BOLD(220)
     font = FONT_REG(200)
-    small_font = FONT_REG(160)
+    # We'll use consistent line heights for wrapping
+    LH_TITLE = 220
+    LH = 200
 
-    # Generate and place QR code to the RITM URL in the top-right corner
-    qr_url = f"https://ucsc.service-now.com/sc_req_item.do?sysparm_query=number=RITM{ritm}"
+    # Precompute line counts using a temporary draw context
+    tmp_img = Image.new("RGB", (2900, 1200), color=(255, 255, 255))
+    tmp_draw = ImageDraw.Draw(tmp_img)
+
+    # Content widths: leave room on the right for a QR and margins
+    left_margin = 100
+    right_margin = 100
+    qr_size = 500  # sized down
+    content_width = 2900 - left_margin - right_margin - qr_size - 100  # ~1900px
+
+    # Measure wrapped lines for each block
+    name_lines = list(break_fix(f"Name: {name}", content_width, font, tmp_draw))
+    serial_lines = list(break_fix(f"Serial: {serial}", content_width, font, tmp_draw))
+    power_lines = list(break_fix(f"Power Adapter: {power_adapter}", content_width, font, tmp_draw))
+
+    # For Service, reserve width for checkbox on the right of the first line
+    box_w = 200
+    box_h = 200
+    box_margin = 20
+    service_wrap_width = max(100, content_width - (box_w + box_margin))
+    service_text = f"Service: {service}"
+    service_lines = list(break_fix(service_text, service_wrap_width, font, tmp_draw))
+
+    # Optional fields
+    card_lines = list(break_fix(f"Card Number: {card_number}", content_width, font, tmp_draw)) if card_number else []
+    os_lines = list(break_fix(f"OS Version: {os_version}", content_width, font, tmp_draw)) if os_version else []
+
+    top_margin = 100
+    between_blocks = 30
+    bottom_margin = 100
+
+    # Calculate total height needed
+    total_height = top_margin
+    total_height += LH_TITLE  # RITM line
+    total_height += len(name_lines) * LH + between_blocks
+    total_height += len(serial_lines) * LH + between_blocks
+    total_height += len(power_lines) * LH + between_blocks
+    # Service block must fit text and the 200px checkbox
+    total_height += max(len(service_lines) * LH, box_h + 40) + between_blocks
+    if card_lines:
+        total_height += len(card_lines) * LH + between_blocks
+    if verified_access:
+        total_height += max(LH, 100) + between_blocks  # include 100px checkbox
+    if os_lines:
+        total_height += len(os_lines) * LH + between_blocks
+    total_height += bottom_margin
+
+    # Ensure tall enough for QR area
+    min_for_qr = 80 + qr_size + 100
+    total_height = max(total_height, min_for_qr)
+
+    # Render on final image
+    img = Image.new("RGB", (2900, total_height), color=(255, 255, 255))
+    imgdraw = ImageDraw.Draw(img)
+
+    # Draw QR top-right (short link, smaller)
+    qr_url = f"https://its-depot.ucsc.edu/ritm{ritm}"
     qr = qrcode.QRCode(border=2, box_size=10)
     qr.add_data(qr_url)
     qr.make(fit=True)
-    qr_img = qr.make_image(fill_color="black", back_color="white").convert("RGB")
-    max_qr = 500
-    qr_img = qr_img.resize((max_qr, max_qr), Image.NEAREST)
-    qr_x = img.size[0] - 100 - max_qr
+    qr_img = qr.make_image(image_factory=PilImage, fill_color="black", back_color="white").get_image()
+    qr_img = qr_img.resize((qr_size, qr_size), resample=Image.Resampling.NEAREST)
+    qr_x = img.size[0] - right_margin - qr_size
     qr_y = 80
     img.paste(qr_img, (qr_x, qr_y))
 
-    y = 100
-    # Draw RITM first and bolded
-    imgdraw.text((100, y), f"RITM{ritm}", (0, 0, 0), font=label_font)
-    y += 180
-    # Then draw Name in regular font (not bold)
-    imgdraw.text((100, y), f"Name: {name}", (0, 0, 0), font=font)
-    y += 150
-    imgdraw.text((100, y), f"Serial: {serial}", (0, 0, 0), font=font)
-    y += 150
-    imgdraw.text((100, y), f"Power Adapter: {power_adapter}", (0, 0, 0), font=font)
-    y += 150
-    # Draw service text and place checkbox right after the text end
-    service_text = f"Service: {service}"
-    imgdraw.text((100, y), service_text, (0, 0, 0), font=font)
-    text_w = imgdraw.textlength(service_text, font=font)
-    box_w = 200
-    box_h = 200
-    margin = 20
-    box_x = 100 + text_w + margin
-    box_x = min(box_x, img.size[0] - 100 - box_w)
-    # Match style used elsewhere: offset down a bit and use thicker border
-    box_y = y + 20
+    x = left_margin
+    y = top_margin
+
+    # RITM (single line)
+    imgdraw.text((x, y), f"RITM{ritm}", (0, 0, 0), font=label_font)
+    y += LH_TITLE
+
+    # Name
+    y += fit_text(img, f"Name: {name}", (0, 0, 0), font, x, y, content_width, LH) * 0  # no-op to keep API similar
+    for t, _ in name_lines:
+        imgdraw.text((x, y), t.strip(), fill=(0, 0, 0), font=font)
+        y += LH
+    y += between_blocks
+
+    # Serial
+    for t, _ in serial_lines:
+        imgdraw.text((x, y), t.strip(), fill=(0, 0, 0), font=font)
+        y += LH
+    y += between_blocks
+
+    # Power Adapter
+    for t, _ in power_lines:
+        imgdraw.text((x, y), t.strip(), fill=(0, 0, 0), font=font)
+        y += LH
+    y += between_blocks
+
+    # Service text with checkbox after first line
+    # Draw the service text within the reserved width
+    line_y_start = y
+    drawn_first_line_width = 0
+    for i, (t, w) in enumerate(service_lines):
+        imgdraw.text((x, y), t.strip(), fill=(0, 0, 0), font=font)
+        if i == 0:
+            drawn_first_line_width = w
+        y += LH
+    # Place checkbox aligned with the first line
+    box_x = x + drawn_first_line_width + box_margin
+    box_x = min(box_x, img.size[0] - right_margin - box_w)
+    box_y = line_y_start + 20
     imgdraw.rectangle((box_x, box_y, box_x + box_w, box_y + box_h), None, "black", 10)
-    # Extra vertical spacing to accommodate 200px checkbox height
-    y += 270
-    if card_number:
-        imgdraw.text((100, y), f"Card Number: {card_number}", (0, 0, 0), font=font)
-        y += 150
+    # Move y past the taller of text block vs checkbox
+    y = max(line_y_start + len(service_lines) * LH, box_y + box_h) + between_blocks
+
+    # Card Number (optional)
+    if card_lines:
+        for t, _ in card_lines:
+            imgdraw.text((x, y), t.strip(), fill=(0, 0, 0), font=font)
+            y += LH
+        y += between_blocks
+
+    # Verified Access (optional) - draw label and empty 100x100 box
     if verified_access:
-        imgdraw.text((100, y), "Verified Access:", (0, 0, 0), font=font)
-        box_x = 700
-        box_y = y - 30
-        box_w = 100
-        box_h = 100
-        imgdraw.rectangle((box_x, box_y, box_x + box_w, box_y + box_h), None, "black", 7)
-        y += 150
-    if os_version:
-        imgdraw.text((100, y), f"OS Version: {os_version}", (0, 0, 0), font=font)
-        y += 150
+        label = "Verified Access:"
+        imgdraw.text((x, y), label, (0, 0, 0), font=font)
+        label_w = imgdraw.textlength(label, font=font)
+        va_w = 100
+        va_h = 100
+        # Place box immediately after the label and vertically centered on the line
+        va_box_x = x + label_w + 20
+        va_box_y = y + (LH - va_h) // 2
+        imgdraw.rectangle((va_box_x, va_box_y, va_box_x + va_w, va_box_y + va_h), None, "black", 7)
+        # Advance by one line height
+        y += LH + between_blocks
+
+    # OS Version (optional)
+    if os_lines:
+        for t, _ in os_lines:
+            imgdraw.text((x, y), t.strip(), fill=(0, 0, 0), font=font)
+            y += LH
+        y += between_blocks
+
     img.save("resnet.png")
 
 
 def resnet_name_ritm(name: str, ritm: str):
     log_history("resnet_name_ritm", name, ritm)
-    img = Image.new("RGB", (2900, 700), color=(255, 255, 255))
-    draw = ImageDraw.Draw(img)
+
+    # Fonts and metrics
     title_font = FONT_BOLD(260)
     font = FONT_REG(220)
+    LH_TITLE = 260
+    LH = 220
+    left_margin = 100
+    right_margin = 100
 
-    y = 100
-    # RITM first, bold
-    draw.text((100, y), f"RITM{ritm}", (0, 0, 0), font=title_font)
-    y += 220
-    # Name below, regular
-    draw.text((100, y), f"Name: {name}", (0, 0, 0), font=font)
+    # Measure wrapped lines for name
+    tmp_img = Image.new("RGB", (2900, 300), color=(255, 255, 255))
+    tmp_draw = ImageDraw.Draw(tmp_img)
+    name_lines = list(break_fix(f"Name: {name}", 2900 - left_margin - right_margin, font, tmp_draw))
+
+    top_margin = 100
+    between = 30
+    bottom_margin = 100
+
+    total_height = top_margin + LH_TITLE + between + len(name_lines) * LH + bottom_margin
+
+    img = Image.new("RGB", (2900, total_height), color=(255, 255, 255))
+    draw = ImageDraw.Draw(img)
+
+    y = top_margin
+    draw.text((left_margin, y), f"RITM{ritm}", (0, 0, 0), font=title_font)
+    y += LH_TITLE + between
+
+    for t, _ in name_lines:
+        draw.text((left_margin, y), t.strip(), (0, 0, 0), font=font)
+        y += LH
 
     img.save("resnet_name_ritm.png")
+
+
+# Renamed from name_date to food_label
+
+def food_label(name: str, date: str):
+    log_history("food_label", name, date)
+
+    name_font = FONT_BOLD(260)
+    date_font = FONT_REG(220)
+    LH_NAME = 260
+    LH_DATE = 220
+    left_margin = 100
+    right_margin = 100
+
+    # Measure wrapping
+    tmp_img = Image.new("RGB", (2900, 300), color=(255, 255, 255))
+    tmp_draw = ImageDraw.Draw(tmp_img)
+    name_lines = list(break_fix(f"Name: {name}", 2900 - left_margin - right_margin, name_font, tmp_draw))
+    date_lines = list(break_fix(f"Date: {date}", 2900 - left_margin - right_margin, date_font, tmp_draw))
+
+    top_margin = 100
+    between = 40
+    bottom_margin = 100
+
+    total_height = top_margin + len(name_lines) * LH_NAME + between + len(date_lines) * LH_DATE + bottom_margin
+
+    img = Image.new("RGB", (2900, total_height), color=(255, 255, 255))
+    draw = ImageDraw.Draw(img)
+
+    y = top_margin
+    for t, _ in name_lines:
+        draw.text((left_margin, y), t.strip(), (0, 0, 0), font=name_font)
+        y += LH_NAME
+
+    y += between
+
+    for t, _ in date_lines:
+        draw.text((left_margin, y), t.strip(), (0, 0, 0), font=date_font)
+        y += LH_DATE
+
+    img.save("food_label.png")
 
 
 if __name__ == "__main__":
