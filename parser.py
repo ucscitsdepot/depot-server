@@ -11,6 +11,7 @@ from datetime import datetime
 from dotenv import load_dotenv
 
 import log
+from directory import lookup_cruzid
 from local_admins import log_thread as log_admin
 
 # Change directory to current file location
@@ -296,12 +297,12 @@ if __name__ == "__main__":
                                 )
                                 if field != "" and label.client_name != "":
                                     label.client_name = field
-                                    label.client_cruzid = "____"
-                            elif "Name of the current staff person who will be using the computer: " in field:                                                               
-                                field = field.replace("Name of the current staff person who will be using the computer: ", "")                                               
+                                    label.client_cruzid = lookup_cruzid(field.strip()) or "____"
+                            elif "Name of the current staff person who will be using the computer: " in field:
+                                field = field.replace("Name of the current staff person who will be using the computer: ", "")
                                 if field != "" and label.client_name != "":
                                     label.client_name = field
-                                    label.client_cruzid = "____"
+                                    label.client_cruzid = lookup_cruzid(field.strip()) or "____"
                             elif "Preferred username for login: " in field:
                                 field = field.replace(
                                     "Preferred username for login: ", ""
