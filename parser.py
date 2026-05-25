@@ -297,11 +297,8 @@ if __name__ == "__main__":
                                 if field != "" and label.client_name != "":
                                     label.client_name = field
                                     label.client_cruzid = "____"
-                            elif "Name of the current staff person who will be using this computer: " in field:
-                                field = field.replace(
-                                    "Name of the current staff person who will be using this computer: ",
-                                    "",
-                                )
+                            elif "Name of the current staff person who will be using the computer: " in field:                                                               
+                                field = field.replace("Name of the current staff person who will be using the computer: ", "")                                               
                                 if field != "" and label.client_name != "":
                                     label.client_name = field
                                     label.client_cruzid = "____"

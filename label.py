@@ -2,6 +2,8 @@ import csv
 import difflib
 import re
 
+from directory import lookup_cruzid
+
 # list of all departments & their appropriate abbreviations for the computer name prefixes
 departments = {}
 with open("departments.csv", newline="") as csvfile:
@@ -57,8 +59,13 @@ class Label:
 
     # set client data (cruzid, name)
     def setClient(self, user):
-        self.client_cruzid = user[user.find("(") + 1 : user.find(")")]
-        self.client_name = user[: user.find("(") - 1]
+        if "(" in user and ")" in user:                                                                                                              
+          self.client_cruzid = user[user.find("(") + 1 : user.find(")")]
+          self.client_name = user[: user.find("(") - 1].strip()                                                                                    
+        else:                                                    
+          self.client_name = user.strip()                                                                                                          
+          self.client_cruzid = lookup_cruzid(user.strip())
+
 
     # group username
     def setGroupLogin(self, group: str):
@@ -71,8 +78,11 @@ class Label:
 
     # requestor name (may be same as client)
     def setRequestor(self, user):
-        self.requestor_name = user[: user.find("(") - 1]
-
+        if "(" in user:                                                                                                                              
+          self.requestor_name = user[: user.find("(") - 1].strip()
+        else:
+          self.requestor_name = user.strip()                                                                                                       
+   
     # Mac/Windows type
     def setType(self, type):
         self.type = type
