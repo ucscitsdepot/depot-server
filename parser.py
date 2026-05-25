@@ -271,15 +271,12 @@ if __name__ == "__main__":
                         # split label by newlines
                         fields = re.split("<p>|<br>", label)
                         # remove closing html data from last line
-                        fields[-1] = fields[-1].replace("</p></body></html>\r\n", "")
+                        fields[-1] = re.sub(r"<[^>]+>|\r\n", "", fields[-1])
                         # remove opening html data from first line, plus "RITM", plus heading format
-                        fields[0] = (
-                            fields[0].replace(
-                                '<html><head></head><body><h3 id="main">RITM', ""
-                            )
-                        ).replace("&nbsp;</h3>\r\n", "")
+                        m = re.search(r"RITM(\d+)", fields[0])                                                                                                           
+                        ritm_number = m.group(1) if m else fields[0]                                                                                                     
                         # create label from RITM
-                        label = Label(fields[0])
+                        label = Label(ritm_number)
                         # if ticket is from scotts valley campus, don't print a label
                         SVC = False
 
@@ -295,6 +292,14 @@ if __name__ == "__main__":
                             ):
                                 field = field.replace(
                                     "Name of the new person who will be using this computer: ",
+                                    "",
+                                )
+                                if field != "" and label.client_name != "":
+                                    label.client_name = field
+                                    label.client_cruzid = "____"
+                            elif "Name of the current staff person who will be using this computer: " in field:
+                                field = field.replace(
+                                    "Name of the current staff person who will be using this computer: ",
                                     "",
                                 )
                                 if field != "" and label.client_name != "":
@@ -509,7 +514,8 @@ if __name__ == "__main__":
                             raw = body.replace("\r", "")
                             # Extract RITM from header or anywhere in the original body before stripping tags
                             ritm_top = ""
-                            m = re.search(r"RITM\s*([0-9]+)", body, re.IGNORECASE)
+                            m = re.search(r"RITM(\d+)", fields[0])
+                            ritm_number = m.group(1) if m else fields[0]
                             if not m:
                                 m = re.search(r"RITM\s*([0-9]+)", raw, re.IGNORECASE)
                             if m:
