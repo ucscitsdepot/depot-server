@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Depot Scanner</title>
+    <style>
+        /* Match index.html look-and-feel */
+        #labels {
+            display: flex;
+            flex-flow: row wrap;
+            justify-content: space-evenly;
+            align-items: flex-start;
+            align-content: space-around;
+        }
+
+        #container {
+            display: flex;
+            flex-flow: row;
+            justify-content: space-evenly;
+            align-items: flex-start;
+            align-content: flex-start;
+        }
+
+        h1,
+        .alert {
+            text-align: center;
+        }
+
+        .box {
+            display: inline-block;
+            white-space: nowrap;
+            border: 1px black solid;
+            padding: 10px;
+            margin: 10px;
+        }
+
+        input[type="text"] {
+            width: 420px;
+        }
+    </style>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='ITS-Logo.png') }}">
+</head>
+
+<body>
+    <a href="/" style="color: black; text-decoration: none;">
+        <h1>Depot Scanner</h1>
+    </a>
+
+    {% for message in get_flashed_messages() %}
+    <div class="alert">{{ message }}</div>
+    {% endfor %}
+
+    <div id="container">
+        <div id="labels">
+            <div class="box">
+                <h2>Scanner</h2>
+                <form method="post">
+                    <input type="hidden" name="action" value="scan">
+                    Mode:
+                    <label><input type="radio" name="mode" value="return_close" {% if mode != 'close_only' %}checked{% endif %}> Return & Close</label>
+                    <label style="margin-left: 10px;"><input type="radio" name="mode" value="close_only" {% if mode == 'close_only' %}checked{% endif %}> Close only</label>
+                    <br>
+                    Scanned URL or RITM:
+                    <input id="scanned_url" name="scanned_url" type="text" placeholder="https://its-depot.ucsc.edu/RITM0112991 or RITM0112991">
+                    <br>
+                    <button type="submit">Send</button>
+                </form>
+            </div>
+
+            <div class="box">
+                <h2>Resend Last</h2>
+                <form method="post">
+                    <input type="hidden" name="action" value="resend">
+                    <input type="hidden" name="mode" value="{{ mode }}">
+                    Last ticket: <strong>{{ last_ritm or '(none)' }}</strong>
+                    <br>
+                    Phase: <strong>{{ last_phase or '(none)' }}</strong>
+                    <br>
+                    <button type="submit" {% if not last_ritm %}disabled{% endif %}>Resend last</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Auto-focus and select the scan box for quick scanning on load
+        window.addEventListener('DOMContentLoaded', () => {
+            const el = document.getElementById('scanned_url');
+            if (el) { el.focus(); el.select(); }
+        });
+    </script>
+</body>
+
+</html>

@@ -35,6 +35,7 @@ from write_pngs import (
     username,
     winsetup,
 )
+from scloser_web import handle_scan
 
 # Change directory to current file location
 path = os.path.dirname(os.path.abspath(__file__))
@@ -213,6 +214,38 @@ def server():
         selected_type=selected_type,
         data=data,
     )
+
+
+# Simple scanner UI: serves a page that focuses an input for scan guns
+@app.route("/scanner", methods=("GET",))
+@app.route("/scanner/", methods=("GET",))
+def scanner_page():
+    try:
+        return render_template("scanner.html")
+    except Exception:
+        logger.error(f"app.scanner_page: {traceback.format_exc()}")
+        return redirect(url_for("server"))
+
+
+# Optional: endpoint the scanner UI can call to trigger scloser email flow
+# Example: /scloser/scan?url=https://its-depot.ucsc.edu/ritm123456&mode=return_close
+@app.route("/scloser/scan", methods=("GET",))
+@app.route("/scloser/scan/", methods=("GET",))
+def scloser_scan():
+    scanned = request.args.get("url", "")
+    mode = request.args.get("mode", "return_close")
+    try:
+        res = handle_scan(scanned, mode)
+        status_code = 200 if res.ok else 400
+        return jsonify({
+            "ok": res.ok,
+            "status": res.status_text,
+            "last_ritm": res.last_ritm,
+            "last_phase": res.last_phase
+        }), status_code
+    except Exception:
+        logger.error(f"app.scloser_scan: {traceback.format_exc()}")
+        return jsonify({"ok": False, "status": "internal error"}), 500
 
 
 @app.route("/kiosk/")

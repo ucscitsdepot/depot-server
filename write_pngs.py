@@ -134,13 +134,13 @@ def ritm(
 
     # Draw QR top-right (short link, smaller)
     try:
-        qr_side = 500
+        qr_side = 850
         qr = qrcode.QRCode(border=2, box_size=10)
         qr.add_data(f"https://its-depot.ucsc.edu/ritm{ritm}")
         qr.make(fit=True)
         qr_img = qr.make_image(image_factory=PilImage, fill_color="black", back_color="white").get_image()
         qr_img = qr_img.resize((qr_side, qr_side), resample=Image.Resampling.NEAREST)
-        img.paste(qr_img, (img.size[0] - 100 - qr_side, 80))
+        img.paste(qr_img, (img.size[0] - 60 - qr_side, 560))
     except Exception:
         pass
 
