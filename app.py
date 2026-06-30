@@ -54,7 +54,7 @@ logger = logging.getLogger("gunicorn.error")
 # Agent-app universal link here means every label already in the field opens
 # in the app, with no reprints. Any failure falls back to the web record view,
 # so a scan never dead-ends.
-SN_INSTANCE = "https://ucsc.service-now.com"
+SN_INSTANCE = "https://ucscprod2.service-now.com"
 SN_AGENT_API = f"{SN_INSTANCE}/api/x_ucsc/label_links/agent_link"
 SN_AUTH = (os.environ.get("SN_USER", ""), os.environ.get("SN_PASS", ""))
 SN_TIMEOUT = 4  # keep snappy — a human is waiting on the redirect
