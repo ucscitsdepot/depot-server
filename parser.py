@@ -581,10 +581,7 @@ if __name__ == "__main__":
                             raw = body.replace("\r", "")
                             # Extract RITM from header or anywhere in the original body before stripping tags
                             ritm_top = ""
-                            m = re.search(r"RITM(\d+)", fields[0])
-                            ritm_number = m.group(1) if m else fields[0]
-                            if not m:
-                                m = re.search(r"RITM\s*([0-9]+)", raw, re.IGNORECASE)
+                            m = re.search(r"RITM\s*([0-9]+)", raw, re.IGNORECASE)
                             if m:
                                 ritm_top = m.group(1)
 
