@@ -7,6 +7,7 @@ import time
 import traceback
 import unicodedata
 from datetime import datetime
+from html import unescape
 
 from dotenv import load_dotenv
 
@@ -47,6 +48,68 @@ load_dotenv()
 # remove non-unicode accents from text (names) so they can be properly processed and printed by python
 def strip_accents(data):
     return unicodedata.normalize("NFD", data).encode("ascii", "ignore").decode("utf-8")
+
+
+def html_to_text(body: str):
+    body = body.replace("\r", "")
+    body = re.sub(r"(?i)<br\s*/?>", "\n", body)
+    body = re.sub(r"(?i)</p>", "\n", body)
+    body = re.sub(r"(?i)<[^>]+>", "", body)
+    body = unescape(body)
+    body = re.sub(r"\n{3,}", "\n\n", body)
+    return body.strip()
+
+
+def parse_resnet_label(body: str):
+    if (
+        "Opened By:" not in body
+        or "Client Name:" not in body
+        or "Computer Model:" not in body
+        or "Serial Number:" not in body
+    ):
+        return None
+
+    text = html_to_text(body)
+    ritm_match = re.search(r"RITM(\d+)", text)
+    if not ritm_match:
+        return None
+
+    label = Label(ritm_match.group(1))
+    label.setDepartment("Resnet Staff")
+
+    opened_by = re.search(r"Opened By:\s*(.+)", text)
+    client_name = re.search(r"Client Name:\s*(.+)", text)
+    computer_model = re.search(r"Computer Model:\s*(.+)", text)
+    serial_number = re.search(r"Serial Number:\s*(.+)", text)
+    service_requested = re.search(r"Select list for service requested::\s*(.+)", text)
+    description = re.search(r"Description:\s*(.+)", text)
+
+    if opened_by:
+        label.setRequestor(opened_by.group(1).strip())
+    if client_name:
+        client_value = client_name.group(1).strip()
+        if "(" in client_value and ")" in client_value:
+            label.setClient(client_value)
+        else:
+            label.client_name = client_value
+    if computer_model:
+        model = computer_model.group(1).strip()
+        if "mac" in model.lower() or "apple" in model.lower():
+            label.setType("Mac")
+        else:
+            label.setType("Windows")
+    if serial_number:
+        label.serial = [serial_number.group(1).strip()]
+
+    notes = []
+    if service_requested:
+        notes.append(service_requested.group(1).strip())
+    if description:
+        notes.append(description.group(1).strip())
+    if notes:
+        label.setNotes(" ".join(notes))
+
+    return label
 
 
 # setup pngs and print labels
@@ -269,6 +332,12 @@ if __name__ == "__main__":
 
                     # iterate over list of labels (as email text)
                     for label in labels:
+                        resnet_label = parse_resnet_label(label)
+                        if resnet_label is not None:
+                            logger.info(f"parse: label to print: {resnet_label}")
+                            labelExecute(resnet_label)
+                            continue
+
                         # split label by newlines
                         fields = re.split("<p>|<br>", label)
                         # remove closing html data from last line
