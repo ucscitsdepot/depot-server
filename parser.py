@@ -112,6 +112,12 @@ def parse_resnet_label(body: str):
     return label
 
 
+def clean_resnet_name(name: str):
+    name = name.strip()
+    name = re.sub(r"\s*\([^)]*\)$", "", name)
+    return name.strip()
+
+
 # setup pngs and print labels
 def labelExecute(label: Label | Ewaste):
     if type(label) == Label:
@@ -608,31 +614,33 @@ if __name__ == "__main__":
                             verified_access = False
 
                             for ln in lines:
-                                if ln.startswith("Opened by:"):
-                                    opened_by = ln.split(":", 1)[1].strip()
-                                elif ln.startswith("Requestor:"):
-                                    requestor = ln.split(":", 1)[1].strip()
-                                elif ln.startswith("Originating Incident Number:"):
-                                    ritm_id = ln.split(":", 1)[1].strip()
-                                elif ln.startswith("Computer Model:"):
-                                    computer_model = ln.split(":", 1)[1].strip()
-                                elif ln.startswith("Serial Number:"):
-                                    device_serial = ln.split(":", 1)[1].strip()
-                                elif re.match(r"(?i)^Serial number:", ln):
-                                    card_serial = ln.split(":", 1)[1].strip()
-                                elif ln.startswith("Power Adapter:"):
-                                    power_adapter = ln.split(":", 1)[1].strip()
-                                elif ln.startswith("Select list for service requested:"):
-                                    service_req = ln.split(":", 1)[1].strip()
-                                elif ln.startswith("Card provided:"):
-                                    card_provided = ln.split(":", 1)[1].strip()
-                                elif ln.startswith("OS version:"):
-                                    os_version = ln.split(":", 1)[1].strip()
-                                elif ln.startswith("Verified Access:"):
-                                    val = ln.split(":", 1)[1].strip().lower()
+                                normalized = ln.strip()
+                                value = normalized.split(":", 1)[1].strip() if ":" in normalized else ""
+                                value = value.lstrip(":").strip()
+
+                                if re.match(r"(?i)^Opened by\s*:", normalized):
+                                    opened_by = value
+                                elif re.match(r"(?i)^Requestor\s*:", normalized):
+                                    requestor = value
+                                elif re.match(r"(?i)^Originating Incident Number\s*:", normalized):
+                                    ritm_id = value
+                                elif re.match(r"(?i)^Computer Model\s*:", normalized):
+                                    computer_model = value
+                                elif re.match(r"(?i)^Serial Number\s*:", normalized):
+                                    device_serial = value
+                                elif re.match(r"(?i)^Power Adapter\s*:", normalized):
+                                    power_adapter = value
+                                elif re.match(r"(?i)^Select list for service requested\s*:", normalized):
+                                    service_req = value
+                                elif re.match(r"(?i)^Card provided\s*:", normalized):
+                                    card_provided = value
+                                elif re.match(r"(?i)^OS version\s*:", normalized):
+                                    os_version = value
+                                elif re.match(r"(?i)^Verified Access\s*:", normalized):
+                                    val = value.lower()
                                     verified_access = val in ("true", "yes", "y", "1", "checked", "x")
 
-                            name_val = requestor or opened_by
+                            name_val = clean_resnet_name(requestor or opened_by or client_name)
                             name_val = strip_accents(name_val) if name_val else ""
 
                             # Prefer RITM found in header; fall back to incident number if missing
