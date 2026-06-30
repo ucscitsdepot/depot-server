@@ -5,6 +5,7 @@ import secrets
 import traceback
 from datetime import datetime
 
+import requests
 from flask import (
     Flask,
     flash,
@@ -47,6 +48,45 @@ app.secret_key = secrets.token_hex()
 app.url_map.strict_slashes = True
 
 logger = logging.getLogger("gunicorn.error")
+
+# --- ServiceNow Agent-app deep linking -------------------------------------
+# The QR codes point at /<ritm_num>/ on this server. Redirecting through the
+# Agent-app universal link here means every label already in the field opens
+# in the app, with no reprints. Any failure falls back to the web record view,
+# so a scan never dead-ends.
+SN_INSTANCE = "https://ucsc.service-now.com"
+SN_AGENT_API = f"{SN_INSTANCE}/api/x_ucsc/label_links/agent_link"
+SN_AUTH = (os.environ.get("SN_USER", ""), os.environ.get("SN_PASS", ""))
+SN_TIMEOUT = 4  # keep snappy — a human is waiting on the redirect
+
+# A record's sys_id never changes, so its universal link is permanent: cache it.
+# (Cache is per gunicorn worker; first scan per ticket per worker pays one
+# REST round-trip, everything after is a dict hit.)
+_mobile_link_cache: dict[str, str] = {}
+
+
+def mobile_link(number: str, table: str, fallback: str) -> str:
+    """Agent-app universal link for a ticket number, or `fallback` (the web
+    record URL) if ServiceNow can't be reached or the number doesn't resolve."""
+    key = f"{table}:{number}"
+    if key in _mobile_link_cache:
+        return _mobile_link_cache[key]
+    try:
+        resp = requests.get(
+            SN_AGENT_API,
+            params={"number": number, "table": table},
+            auth=SN_AUTH,
+            headers={"Accept": "application/json"},
+            timeout=SN_TIMEOUT,
+        )
+        resp.raise_for_status()
+        link = resp.json()["result"].get("universal_link")
+        if link:
+            _mobile_link_cache[key] = link
+            return link
+    except Exception:
+        logger.error(f"app.mobile_link: {traceback.format_exc()}")
+    return fallback
 
 
 # define this function to be the root page, accepts both GET requests (loading the page) and POST requests (submitted a form)
@@ -197,16 +237,13 @@ def server():
             elif request.form["label"] == "blank":
                 blank(str(request.form["text"]))
                 print_thread(logger)
-
             if request.form["label"] != "history":
                 flash(f"Reload to repeat {request.form['label']}")
-
         # max number of history items that can generally fit on the page
         # TODO: this could be changed to be dynamic based on the screen size
         h = get_history(23)
     except Exception:
         logger.error(f"app.server: {traceback.format_exc()}")
-
     return render_template(
         "index.html",
         history=[] if not h else h,
@@ -252,13 +289,10 @@ def scloser_scan():
 def print_kiosk():
     serial = request.args.get("serial")
     destination = request.args.get("destination")
-
     if not serial:
         serial = ""
-
     if not destination:
         destination = ""
-
     # create kiosk label w/ serial & date
     kiosk(serial.upper(), datetime.now().strftime("%m/%d/%Y"), destination)
     # print the kiosk label in a thread
@@ -269,14 +303,24 @@ def print_kiosk():
 @app.route("/<ritm_num>/")
 def ritm_link(ritm_num):
     try:
-        if not ritm_num or not re.sub("[^0-9]", "", ritm_num).isnumeric():
+        token = ritm_num.strip().lower()
+        digits = re.sub("[^0-9]", "", token)
+        if not digits or not digits.isnumeric():
             return redirect(url_for("server"))
 
-        ritm_text = str("RITM%07d" % int(re.sub("[^0-9]", "", ritm_num)))
-        return redirect(
-            "https://ucsc.service-now.com/sc_req_item.do?sysparm_query=number="
-            + ritm_text
-        )
+        # INC vs RITM — the table has to match, both for the web fallback and
+        # for the Agent deep link's target record.
+        if token.startswith("inc"):
+            number = "INC%07d" % int(digits)
+            table = "incident"
+            web_url = f"{SN_INSTANCE}/incident.do?sysparm_query=number={number}"
+        else:
+            number = "RITM%07d" % int(digits)
+            table = "sc_req_item"
+            web_url = f"{SN_INSTANCE}/sc_req_item.do?sysparm_query=number={number}"
+
+        # Opens in the Agent app if installed, else the web record view.
+        return redirect(mobile_link(number, table, fallback=web_url))
     except Exception:
         logger.error(f"app.ritm_link: {traceback.format_exc()}")
         return redirect(url_for("server"))
@@ -303,20 +347,14 @@ def calendar():
 def ip_db():
     name = request.args.get("name")
     ip = request.args.get("ip")
-
     logger.info(f"app.ip_db: name = '{name}', ip = '{ip}'")
-
     db_path = os.path.dirname(os.path.abspath(__file__)) + "/ip_db"
-
     if not name or not ip:
         return "fail", 400
-
     if not os.path.exists(db_path):
         os.makedirs(db_path)
-
     with open(db_path + "/" + name, "w") as f:
         f.write(ip)
-
     return "success"
 
 
@@ -345,7 +383,6 @@ def locker_list():
 def locker(filename):
     if filename not in locker_files:
         return "file does not exist", 400
-
     return send_file(
         os.path.join("static", "lockers", locker_files[filename]),
         as_attachment=True,
