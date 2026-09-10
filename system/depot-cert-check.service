@@ -1,0 +1,16 @@
+[Unit]
+Description=Check how long the depot TLS certificate has left and ask for a renewal
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=depot
+Group=www-data
+WorkingDirectory=/home/depot/depot-server
+# needs the system directories too, for openssl and sudo
+Environment="PATH=/home/depot/depot-server/venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+ExecStart=/home/depot/depot-server/venv/bin/python /home/depot/depot-server/cert_check.py
+
+[Install]
+WantedBy=multi-user.target

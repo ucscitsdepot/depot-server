@@ -1,0 +1,118 @@
+#!/bin/bash
+# Install a downloaded InCommon certificate for nginx and reload it.
+#
+# Runs as root (see system/depot-cert.sudoers); cert_pull.py calls it with the
+# path of a staged, already validated PEM chain. Everything here is a re-check:
+# this script is the thing with write access, so it does not trust its caller.
+
+set -euo pipefail
+
+DOMAIN="${cert_domain:-its-depot.ucsc.edu}"
+CERT="${cert_path:-/etc/ssl/certs/depot-server.crt}"
+KEY="${cert_key_path:-/etc/ssl/private/depot-server.key}"
+BACKUP_DIR="${cert_backup_dir:-/var/backups/depot-cert}"
+
+log() { echo "depot-cert-install: $*"; }
+die() { echo "depot-cert-install: error: $*" >&2; exit 1; }
+
+[ "$(id -u)" -eq 0 ] || die "must run as root"
+[ $# -eq 1 ] || die "usage: $0 <certificate.pem>"
+
+NEW="$1"
+[ -f "$NEW" ] || die "no such file: $NEW"
+[ -f "$KEY" ] || die "no private key at $KEY"
+
+# -------------------- Validate the new chain --------------------
+
+# leaf must parse
+openssl x509 -in "$NEW" -noout 2>/dev/null || die "$NEW is not a PEM certificate"
+
+# leaf plus at least one intermediate, or clients will fail to build a chain
+count="$(grep -c -- '-----BEGIN CERTIFICATE-----' "$NEW" || true)"
+[ "$count" -ge 2 ] || die "expected leaf + chain, found $count certificate(s)"
+
+# not expired, not post-dated
+openssl x509 -in "$NEW" -noout -checkend 0 >/dev/null \
+    || die "certificate expired ($(openssl x509 -in "$NEW" -noout -enddate))"
+
+# right hostname
+subject="$(openssl x509 -in "$NEW" -noout -subject 2>/dev/null || true)"
+sans="$(openssl x509 -in "$NEW" -noout -ext subjectAltName 2>/dev/null || true)"
+if ! printf '%s\n%s\n' "$subject" "$sans" | grep -qi -- "$DOMAIN"; then
+    die "certificate is not for $DOMAIN ($subject)"
+fi
+
+# the certificate has to match the private key nginx is already configured with,
+# otherwise nginx will refuse to start and the site goes down
+cert_pub="$(openssl x509 -in "$NEW" -noout -pubkey 2>/dev/null)" \
+    || die "could not read public key from certificate"
+key_pub="$(openssl pkey -in "$KEY" -pubout 2>/dev/null)" \
+    || die "could not read private key $KEY"
+if [ "$cert_pub" != "$key_pub" ]; then
+    die "certificate does not match $KEY - the CSR was made with a different key; install the matching key before retrying"
+fi
+
+log "validated $(openssl x509 -in "$NEW" -noout -subject -enddate | tr '\n' ' ')"
+
+# -------------------- Install --------------------
+
+mkdir -p "$BACKUP_DIR"
+chmod 700 "$BACKUP_DIR"
+
+BACKUP=""
+if [ -f "$CERT" ]; then
+    BACKUP="$BACKUP_DIR/$(basename "$CERT").$(date +%Y%m%d%H%M%S)"
+    cp -p "$CERT" "$BACKUP"
+    log "backed up current certificate to $BACKUP"
+fi
+
+restore() {
+    if [ -n "$BACKUP" ]; then
+        cp -p "$BACKUP" "$CERT"
+        log "restored previous certificate from $BACKUP"
+    else
+        rm -f "$CERT"
+        log "removed newly installed certificate"
+    fi
+}
+
+# write beside the target and rename, so nginx never reads a half written file
+TMP="$(mktemp "$(dirname "$CERT")/.depot-cert.XXXXXX")"
+cat "$NEW" > "$TMP"
+chown root:root "$TMP"
+chmod 644 "$TMP"
+mv -f "$TMP" "$CERT"
+log "installed $CERT"
+
+# -------------------- Test & reload --------------------
+
+if ! nginx -t; then
+    restore
+    nginx -t || log "WARNING: nginx config is broken even after restoring"
+    die "nginx rejected the new certificate, rolled back"
+fi
+
+if ! systemctl reload nginx; then
+    restore
+    systemctl reload nginx || log "WARNING: nginx reload failed after restoring"
+    die "nginx reload failed, rolled back"
+fi
+
+log "nginx reloaded"
+
+# -------------------- Confirm what is served --------------------
+
+expected="$(openssl x509 -in "$CERT" -noout -fingerprint -sha256 | cut -d= -f2)"
+served="$(echo | timeout 10 openssl s_client -connect 127.0.0.1:443 \
+    -servername "$DOMAIN" 2>/dev/null \
+    | openssl x509 -noout -fingerprint -sha256 2>/dev/null | cut -d= -f2 || true)"
+
+if [ -z "$served" ]; then
+    log "WARNING: could not read the served certificate to confirm the reload"
+elif [ "$served" = "$expected" ]; then
+    log "$DOMAIN is serving the new certificate"
+else
+    log "WARNING: $DOMAIN is serving a different certificate than $CERT"
+fi
+
+log "done"

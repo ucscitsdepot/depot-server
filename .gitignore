@@ -13,3 +13,4 @@ venv/
 /ip_db
 /.vscode
 static/schedule.png
+/certs/

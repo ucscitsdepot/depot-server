@@ -1,0 +1,16 @@
+[Unit]
+Description=Pull InCommon certificates from the depot mailbox and install them for nginx
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=depot
+Group=www-data
+WorkingDirectory=/home/depot/depot-server
+# needs the system directories too, for openssl and sudo
+Environment="PATH=/home/depot/depot-server/venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+ExecStart=/home/depot/depot-server/venv/bin/python /home/depot/depot-server/cert_pull.py
+
+[Install]
+WantedBy=multi-user.target
