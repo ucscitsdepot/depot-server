@@ -12,3 +12,4 @@ git+https://github.com/ucsc-itsdepot/brother_ql.git
 autoflake
 black
 isort
+qrcode[pil]
