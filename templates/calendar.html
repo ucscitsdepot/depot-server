@@ -31,7 +31,7 @@
             justify-content: space-between;
             align-items: flex-start;
             align-content: flex-start;
-            overflow: hidden;
+            overflow: clip;
             column-gap: 25vw;
             margin: 0;
             padding: 0.5vh 0.5vw 0.5vh 0.5vw;
@@ -135,10 +135,12 @@
             <div id="types">
                 <h2>📦: Inbound Computer</h2>
                 <h2>🖥️✨: Outbound</h2>
+		<h2>🎓: Resnet</h2>
+		<h2>🚨: Computer Return</h2>
                 <h2>🔥🗑️🔥: Inbound Ewaste</h2>
                 <h2>🚚: Ewaste (to receiving)</h2>
                 <h2>⁉️: Unknown</h2>
-            </div>
+		</div>
         </div>
         <div width="100%">
             <img src="{{ url_for('static', filename='schedule.png') }}">

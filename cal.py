@@ -15,6 +15,8 @@ TYPE_INBOUND_COMPUTER = "📦"
 TYPE_UNKNOWN = "⁉️"
 TYPE_OUTBOUND = "🖥️✨"
 TYPE_EWASTE = "🚚"
+TYPE_RESNET = "🎓"
+TYPE_RETURN = "🚨"
 
 TICKET_STRING = "RITM or INC #\n--------------------\n"
 
@@ -148,6 +150,14 @@ def get_events():
                 e["dir"] = TYPE_INBOUND_EWASTE
             elif "summary" in event and "(Outbound)" in str(event["summary"]):
                 e["dir"] = TYPE_OUTBOUND
+#Begin Michael mucking around
+            elif "summary" in event and "Coming to Depot (Resnet)" in str(event["summary"]):
+                e["dir"] = TYPE_RESNET
+
+            elif "summary" in event and "(Inbound) Return Computer to Depot" in str(event["summary"]):
+                e["dir"] = TYPE_RETURN
+
+#End Michael mucking around
             elif "summary" in event and "Coming to Depot (Pickup or Dropoff)" in str(
                 event["summary"]
             ):

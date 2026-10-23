@@ -85,7 +85,7 @@ def parse_resnet_label(body: str):
     description = re.search(r"Description:\s*(.+)", text)
 
     if opened_by:
-        label.setRequestor(opened_by.group(1).strip())
+        label.setRequestor(client_name.group(1).strip())
     if client_name:
         client_value = client_name.group(1).strip()
         if "(" in client_value and ")" in client_value:
@@ -601,7 +601,8 @@ if __name__ == "__main__":
 
                             lines = [ln.strip() for ln in raw.split("\n") if ln.strip()]
 
-                            opened_by = ""
+                            client_name = ""
+			   # opened_by = ""
                             requestor = ""
                             ritm_id = ""
                             computer_model = ""
@@ -640,7 +641,7 @@ if __name__ == "__main__":
                                     val = value.lower()
                                     verified_access = val in ("true", "yes", "y", "1", "checked", "x")
 
-                            name_val = clean_resnet_name(requestor or opened_by or client_name)
+                            name_val = clean_resnet_name(client_name)
                             name_val = strip_accents(name_val) if name_val else ""
 
                             # Prefer RITM found in header; fall back to incident number if missing

@@ -2,52 +2,96 @@ import json
 import math
 import os.path
 import traceback
+import urllib.request
 from collections import defaultdict
 from datetime import datetime, timedelta, timezone
+from zoneinfo import ZoneInfo
 
 import numpy as np
-from google.auth.transport.requests import Request
-from google.oauth2.credentials import Credentials
-from google_auth_oauthlib.flow import InstalledAppFlow
-from googleapiclient.discovery import build
 from PIL import Image, ImageDraw, ImageFont
-
-# If modifying these scopes, delete the file cal_token.json.
-SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"]
-
-CALENDAR_ID = "cu1q702bdajlgk26ptpq88177d4g00ke@import.calendar.google.com"
 
 START = 0
 ONGOING = 1
 
-creds = None
-# The file cal_token.json stores the user's access and refresh tokens, and is
-# created automatically when the authorization flow completes for the first
-# time.
-token_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), "cal_token.json")
+path = os.path.abspath(os.path.dirname(__file__))
 
-try:
-    if os.path.exists(token_path):
-        creds = Credentials.from_authorized_user_file(token_path, SCOPES)
-except:
-    print(f"cal.py: {traceback.format_exc()}")
-    creds = None
+# The When I Work feed url carries an access token, so it is kept out of here.
+# See schedule_feed.json.example for the shape of the file.
+FEED_PATH = os.path.join(path, "common/schedule_feed.json")
 
-# If there are no (valid) credentials available, let the user log in.
-if not creds or not creds.valid:
-    if creds and creds.expired and creds.refresh_token:
-        creds.refresh(Request())
+# Used only if the feed does not name its own timezone.
+DEFAULT_TZ = "America/Los_Angeles"
+
+
+def get_feed_url():
+    with open(FEED_PATH) as f:
+        return json.load(f)["url"]
+
+
+def fetch_ics(url):
+    request = urllib.request.Request(url, headers={"User-Agent": "depot-server"})
+    with urllib.request.urlopen(request, timeout=60) as response:
+        return response.read().decode("utf-8")
+
+
+def parse_ics(text):
+    """Pull the VEVENTs out of an ics feed.
+
+    The When I Work export has no RRULEs, so there is nothing to expand and
+    each VEVENT is one shift.
+    """
+    # Unfold: ics wraps long lines at 75 characters, continuing with a space.
+    text = text.replace("\r\n", "\n").replace("\n ", "").replace("\n\t", "")
+
+    calendar = {}
+    events = []
+    event = None
+
+    for line in text.split("\n"):
+        if line == "BEGIN:VEVENT":
+            event = {}
+            continue
+        if line == "END:VEVENT":
+            events.append(event)
+            event = None
+            continue
+        if ":" not in line:
+            continue
+
+        key, value = line.split(":", 1)
+        params = key.split(";")
+        name = params[0]
+
+        target = calendar if event is None else event
+        target[name] = value
+        for param in params[1:]:
+            if param.startswith("TZID="):
+                target[f"{name}_tzid"] = param[len("TZID=") :]
+
+    return calendar, events
+
+
+def ics_datetime(value, tzid, tz):
+    """20260903T180000Z, 20260903T180000 or 20260903 -> aware datetime in tz."""
+    if value.endswith("Z"):
+        dt = datetime.strptime(value, "%Y%m%dT%H%M%SZ").replace(tzinfo=timezone.utc)
+    elif "T" in value:
+        dt = datetime.strptime(value, "%Y%m%dT%H%M%S")
+        dt = dt.replace(tzinfo=ZoneInfo(tzid) if tzid else tz)
     else:
-        flow = InstalledAppFlow.from_client_secrets_file(
-            os.path.join(
-                os.path.abspath(os.path.dirname(__file__)), "credentials.json"
-            ),
-            SCOPES,
-        )
-        creds = flow.run_local_server(port=0, open_browser=False)
-    # Save the credentials for the next run
-    with open(token_path, "w") as token:
-        token.write(creds.to_json())
+        dt = datetime.strptime(value, "%Y%m%d").replace(tzinfo=tz)
+
+    return dt.astimezone(tz)
+
+
+def get_colors():
+    """Name -> #rrggbb. Missing or broken file just means uncoloured blocks."""
+    try:
+        with open(os.path.join(path, "common/schedule_colours.json")) as f:
+            return json.load(f)
+    except Exception:
+        print(f"schedule.get_colors(): {traceback.format_exc()}")
+        return {}
 
 
 def linear_gradient(i, poly, p1, p2, c1, c2):
@@ -96,71 +140,56 @@ def linear_gradient(i, poly, p1, p2, c1, c2):
 
 
 def get_events():
-    events = []
     try:
-        service = build("calendar", "v3", credentials=creds)
+        calendar, raw = parse_ics(fetch_ics(get_feed_url()))
+        tz = ZoneInfo(calendar.get("X-WR-TIMEZONE", DEFAULT_TZ))
 
-        # Call the Calendar API
-        today = (
-            datetime.now()
-            .replace(hour=0, minute=0, second=0, microsecond=0)
-            .astimezone(timezone.utc)
-        )
-
+        today = datetime.now(tz).replace(hour=0, minute=0, second=0, microsecond=0)
         tonight = today + timedelta(days=1)
-
-        events_result = (
-            service.events()
-            .list(
-                calendarId=CALENDAR_ID,
-                timeMin=today.isoformat(),
-                timeMax=tonight.isoformat(),
-                maxResults=20,
-                singleEvents=True,
-                orderBy="startTime",
-                eventTypes="default",
-            )
-            .execute()
-        )
-        events = events_result.get("items", [])
 
         schedule = []
 
-        start = tonight
-        end = today
+        # Hours of the day the board has to span, as decimals past midnight.
+        min_dec = 24.0
+        max_dec = 0.0
 
-        # start_end_events = []
         events_by_hour = defaultdict(list)
 
-        for event in events:
-            if (
-                "summary" not in event
-                or "start" not in event
-                or "dateTime" not in event["start"]
-            ):
+        for event in sorted(raw, key=lambda e: e.get("DTSTART", "")):
+            if "SUMMARY" not in event or "DTSTART" not in event or "DTEND" not in event:
                 continue
 
+            dt_start = ics_datetime(event["DTSTART"], event.get("DTSTART_tzid"), tz)
+            dt_end = ics_datetime(event["DTEND"], event.get("DTEND_tzid"), tz)
+
+            # The board only shows today.
+            if dt_end <= today or dt_start >= tonight:
+                continue
+
+            # A shift crossing midnight is clipped to the day being drawn.
+            dt_start = max(dt_start, today)
+            dt_end = min(dt_end, tonight)
+
             e = dict()
-            e["name"] = event["summary"][: event["summary"].find(" (")]
-            e["start"] = event["start"]["dateTime"]
-            e["end"] = event["end"]["dateTime"]
 
-            dt_start = datetime.fromisoformat(e["start"])
-            if dt_start < start:
-                start = dt_start
+            # "Name (Shift as Depot Technician at Hardware Depot)" -> "Name".
+            summary = event["SUMMARY"]
+            cut = summary.find(" (")
+            e["name"] = summary[:cut] if cut != -1 else summary
 
-            dt_end = datetime.fromisoformat(e["end"])
-            if dt_end > end:
-                end = dt_end
+            e["start"] = dt_start.isoformat()
+            e["end"] = dt_end.isoformat()
 
-            e["start_dec"] = dt_start.hour + dt_start.minute / 60
-            e["end_dec"] = dt_end.hour + dt_end.minute / 60
+            # Measured from midnight, so a shift ending at midnight reads 24.
+            e["start_dec"] = (dt_start - today).total_seconds() / 3600
+            e["end_dec"] = (dt_end - today).total_seconds() / 3600
+
+            min_dec = min(min_dec, e["start_dec"])
+            max_dec = max(max_dec, e["end_dec"])
+
             e["idx"] = 0
             e["split"] = 1
             e["shift"] = True
-
-            # start_end_events.append((e["start_dec"], len(schedule), "start"))
-            # start_end_events.append((e["end_dec"], len(schedule), "end"))
 
             events_by_hour[math.floor(e["start_dec"])].append((len(schedule), START))
             for hr in range(math.floor(e["start_dec"]) + 1, math.ceil(e["end_dec"])):
@@ -168,8 +197,12 @@ def get_events():
 
             schedule.append(e)
 
-        start = start.replace(minute=0, second=0, microsecond=0)
-        end = end.replace(minute=0, second=0, microsecond=0)
+        if schedule:
+            start_hr = math.floor(min_dec)
+            end_hr = math.ceil(max_dec)
+        else:
+            # Nothing on today - draw an empty working day rather than nothing.
+            start_hr, end_hr = 8, 18
 
         # start_end_events.sort(key=lambda x: x[0])
         # idx = start.hour
@@ -201,13 +234,13 @@ def get_events():
         img = Image.new("RGB", (w_img, h_img), color=(255, 255, 255))
         d = ImageDraw.Draw(img, "RGBA")
 
-        font = ImageFont.truetype("Roboto-Regular.ttf", 20)
+        font = ImageFont.truetype(os.path.join(path, "Roboto-Regular.ttf"), 20)
         max_hr_width = d.textlength("12AM", font=font)
 
         def get_y(hr):
-            return 10 + (h_img / (end.hour - start.hour + 1)) * (hr - start.hour)
+            return 10 + (h_img / (end_hr - start_hr + 1)) * (hr - start_hr)
 
-        for hr in range(start.hour, end.hour + 1):
+        for hr in range(start_hr, end_hr + 1):
             ampm = "AM" if hr < 12 else "PM"
             txt_hr = hr % 12
             if txt_hr == 0:
@@ -230,13 +263,13 @@ def get_events():
                 width=2,
             )
 
-        colors = json.load(open("schedule_colors.json"))
+        colors = get_colors()
 
         max_event_width = w_img - 30 - max_hr_width
 
         for event in schedule:
             y = get_y(event["start_dec"])
-            h = (h_img / (end.hour - start.hour + 1)) * (
+            h = (h_img / (end_hr - start_hr + 1)) * (
                 event["end_dec"] - event["start_dec"]
             )
 
@@ -289,12 +322,12 @@ def get_events():
             )
 
         now = datetime.now()
-        if now.hour >= start.hour and now.hour <= end.hour:
+        if now.hour >= start_hr and now.hour <= end_hr:
             y = get_y(now.hour + now.minute / 60)
             d.line((10, y, w_img - 10, y), fill=(0, 0, 0), width=4)
             d.circle((w_img - 10, y), 10, fill=(0, 0, 0))
 
-        img.save("static/schedule.png")
+        img.save(os.path.join(path, "static", "schedule.png"))
 
         return schedule
 
