@@ -621,6 +621,8 @@ if __name__ == "__main__":
 
                                 if re.match(r"(?i)^Opened by\s*:", normalized):
                                     opened_by = value
+                                elif re.match(r"(?i)^Client Name\s*:", normalized):
+                                    client_name = value
                                 elif re.match(r"(?i)^Requestor\s*:", normalized):
                                     requestor = value
                                 elif re.match(r"(?i)^Originating Incident Number\s*:", normalized):
